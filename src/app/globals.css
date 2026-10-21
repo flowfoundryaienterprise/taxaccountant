@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+/*
+ * TaxAccountant.com design tokens.
+ * Source of truth: documents/DESIGN.md section 2-4 (approved master-plan
+ * palette; derived tokens are proposals pending brand/contrast sign-off).
+ */
+@theme {
+  /* Brand colors */
+  --color-navy: #102c57;
+  --color-action: #0879e9;
+  --color-tint: #eaf5ff;
+  --color-white: #ffffff;
+  --color-slate: #4c6178;
+
+  /* Derived tokens (pending approval, see DESIGN.md) */
+  --color-border: #d8e1eb;
+  --color-success: #18794e;
+  --color-danger: #b42318;
+  --color-warning: #9a6700;
+  --color-focus: #1459b5;
+
+  /* Typography */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+  --text-compact: 0.875rem;
+  --text-compact--line-height: 1.5;
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-lead: 1.125rem;
+  --text-lead--line-height: 1.6;
+  --text-heading-sm: 1.5rem;
+  --text-heading-sm--line-height: 1.3;
+  --text-heading-lg: 2rem;
+  --text-heading-lg--line-height: 1.2;
+  --text-hero: clamp(2rem, 1.6rem + 2vw, 3.25rem);
+  --text-hero--line-height: 1.1;
+
+  /* Radii */
+  --radius-input: 0.5rem;
+  --radius-card: 0.75rem;
+  --radius-panel: 1rem;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--color-white);
+  color: var(--color-navy);
+  font-family: var(--font-sans);
+}
+
+a {
+  color: inherit;
+}
+
+/* Visible, accessible focus state (WCAG 2.2 AA, DESIGN.md section 10) */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
