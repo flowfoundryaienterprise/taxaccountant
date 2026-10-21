@@ -3,12 +3,6 @@
 **Global Tax & Accounting Marketplace**  
 A phased marketplace project for helping individuals and businesses discover and, in later releases, work with tax and accounting professionals across jurisdictions.
 
-**Development organization:** FlowFoundry AI Solutions  
-**Repository:** [flowfoundryaienterprise/taxaccountant](https://github.com/flowfoundryaienterprise/taxaccountant)  
-**Current stage:** Phase 1 — Public Marketplace & Technical Foundation (in development)
-
-> **Project status:** This repository is under active development. Features described in the roadmap are *planned*, not automatically available in the current application. Professional listings, credentials, reviews, coverage, and business claims must be approved before publication.
-
 ## Overview
 
 TaxAccountant.com is being designed as a **two-sided international marketplace** for three broad audiences:
