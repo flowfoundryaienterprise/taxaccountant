@@ -1,0 +1,48 @@
+{
+	"name": "taxaccountant-web",
+	"version": "0.1.0",
+	"private": true,
+	"packageManager": "npm",
+	"dependencies": {
+		"@vinext/cloudflare": "latest",
+		"class-variance-authority": "latest",
+		"clsx": "latest",
+		"convex": "latest",
+		"lucide-react": "latest",
+		"react": "latest",
+		"react-dom": "latest",
+		"react-server-dom-webpack": "latest",
+		"tailwind-merge": "latest",
+		"vinext": "latest"
+	},
+	"devDependencies": {
+		"@cloudflare/vite-plugin": "beta",
+		"@eslint/js": "latest",
+		"@tailwindcss/postcss": "latest",
+		"@types/node": "latest",
+		"@types/react": "latest",
+		"@types/react-dom": "latest",
+		"@vitejs/plugin-react": "latest",
+		"@vitejs/plugin-rsc": "latest",
+		"cf": "^1.0.0-beta.20",
+		"eslint": "latest",
+		"eslint-plugin-react-hooks": "latest",
+		"globals": "latest",
+		"tailwindcss": "latest",
+		"typescript": "latest",
+		"typescript-eslint": "latest",
+		"vite": "8.3.0"
+	},
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"start": "vite preview",
+		"deploy": "vinext-cloudflare deploy",
+		"preview": "npm run build && npm run start --",
+		"cf-typegen": "cf workers types",
+		"lint": "eslint .",
+		"typecheck": "tsc --noEmit",
+		"convex:dev": "convex dev"
+	}
+}
