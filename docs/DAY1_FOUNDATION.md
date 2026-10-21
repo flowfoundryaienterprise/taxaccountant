@@ -67,33 +67,39 @@ be added after the search spike").
 - **Convention:** one Convex deployment per environment (dev / staging /
   production), each with its own `NEXT_PUBLIC_CONVEX_URL` /
   `CONVEX_DEPLOYMENT`, per `ARCHITECTURE.md` section 3. Names/variables are
-  documented in `.env.example`; no values are committed.
-- **Current state:** no Convex deployment has been provisioned in this
-  session — see the blocker in section 6. `convex/schema.ts` and
-  `convex/healthCheck.ts` are written and ready for `npx convex dev`, which
-  will generate `convex/_generated/` (intentionally excluded from the root
-  `tsconfig.json`'s typecheck scope — see `convex/tsconfig.json` — since that
-  directory does not exist until a dev deployment authenticates).
-- Staging environment configuration is **not yet documented beyond this
-  convention** — it requires an approved Cloudflare/Convex account per
-  `IMPLEMENTATION_PLAN.md` "Blocking prerequisites".
+  documented in `.env.example`; no values are committed (`.env.local` is
+  gitignored).
+- **Current state:** a Convex **dev** deployment now exists (`.env.local` has
+  `CONVEX_DEPLOYMENT` / `VITE_CONVEX_URL` / `VITE_CONVEX_SITE_URL`, written
+  by `npx convex dev`), and `convex/_generated/` reflects our
+  `convex/schema.ts` and `convex/healthCheck.ts`. **Caveat found and fixed:**
+  `npx convex dev` detected this as a Vite project and wrote
+  `VITE_CONVEX_URL`, but vinext's client bundle only inlines `NEXT_PUBLIC_*`
+  vars (Next.js convention, not Vite's `import.meta.env.VITE_*`) — see
+  `.env.example` for the mirrored var. `src/components/shared/convex-client-provider.tsx`
+  and `convex-status.tsx` now wire a real `ConvexProvider` + `useQuery` call
+  against `api.healthCheck.status`, verified against the live deployment via
+  `ConvexHttpClient` (see section 6).
+- Staging/production deployments are **not yet provisioned** — that still
+  needs an approved Cloudflare/Convex account per `IMPLEMENTATION_PLAN.md`
+  "Blocking prerequisites".
 
-## 6. Known Day 1 blocker
+## 6. Known Day 1 blockers
 
-No Convex account/CLI authentication and no Cloudflare account authentication
-are available in this environment. Practical effect:
-- `npx convex dev` cannot be run — no live Convex deployment, no
-  `convex/_generated/*`, no frontend `ConvexProvider` wiring, no live query
-  from the homepage. The homepage therefore reports "not yet connected"
-  rather than asserting a working connection (see `src/app/page.tsx`).
-- `npm run deploy` (`vinext-cloudflare deploy` / Wrangler) was **not run**.
+- **Convex (resolved):** a dev deployment is live and `healthCheck:status`
+  was called directly with `ConvexHttpClient` outside the browser, returning
+  `{"ok":true,"serverTime":...}` — confirming the schema + function deployed
+  correctly. The in-browser `useQuery` path renders "Connecting to
+  Convex…" during SSR (expected — the WebSocket only opens after browser
+  hydration) and was not separately re-verified in an actual browser in this
+  session.
+- **Cloudflare (open):** no Cloudflare account authentication is available.
+  `npm run deploy` (`vinext-cloudflare deploy` / Wrangler) was **not run**.
   The Cloudflare Workers **runtime** was instead validated locally — `npm
   run build` followed by `npm run start` serves the real built Worker
   through the Cloudflare Vite plugin's local `workerd` runtime, which is the
   same runtime Cloudflare's edge uses. This is a genuine Workers-runtime SSR
   smoke test, not just a Node dev server, but it is **not** a deployed smoke
-  test against a real Cloudflare account/domain.
-
-Both require the client/owner to grant account access per
-`IMPLEMENTATION_PLAN.md` "Blocking prerequisites" before Day 1 can be marked
-fully complete.
+  test against a real Cloudflare account/domain. That still requires the
+  client/owner to grant Cloudflare account access per
+  `IMPLEMENTATION_PLAN.md` "Blocking prerequisites".

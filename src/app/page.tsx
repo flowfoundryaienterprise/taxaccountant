@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
-
-const convexConfigured = Boolean(process.env.NEXT_PUBLIC_CONVEX_URL);
+import { ConvexStatus } from "@/components/shared/convex-status";
 
 export default function Home() {
   return (
@@ -47,11 +46,7 @@ export default function Home() {
 
       <section className="rounded-card border border-border bg-white p-5" aria-label="Backend status">
         <h2 className="text-compact font-semibold text-navy">Convex backend</h2>
-        <p className="mt-2 text-compact text-slate">
-          {convexConfigured
-            ? "NEXT_PUBLIC_CONVEX_URL is set. Live query wiring lands once a dev deployment is provisioned."
-            : "Not yet connected: NEXT_PUBLIC_CONVEX_URL is not configured in this environment. convex/schema.ts and convex/healthCheck.ts are written and ready for `npx convex dev`."}
-        </p>
+        <ConvexStatus />
       </section>
     </Container>
   );
