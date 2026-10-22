@@ -12,6 +12,8 @@ export default tseslint.config(
       "dist",
       ".next",
       "convex/_generated",
+      ".agents",
+      ".claude",
     ],
   },
   js.configs.recommended,

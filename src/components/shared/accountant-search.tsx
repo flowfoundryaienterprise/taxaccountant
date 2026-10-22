@@ -1,0 +1,111 @@
+"use client";
+
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { searchCountries, services } from "@/lib/home-content";
+
+/**
+ * Captures country + service and encodes them as `/find-accountant` query
+ * params (DESIGN.md "Search should not reset filters... shareable URL
+ * loads"). `/find-accountant` is today's honest placeholder — the real
+ * filtered directory is IMPLEMENTATION_PLAN.md Day 9.
+ */
+export function AccountantSearch() {
+  const router = useRouter();
+  const [country, setCountry] = React.useState("");
+  const [service, setService] = React.useState("");
+  const [error, setError] = React.useState<string | null>(null);
+
+  function navigate(params: { country?: string; service?: string }) {
+    const query = new URLSearchParams();
+    if (params.country) query.set("country", params.country);
+    if (params.service) query.set("service", params.service);
+    router.push(`/find-accountant${query.size ? `?${query.toString()}` : ""}`);
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!country && !service) {
+      setError("Choose at least a country or a service to search.");
+      return;
+    }
+    setError(null);
+    navigate({ country, service });
+  }
+
+  return (
+    <div className="flex flex-col gap-4 rounded-panel border border-border bg-white p-5 shadow-[0_20px_40px_-24px_rgba(16,44,87,0.25)] sm:p-6">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="flex flex-1 flex-col gap-1.5">
+          <label htmlFor="search-country" className="text-caption font-medium text-slate">
+            Country
+          </label>
+          <select
+            id="search-country"
+            value={country}
+            onChange={(event) => setCountry(event.target.value)}
+            className="h-11 rounded-input border border-border bg-white px-3 text-compact text-navy transition-colors duration-150 hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          >
+            <option value="">Select country or city</option>
+            {searchCountries.map((country) => (
+              <option key={country.code} value={country.code}>
+                {country.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex flex-1 flex-col gap-1.5">
+          <label htmlFor="search-service" className="text-caption font-medium text-slate">
+            Service
+          </label>
+          <select
+            id="search-service"
+            value={service}
+            onChange={(event) => setService(event.target.value)}
+            className="h-11 rounded-input border border-border bg-white px-3 text-compact text-navy transition-colors duration-150 hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          >
+            <option value="">What service do you need?</option>
+            {services.map((item) => (
+              <option key={item.slug} value={item.slug}>
+                {item.title}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <Button
+          type="submit"
+          size="lg"
+          className="transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-18px_rgba(8,121,233,0.6)] active:translate-y-0 active:scale-[0.98] sm:w-auto"
+        >
+          <Search className="h-4 w-4" aria-hidden />
+          Find an Accountant
+        </Button>
+      </form>
+
+      {error ? (
+        <p role="alert" className="text-caption font-medium text-danger">
+          {error}
+        </p>
+      ) : null}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-caption text-slate">Popular:</span>
+        {services.slice(0, 6).map((item) => (
+          <button
+            key={item.slug}
+            type="button"
+            onClick={() => navigate({ service: item.slug })}
+            className="rounded-full border border-border px-3 py-1 text-caption font-medium text-navy transition-all duration-150 hover:-translate-y-0.5 hover:border-action hover:bg-tint active:translate-y-0"
+          >
+            {item.title}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
