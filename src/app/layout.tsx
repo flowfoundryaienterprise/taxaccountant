@@ -14,12 +14,21 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://taxaccountant.com"),
   title: {
     default: "TaxAccountant.com",
     template: "%s | TaxAccountant.com",
   },
   description:
     "TaxAccountant.com connects customers with qualified tax and accounting professionals worldwide.",
+  openGraph: {
+    siteName: "TaxAccountant.com",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
