@@ -1,71 +1,128 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Construction } from "lucide-react";
 
+import { AccountantSearchBar } from "@/components/directory/accountant-search-bar";
+import { ActiveFilters } from "@/components/directory/active-filters";
+import { DirectoryHeader } from "@/components/directory/directory-header";
+import { DirectoryPagination } from "@/components/directory/directory-pagination";
+import { EmptyResults } from "@/components/directory/empty-results";
+import { FilterSidebar } from "@/components/directory/filter-sidebar";
+import { MobileFilterDrawer } from "@/components/directory/mobile-filter-drawer";
+import { ProfessionalResults } from "@/components/directory/professional-results";
+import { SortDropdown } from "@/components/directory/sort-dropdown";
 import { Container } from "@/components/layout/container";
-import { searchCountries, services } from "@/lib/home-content";
+import { allCityTokens, availableCities, searchDirectory } from "@/lib/directory/filters";
+import { directoryFixtures } from "@/lib/directory/fixtures";
+import {
+  parseDirectoryFilters,
+  type RawSearchParams,
+  searchBarKey,
+} from "@/lib/directory/query-params";
 
 export const metadata: Metadata = {
-  title: "Find an Accountant",
+  title: "Find a Tax Accountant",
   description:
-    "The professional directory search is launching next in Phase 1. See what's confirmed so far.",
+    "Explore tax and accounting professionals by country, tax jurisdiction, specialty and language.",
+  alternates: { canonical: "/find-accountant" },
+  openGraph: {
+    title: "Find the Right Tax Accountant for Your Needs",
+    description:
+      "Explore tax and accounting professionals by country, tax jurisdiction, specialty and language.",
+    url: "/find-accountant",
+    type: "website",
+  },
+  /*
+   * Not indexable while the results are development fixtures: section 14 of
+   * the Day 3 brief — "Do not create SEO-indexable fake professional
+   * listings". Flip to index/follow when `professionals:search` serves
+   * approved published profiles.
+   */
+  robots: { index: false, follow: true },
 };
 
 interface FindAccountantPageProps {
-  searchParams: Promise<{ country?: string; service?: string }>;
+  searchParams: Promise<RawSearchParams>;
 }
 
 /**
- * Honest placeholder for IMPLEMENTATION_PLAN.md Day 9 ("directory query and
- * cursor pagination"). The homepage search, service cards and country tiles
- * all land here with their selections preserved in the URL — the directory
- * build reads the same query params once it ships, per the Day 2 brief:
- * "preparing the form for the directory implementation on Day 3."
+ * Public professional directory.
+ *
+ * A Server Component: the URL is the entire filter state, so filtering,
+ * sorting and pagination all happen here on each request and the client
+ * components below only exist to *write* back to the URL. That is what makes
+ * deep links, refresh and browser back/forward correct without any
+ * client-side store.
+ *
+ * ## Data source
+ * Results come from `@/lib/directory/fixtures` — typed, development-only
+ * examples. There is no `convex/professionals` module yet;
+ * `professionals:search` is IMPLEMENTATION_PLAN.md Day 9 and the Day 3 brief
+ * explicitly forbids creating backend search here. The swap is contained:
+ * replace the `searchDirectory(directoryFixtures, filters)` call with the
+ * query's cursor-paginated result and keep the `DirectoryResults` shape.
  */
 export default async function FindAccountantPage({ searchParams }: FindAccountantPageProps) {
-  const { country, service } = await searchParams;
+  const raw = await searchParams;
 
-  const countryLabel = searchCountries.find((item) => item.code === country)?.name;
-  const serviceLabel = services.find((item) => item.slug === service)?.title;
+  // City tokens are validated against the data, so a stale or hand-edited
+  // `?city=` value is dropped instead of silently returning zero results.
+  const filters = parseDirectoryFilters(raw, allCityTokens(directoryFixtures));
+
+  const results = searchDirectory(directoryFixtures, filters);
+  const cityOptions = availableCities(directoryFixtures, filters.countries);
+  const allCityOptions = availableCities(directoryFixtures, []);
+
+  const firstOnPage = results.total === 0 ? 0 : (results.page - 1) * results.pageSize + 1;
+  const lastOnPage = Math.min(results.page * results.pageSize, results.total);
 
   return (
-    <Container className="flex flex-col gap-8 py-16">
-      <div className="flex flex-col gap-3">
-        <span className="inline-flex w-fit items-center gap-2 rounded-full bg-tint px-3 py-1 text-caption font-semibold text-action">
-          <Construction className="h-3.5 w-3.5" aria-hidden />
-          Launching Phase 1, Day 3
-        </span>
-        <h1 className="text-heading-lg font-semibold text-navy">
-          The professional directory is almost here
-        </h1>
-        <p className="max-w-[60ch] text-lead text-slate">
-          Search, filters and cursor pagination across country, tax jurisdiction and service are
-          the next build in this phase. Nothing here is a real listing yet.
-        </p>
-      </div>
+    <>
+      <DirectoryHeader resultCount={directoryFixtures.length} />
 
-      {country || service ? (
-        <div className="flex flex-col gap-3 rounded-card border border-border bg-white p-6">
-          <h2 className="text-compact font-semibold text-navy">Your search was captured</h2>
-          <p className="text-compact text-slate">
-            Once the directory ships, this exact selection will return real results:
-          </p>
-          <dl className="flex flex-wrap gap-6">
-            <div>
-              <dt className="text-caption uppercase tracking-wide text-slate">Country</dt>
-              <dd className="text-compact font-medium text-navy">{countryLabel ?? "Any country"}</dd>
+      <Container className="flex flex-col gap-8 py-8 sm:py-10">
+        <AccountantSearchBar key={searchBarKey(filters)} filters={filters} />
+
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+          <FilterSidebar filters={filters} cityOptions={cityOptions} />
+
+          <section aria-label="Search results" className="flex min-w-0 flex-1 flex-col gap-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <MobileFilterDrawer
+                filters={filters}
+                allCityOptions={allCityOptions}
+                resultCount={results.total}
+              />
+
+              <p aria-live="polite" className="text-compact text-slate">
+                {results.total === 0 ? (
+                  "No professionals match these filters"
+                ) : (
+                  <>
+                    Showing{" "}
+                    <span className="font-semibold text-navy">
+                      {firstOnPage}–{lastOnPage}
+                    </span>{" "}
+                    of <span className="font-semibold text-navy">{results.total}</span>{" "}
+                    {results.total === 1 ? "professional" : "professionals"}
+                  </>
+                )}
+              </p>
+
+              <SortDropdown filters={filters} />
             </div>
-            <div>
-              <dt className="text-caption uppercase tracking-wide text-slate">Service</dt>
-              <dd className="text-compact font-medium text-navy">{serviceLabel ?? "Any service"}</dd>
-            </div>
-          </dl>
+
+            <ActiveFilters filters={filters} cityOptions={allCityOptions} />
+
+            {results.total === 0 ? (
+              <EmptyResults filters={filters} cityOptions={allCityOptions} />
+            ) : (
+              <>
+                <ProfessionalResults results={results} />
+                <DirectoryPagination filters={filters} results={results} />
+              </>
+            )}
+          </section>
         </div>
-      ) : null}
-
-      <Link href="/" className="text-compact font-semibold text-action">
-        &larr; Back to the homepage
-      </Link>
-    </Container>
+      </Container>
+    </>
   );
 }
