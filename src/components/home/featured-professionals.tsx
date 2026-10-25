@@ -29,7 +29,27 @@ export function FeaturedProfessionals() {
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {demoProfessionals.map((professional, index) => (
             <Reveal key={professional.id} delayMs={index * 60}>
-              <ProfessionalCard professional={professional} />
+              {/*
+                Passed field-by-field rather than spread: `ProfessionalCard`
+                gained optional designation/jurisdiction/language rows for the
+                Day 3 directory, and this Day 2 section must keep rendering
+                exactly the fields it was approved with.
+              */}
+              <ProfessionalCard
+                professional={{
+                  id: professional.id,
+                  name: professional.name,
+                  city: professional.city,
+                  countryName: professional.countryName,
+                  services: professional.services,
+                  rating: professional.rating,
+                  reviewCount: professional.reviewCount,
+                  rate: professional.rate,
+                  availability: professional.availability,
+                  photo: professional.photo,
+                  photoAlt: professional.photoAlt,
+                }}
+              />
             </Reveal>
           ))}
         </div>

@@ -5,13 +5,18 @@ import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { buildDirectoryHref, EMPTY_FILTERS } from "@/lib/directory/query-params";
+import { countryCodes, serviceSlugs } from "@/lib/directory/taxonomy";
 import { searchCountries, services } from "@/lib/home-content";
 
 /**
- * Captures country + service and encodes them as `/find-accountant` query
- * params (DESIGN.md "Search should not reset filters... shareable URL
- * loads"). `/find-accountant` is today's honest placeholder — the real
- * filtered directory is IMPLEMENTATION_PLAN.md Day 9.
+ * Homepage hero search. Captures country + service and hands them to the
+ * directory at `/find-accountant` (DESIGN.md "Search should not reset
+ * filters... shareable URL loads").
+ *
+ * The URL is built with the directory's own `buildDirectoryHref`, so the two
+ * entry points cannot drift on param names or encoding. Visual design is
+ * unchanged from Day 2.
  */
 export function AccountantSearch() {
   const router = useRouter();
@@ -20,10 +25,17 @@ export function AccountantSearch() {
   const [error, setError] = React.useState<string | null>(null);
 
   function navigate(params: { country?: string; service?: string }) {
-    const query = new URLSearchParams();
-    if (params.country) query.set("country", params.country);
-    if (params.service) query.set("service", params.service);
-    router.push(`/find-accountant${query.size ? `?${query.toString()}` : ""}`);
+    // Validate against the shared vocabularies before navigating, so a
+    // tampered or stale option value can never reach the directory URL.
+    const validCountry = params.country && countryCodes.has(params.country) ? params.country : "";
+    const validService = params.service && serviceSlugs.has(params.service) ? params.service : "";
+
+    router.push(
+      buildDirectoryHref(EMPTY_FILTERS, {
+        countries: validCountry ? [validCountry] : [],
+        services: validService ? [validService] : [],
+      }),
+    );
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
