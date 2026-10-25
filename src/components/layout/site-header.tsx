@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
+import { BrandLogo } from "@/components/shared/brand-logo";
 import { LocaleSelectors } from "@/components/layout/locale-selectors";
 import { MobileNavigation } from "@/components/layout/mobile-navigation";
 import { NavDropdown, type NavDropdownItem } from "@/components/layout/nav-dropdown";
@@ -38,7 +39,12 @@ export function SiteHeader() {
   return (
     <ScrollHeader>
       <Container className="flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="text-heading-sm font-semibold text-navy transition-transform duration-200 hover:-translate-y-0.5">
+        <Link
+          href="/"
+          aria-label="TaxAccountant home"
+          className="flex items-center gap-2.5 text-heading-sm font-semibold text-navy transition-transform duration-200 hover:-translate-y-0.5"
+        >
+          <BrandLogo size={32} className="shrink-0" />
           TaxAccountant
         </Link>
 

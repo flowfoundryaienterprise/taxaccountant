@@ -19,6 +19,13 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    // Build-time Node scripts (not part of the app bundle).
+    files: ["scripts/**/*.mjs"],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+  },
+  {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },

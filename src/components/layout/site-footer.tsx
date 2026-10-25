@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
+import { BrandLogo } from "@/components/shared/brand-logo";
 import { LocaleSelectors } from "@/components/layout/locale-selectors";
 import {
   FacebookGlyph,
@@ -55,7 +56,12 @@ export function SiteFooter() {
     <footer className="border-t border-border bg-tint">
       <Container className="grid grid-cols-2 gap-10 py-12 sm:grid-cols-3 lg:grid-cols-5">
         <div className="col-span-2 flex flex-col gap-3 sm:col-span-3 lg:col-span-1">
-          <Link href="/" className="text-heading-sm font-semibold text-navy">
+          <Link
+            href="/"
+            aria-label="TaxAccountant home"
+            className="flex items-center gap-2.5 text-heading-sm font-semibold text-navy"
+          >
+            <BrandLogo size={32} className="shrink-0" />
             TaxAccountant
           </Link>
           <p className="max-w-[32ch] text-compact text-slate">

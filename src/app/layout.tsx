@@ -29,6 +29,23 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  /*
+   * Declared explicitly rather than relying on the `app/icon.*` file
+   * convention: vinext's file-based metadata support does not clearly cover
+   * SVG icons, and these assets are generated into `public/` by
+   * `scripts/generate-icons.mjs`. `favicon.svg` serves every browser that
+   * accepts a vector favicon; the PNG/ICO entries are the fallbacks for the
+   * ones that do not (notably Safari, which needs a raster for
+   * apple-touch-icon).
+   */
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

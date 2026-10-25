@@ -44,3 +44,21 @@ requested replica of a supplied reference design — not data this project's
 own `PRD.md`/`AGENTS.md` would otherwise allow fabricating. See the git
 history / conversation log for that instruction before treating any of this
 content as a real data source.
+
+## Brand mark and favicons
+
+`public/favicon.svg`, `public/favicon.ico`, `public/favicon-32.png`,
+`public/apple-touch-icon.png`, `public/icon-192.png` and
+`public/icon-512.png` are **original artwork for this project** — no
+third-party asset, stock mark or licensed font is involved, so no
+attribution is owed.
+
+They are generated from a single geometry definition by
+`scripts/generate-icons.mjs` (Node built-ins only). Regenerate with:
+
+```
+node scripts/generate-icons.mjs
+```
+
+The same shape is drawn inline by `src/components/shared/brand-logo.tsx`
+for the header and footer; the two must be kept in sync by hand.
