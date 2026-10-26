@@ -76,8 +76,11 @@ export const services: ServiceItem[] = [
     icon: Globe2,
   },
   {
+    // Slug kept as-is so existing `?service=` links and bookmarks still
+    // resolve; the title dropped its "IRS /" prefix in Day 4 because the
+    // category is offered across jurisdictions, not only in the US.
     slug: "irs-tax-audit-support",
-    title: "IRS / Tax Audit Support",
+    title: "Tax Audit Support",
     description: "Representation and documentation support through an active audit.",
     icon: ShieldCheck,
   },

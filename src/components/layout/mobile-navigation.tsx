@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Lock, Menu, X } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { isActivePath } from "@/components/layout/nav-link";
 import type { NavDropdownItem } from "@/components/layout/nav-dropdown";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +23,9 @@ interface MobileNavigationProps {
 export function MobileNavigation({ primaryLinks, sections }: MobileNavigationProps) {
   const [open, setOpen] = React.useState(false);
   const panelRef = React.useRef<HTMLDivElement>(null);
+  // Read for active-page indication only. The sheet closes from each
+  // link's own `onClick`, not from an effect watching the pathname.
+  const pathname = usePathname() ?? "/";
 
   React.useEffect(() => {
     if (!open) return;
@@ -40,7 +45,7 @@ export function MobileNavigation({ primaryLinks, sections }: MobileNavigationPro
   }, [open]);
 
   return (
-    <div className="lg:hidden">
+    <div className="xl:hidden">
       <button
         type="button"
         aria-label={open ? "Close menu" : "Open menu"}
@@ -64,17 +69,24 @@ export function MobileNavigation({ primaryLinks, sections }: MobileNavigationPro
       >
         <nav className="flex flex-col gap-6 px-4 py-6">
           <ul className="flex flex-col gap-1">
-            {primaryLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="block rounded-input px-3 py-3 text-compact font-medium text-navy hover:bg-tint"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
+            {primaryLinks.map((link) => {
+              const active = isActivePath(pathname, link.href, link.href !== "/");
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "block rounded-input px-3 py-3 text-compact font-medium hover:bg-tint",
+                      active ? "bg-tint text-action" : "text-navy",
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
 
           {sections.map((section) => (
@@ -88,7 +100,16 @@ export function MobileNavigation({ primaryLinks, sections }: MobileNavigationPro
                     key={item.label}
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className="block rounded-input px-3 py-2.5 text-compact text-navy hover:bg-tint"
+                    aria-current={
+                      isActivePath(pathname, item.href, false) ? "page" : undefined
+                    }
+                    className={cn(
+                      "block rounded-input px-3 py-2.5 text-compact hover:bg-tint",
+                      isActivePath(pathname, item.href, false)
+                        ? "bg-tint font-medium text-action"
+                        : "text-navy",
+                      item.featured && "font-semibold text-action",
+                    )}
                   >
                     {item.label}
                   </Link>
