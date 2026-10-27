@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
+import { SiteChrome } from "@/components/layout/site-chrome";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ConvexClientProvider } from "@/components/shared/convex-client-provider";
@@ -53,9 +54,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={inter.variable}>
       <body className="flex min-h-screen flex-col">
         <ConvexClientProvider>
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
+          {/*
+            `SiteChrome` renders the public header/footer for every public
+            route and steps aside for the CMS at `/admin`, which brings its
+            own full-height layout. Both are rendered here on the server and
+            handed down as props, so they stay Server Components.
+          */}
+          <SiteChrome header={<SiteHeader />} footer={<SiteFooter />}>
+            {children}
+          </SiteChrome>
         </ConvexClientProvider>
       </body>
     </html>
