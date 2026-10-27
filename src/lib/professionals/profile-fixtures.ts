@@ -323,66 +323,34 @@ function buildProfile(row: DirectoryProfessional): ProfessionalProfile {
   };
 }
 
-const publishedProfiles: ProfessionalProfile[] = directoryFixtures.map(buildProfile);
+/**
+ * Every published, approved profile. Exported so the CMS can compose its own
+ * wider view (published + unpublished) without the public module having to
+ * carry unapproved rows — see `@/lib/admin/admin-unpublished-fixtures`.
+ */
+export const publishedProfiles: ProfessionalProfile[] = directoryFixtures.map(buildProfile);
 
 /**
- * Profiles that exist but must never be reachable publicly.
+ * Public lookup index.
  *
- * Deliberately absent from `directoryFixtures`, so they appear in no listing
- * and can only be reached by guessing the URL — which is exactly the path
- * being proven. Both resolve to the standard not-found page: an unpublished
- * profile reveals nothing about itself, not even that it exists (API.md
- * section 1: "Avoid leaking whether private objects/accounts exist").
- */
-const unpublishedProfiles: ProfessionalProfile[] = [
-  {
-    slug: "atlas-fiscal-group",
-    displayName: "Atlas Fiscal Group",
-    kind: "firm",
-    firmName: "Atlas Fiscal Group",
-    bio: [],
-    approvedProfile: false,
-    verificationStatus: "not_reviewed",
-    publicationStatus: "draft",
-    remoteServices: true,
-    publicContactMode: "none",
-    featured: false,
-    locations: [{ countryCode: "US", city: "Chicago", isPrimary: true }],
-    services: [],
-    languageCodes: ["en"],
-    credentials: [],
-  },
-  {
-    slug: "helena-fischer",
-    displayName: "Helena Fischer",
-    kind: "individual",
-    bio: [],
-    approvedProfile: true,
-    verificationStatus: "not_reviewed",
-    publicationStatus: "suspended",
-    remoteServices: true,
-    publicContactMode: "none",
-    featured: false,
-    locations: [{ countryCode: "DE", city: "Hamburg", isPrimary: true }],
-    services: [],
-    languageCodes: ["de", "en"],
-    credentials: [],
-  },
-];
-
-/**
- * Every fixture, published or not, in one lookup.
+ * Built from published rows **only**, deliberately.
  *
- * Deliberately *not* exported, and deliberately not split into a
- * "safe" map: the unpublished rows sit in the same index the public read
- * uses, so the publication gate below is what actually blocks them. A
- * pre-filtered map would make that gate untestable dead code — and would
- * tree-shake the unpublished rows away entirely, so the blocked path would
- * pass for the wrong reason.
+ * Day 5 briefly held the draft and suspended fixtures in this same map so
+ * that the publication gate below did the rejecting. That was the wrong
+ * trade: it put unapproved records into the deployed worker bundle, which
+ * the project forbids outright, and a production build was measured
+ * carrying them. Unapproved data must not be in a public module at all —
+ * the strongest version of "unpublished profiles are inaccessible" is that
+ * the public side never holds them.
+ *
+ * The gate in `getPublishedProfile` is unchanged and still runs on every
+ * lookup: it is what will reject a draft or suspended row once
+ * `professionals:getPublishedBySlug` returns real records, and it must also
+ * be enforced server-side in that query. The unpublished fixtures now live
+ * in `@/lib/admin/admin-unpublished-fixtures`, which only the CMS imports
+ * and which is stripped from production builds.
  */
-const bySlug = new Map(
-  [...publishedProfiles, ...unpublishedProfiles].map((profile) => [profile.slug, profile]),
-);
+const bySlug = new Map(publishedProfiles.map((profile) => [profile.slug, profile]));
 
 /**
  * The public read. Mirrors `professionals:getPublishedBySlug`: an
