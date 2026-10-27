@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ChevronDown, Lock } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -10,11 +11,18 @@ export interface NavDropdownItem {
   label: string;
   href: string;
   available: boolean;
+  /** Renders above a divider — used for the "All …" overview link. */
+  featured?: boolean;
 }
 
 interface NavDropdownProps {
   label: string;
   items: NavDropdownItem[];
+  /**
+   * Route prefix that makes this menu the active section, e.g. `/services`.
+   * Omit for menus that do not own a route of their own.
+   */
+  activePrefix?: string;
 }
 
 /**
@@ -23,9 +31,14 @@ interface NavDropdownProps {
  * a link — DESIGN.md: "Future-phase features must display honest
  * availability information instead of pretending to work."
  */
-export function NavDropdown({ label, items }: NavDropdownProps) {
+export function NavDropdown({ label, items, activePrefix }: NavDropdownProps) {
   const [open, setOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const pathname = usePathname() ?? "/";
+
+  const active = Boolean(
+    activePrefix && (pathname === activePrefix || pathname.startsWith(`${activePrefix}/`)),
+  );
 
   React.useEffect(() => {
     if (!open) return;
@@ -53,13 +66,23 @@ export function NavDropdown({ label, items }: NavDropdownProps) {
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-current={active ? "page" : undefined}
         onClick={() => setOpen((value) => !value)}
-        className="flex items-center gap-1 text-compact font-medium text-navy transition-colors duration-150 hover:text-action"
+        className={cn(
+          "group relative flex items-center gap-1 whitespace-nowrap text-compact font-medium transition-colors duration-150 hover:text-action",
+          active ? "text-action" : "text-navy",
+        )}
       >
         {label}
         <ChevronDown
           className={cn("h-3.5 w-3.5 transition-transform duration-150", open && "rotate-180")}
           aria-hidden
+        />
+        <span
+          className={cn(
+            "absolute -bottom-1 left-0 h-0.5 bg-action transition-[width] duration-200",
+            active ? "w-full" : "w-0 group-hover:w-full",
+          )}
         />
       </button>
 
@@ -75,7 +98,10 @@ export function NavDropdown({ label, items }: NavDropdownProps) {
                 href={item.href}
                 role="menuitem"
                 onClick={() => setOpen(false)}
-                className="animate-fade-up block rounded-input px-3 py-2 text-compact text-navy transition-all duration-150 hover:translate-x-0.5 hover:bg-tint"
+                className={cn(
+                  "animate-fade-up block rounded-input px-3 py-2 text-compact text-navy transition-all duration-150 hover:translate-x-0.5 hover:bg-tint",
+                  item.featured && "mb-1 border-b border-border pb-2.5 font-semibold text-action",
+                )}
                 style={{ animationDelay: `${index * 30}ms` }}
               >
                 {item.label}

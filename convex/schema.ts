@@ -37,6 +37,19 @@ export default defineSchema({
       v.literal("published"),
       v.literal("disabled"),
     ),
+    /*
+     * Day 4 addition. `/countries/[countryCode]` needs a unique title,
+     * meta description and canonical path per country, exactly as
+     * `serviceCategories` already has for `/services/[slug]`. The field was
+     * simply missing from the country side of the same requirement
+     * (DATABASE.md section 2 lists `seo:obj` on serviceCategories and
+     * contentPages but not countries).
+     *
+     * Optional, so no existing `countries` document becomes invalid and no
+     * backfill is required — a country with no `seo` falls back to the
+     * generated defaults the page already produces.
+     */
+    seo: v.optional(seoFields),
     updatedAt: v.number(),
   })
     .index("by_code", ["code"])

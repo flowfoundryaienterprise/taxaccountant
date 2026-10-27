@@ -32,8 +32,10 @@ export function GlobalCoverage() {
               </li>
             ))}
           </ul>
+          {/* Day 4 brief section 8: "Explore by Country" opens the country
+              directory, not a generic professional search. */}
           <Link
-            href="/find-accountant"
+            href="/countries"
             className={
               "group inline-flex h-11 w-fit items-center gap-1.5 rounded-input bg-action px-5 text-compact font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0668c7] active:translate-y-0 active:scale-[0.98]"
             }

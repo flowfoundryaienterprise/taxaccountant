@@ -10,22 +10,33 @@ import {
   XGlyph,
   YoutubeGlyph,
 } from "@/components/shared/social-icons";
-import { services } from "@/lib/home-content";
+import { serviceHref } from "@/lib/marketplace/query-params";
+import { serviceCatalog } from "@/lib/marketplace/services";
 
 type FooterLink = { label: string; href: string } | { label: string };
 
 const quickLinks: FooterLink[] = [
   { label: "Home", href: "/" },
   { label: "Find an Accountant", href: "/find-accountant" },
+  { label: "Services", href: "/services" },
+  { label: "Countries", href: "/countries" },
   { label: "How it Works", href: "/#how-it-works" },
-  { label: "Pricing" },
   { label: "Blog", href: "/#articles" },
+  { label: "Pricing" },
   { label: "Contact" },
 ];
 
-const servicesLinks: FooterLink[] = services
-  .slice(0, 6)
-  .map((service) => ({ label: service.title, href: `/find-accountant?service=${service.slug}` }));
+/**
+ * Service links go to the service detail pages, matching the header menu and
+ * the homepage cards — one destination per service across the whole site.
+ * "All services" closes the list so the remaining categories are reachable.
+ */
+const servicesLinks: FooterLink[] = [
+  ...serviceCatalog
+    .slice(0, 6)
+    .map((service) => ({ label: service.title, href: serviceHref(service.slug) })),
+  { label: "All services", href: "/services" },
+];
 
 const forProfessionalsLinks: FooterLink[] = [
   { label: "Join as a Professional", href: "/for-professionals" },
