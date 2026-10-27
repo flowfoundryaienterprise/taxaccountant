@@ -83,6 +83,21 @@ function buildSeoRows(): AdminSeoRow[] {
   }
 
   rows.push({
+    id: "route-resources",
+    contentTitle: "Guides & Resources",
+    path: "/resources",
+    contentType: "Route",
+    seoTitle: "Guides & Resources",
+    metaDescription:
+      "Reviewed guides about tax and accounting topics, written in general terms and scoped to the jurisdiction they describe.",
+    status: "published",
+    indexable: true,
+    indexableReason:
+      "Indexable — serves only published, reviewed resources, of which there are currently none, so it indexes an honest empty state.",
+    provenance: "approved",
+  });
+
+  rows.push({
     id: "route-directory",
     contentTitle: "Find an Accountant",
     path: "/find-accountant",
@@ -151,13 +166,19 @@ function buildSeoRows(): AdminSeoRow[] {
       seoTitle: article.seo.title,
       metaDescription: article.seo.description,
       status: article.status,
-      indexable: article.status === "published" && Boolean(article.reviewedAt),
+      /*
+       * The route exists as of Day 7, but the public repository serves
+       * nothing, so no article is reachable or indexable today. The column
+       * reports eligibility, which is a different question from whether the
+       * record is currently served.
+       */
+      indexable: false,
       indexableReason:
         article.status !== "published"
           ? "Not published, so not eligible for indexing."
-          : article.reviewedAt
-            ? "Would be indexable once the route exists."
-            : "Published without a recorded review — must not be indexed.",
+          : !article.reviewedAt
+            ? "Published without a recorded review — must never be indexed."
+            : "Eligible, but not served: the public repository returns no resources yet.",
       provenance: "demonstration",
     });
   }

@@ -42,10 +42,11 @@ const countryItems: NavDropdownItem[] = [
 ];
 
 /**
- * `/resources` is not built yet (IMPLEMENTATION_PLAN.md day 16-17), so the
- * two entries that would live there stay disabled with a lock rather than
- * linking to a page that cannot answer. The rest point at destinations that
- * genuinely exist.
+ * `/resources` exists as of Day 7 and publishes nothing yet — it renders an
+ * honest empty state — so "Tax Guides" links there. Tax Calendar and
+ * Glossary stay disabled with a lock: those are separate features that do
+ * not exist at all, and a lock is more honest than a link to a page that
+ * does not answer the question the label asks.
  *
  * "For Professionals" lives here rather than inline: seven top-level items
  * do not fit the header at any viewport width (see the note on the nav
@@ -53,7 +54,9 @@ const countryItems: NavDropdownItem[] = [
  */
 const resourceItems: NavDropdownItem[] = [
   { label: "For Professionals", href: "/for-professionals", available: true, featured: true },
-  { label: "Tax Guides", href: "/#articles", available: true },
+  // Day 7: /resources now exists. It currently publishes nothing, and
+  // says so honestly, which is a better destination than a homepage anchor.
+  { label: "Tax Guides", href: "/resources", available: true },
   { label: "Country Tax Facts", href: "/countries", available: true },
   { label: "Tax Calendar", href: "/resources", available: false },
   { label: "Glossary", href: "/resources", available: false },

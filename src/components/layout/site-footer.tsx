@@ -42,7 +42,7 @@ const forProfessionalsLinks: FooterLink[] = [
   { label: "Join as a Professional", href: "/for-professionals" },
   { label: "Professional Login" },
   { label: "Pricing Plans" },
-  { label: "Resources", href: "/#articles" },
+  { label: "Resources", href: "/resources" },
   { label: "Help Center" },
 ];
 

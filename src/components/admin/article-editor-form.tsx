@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { Save, ShieldAlert, Wand2 } from "lucide-react";
+import { ShieldAlert, Wand2 } from "lucide-react";
 
 import {
   AdminSelectField,
@@ -12,10 +11,16 @@ import {
 import { ContentEditor } from "@/components/admin/content-editor";
 import { DeleteConfirmation } from "@/components/admin/delete-confirmation";
 import { MediaPicker } from "@/components/admin/media-picker";
+import { ContentPreview } from "@/components/admin/content-preview";
+import { ContentValidationSummary } from "@/components/admin/content-validation-summary";
+import { EditorialActionBar } from "@/components/admin/editorial-action-bar";
 import { SeoFields } from "@/components/admin/seo-fields";
+import { UnsavedChangesDialog } from "@/components/admin/unsaved-changes-dialog";
 import { articleCategories } from "@/lib/admin/admin-fixtures";
 import { toSlug } from "@/lib/admin/admin-formatters";
 import { LIMITS, errorFor, validateArticleForm } from "@/lib/admin/admin-validation";
+import type { EditorialStatus } from "@/lib/cms/content-status";
+import { articlePublishIssues, toActionBlockers } from "@/lib/cms/content-validation";
 import type { AdminArticleRow, ContentBlock } from "@/lib/admin/admin-types";
 
 interface ArticleEditorFormProps {
@@ -50,8 +55,6 @@ export function ArticleEditorForm({
   existingSlugs,
   jurisdictions,
 }: ArticleEditorFormProps) {
-  const isNew = !record;
-
   const [title, setTitle] = React.useState(record?.title ?? "");
   const [slug, setSlug] = React.useState(record?.slug ?? "");
   const [excerpt, setExcerpt] = React.useState(record?.excerpt ?? "");
@@ -96,6 +99,41 @@ export function ArticleEditorForm({
 
   const invalid = result && !result.ok;
   const reviewed = Boolean(record?.reviewer && record?.reviewedAt);
+
+  /*
+   * Publish-readiness is recomputed from the *live form state*, not from the
+   * saved record, so an editor sees the effect of what they are typing. The
+   * review fields are the exception — they come from the record, because a
+   * review is something a reviewer performs, not something an author can
+   * type into this form.
+   */
+  const publishIssues = React.useMemo(
+    () =>
+      articlePublishIssues({
+        title,
+        slug,
+        body: blocks,
+        category,
+        seo: { description: seo.seoDescription },
+        featuredImage: image ? { path: image, alt: imageAlt } : undefined,
+        editorial: { reviewer: record?.reviewer, reviewedAt: record?.reviewedAt },
+      }),
+    [title, slug, blocks, category, seo.seoDescription, image, imageAlt, record],
+  );
+
+  const dirty =
+    title !== (record?.title ?? "") ||
+    slug !== (record?.slug ?? "") ||
+    excerpt !== (record?.excerpt ?? "") ||
+    category !== (record?.category ?? "") ||
+    jurisdiction !== (record?.jurisdictionCode ?? "") ||
+    status !== (record?.status ?? "draft") ||
+    author !== (record?.author ?? "") ||
+    image !== record?.featuredImage?.path ||
+    imageAlt !== (record?.featuredImage?.alt ?? "") ||
+    JSON.stringify(blocks) !== JSON.stringify(record?.body ?? []);
+
+  const jurisdictionText = jurisdictions.find((entry) => entry.value === jurisdiction)?.label;
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-6">
@@ -212,6 +250,25 @@ export function ArticleEditorForm({
             }}
             fallbackTitle={title || "Article title"}
           />
+
+          <ContentValidationSummary issues={publishIssues} subject="article" />
+
+          {/* Renders the live form state through the same block renderer the
+              public resource pages use, inside the editor — there is no
+              preview URL and no draft is reachable from outside. */}
+          <ContentPreview
+            status={status as EditorialStatus}
+            title={title}
+            excerpt={excerpt}
+            body={blocks}
+            category={category}
+            jurisdictionLabel={jurisdictionText}
+            featuredImage={image ? { path: image, alt: imageAlt } : undefined}
+            author={author}
+            reviewer={record?.reviewer}
+            reviewedAt={record?.reviewedAt}
+            publishedAt={record?.publishedAt}
+          />
         </div>
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-28">
@@ -281,42 +338,28 @@ export function ArticleEditorForm({
               value={status}
               onChange={(value) => setStatus(value as AdminArticleRow["status"])}
               options={STATUS_OPTIONS}
+              hint="Shown so the workflow below can be exercised from each state. Changing it here does not move the record — only an authorized transition does that."
             />
 
-            {status === "published" && !reviewed ? (
-              <p role="alert" className="rounded-input bg-tint/70 px-3 py-2 text-caption text-danger">
-                This article has no recorded review. Publishing it would put unreviewed tax content
-                in front of readers — the publish path must refuse this on the server.
-              </p>
-            ) : null}
-
-            <div className="flex flex-col gap-2">
-              <button
-                type="submit"
-                className="inline-flex min-h-11 items-center justify-center rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
-              >
-                Validate form
-              </button>
-
-              <button
-                type="button"
-                disabled
-                aria-disabled
-                title="Saving requires an authorized Convex mutation, which does not exist yet"
-                className="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-1.5 rounded-input bg-action/40 px-4 text-compact font-medium text-white"
-              >
-                <Save className="h-4 w-4" aria-hidden />
-                Save {isNew ? "article" : "changes"}
-              </button>
-
-              <Link
-                href="/admin/articles"
-                className="inline-flex min-h-11 items-center justify-center rounded-input px-4 text-compact font-medium text-slate hover:bg-tint"
-              >
-                Cancel
-              </Link>
-            </div>
+            <button
+              type="submit"
+              className="inline-flex min-h-11 items-center justify-center rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+            >
+              Check fields
+            </button>
           </fieldset>
+
+          {/*
+            Workflow actions, all disabled. Validation blockers are passed
+            through so the bar explains the useful reason ("no recorded
+            review") in preference to the generic one ("no backend").
+          */}
+          <EditorialActionBar
+            status={status as EditorialStatus}
+            blockers={toActionBlockers(publishIssues)}
+          >
+            <UnsavedChangesDialog dirty={dirty} cancelHref="/admin/articles" />
+          </EditorialActionBar>
 
           {record ? (
             <div className="flex flex-col gap-2 rounded-card border border-border bg-white p-5">

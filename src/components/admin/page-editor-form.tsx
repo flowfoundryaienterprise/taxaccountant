@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { Save, Wand2 } from "lucide-react";
+import { Wand2 } from "lucide-react";
 
 import {
   AdminSelectField,
@@ -11,9 +10,15 @@ import {
 } from "@/components/admin/admin-form-field";
 import { ContentEditor } from "@/components/admin/content-editor";
 import { DeleteConfirmation } from "@/components/admin/delete-confirmation";
+import { ContentPreview } from "@/components/admin/content-preview";
+import { ContentValidationSummary } from "@/components/admin/content-validation-summary";
+import { EditorialActionBar } from "@/components/admin/editorial-action-bar";
 import { SeoFields } from "@/components/admin/seo-fields";
+import { UnsavedChangesDialog } from "@/components/admin/unsaved-changes-dialog";
 import { toSlug } from "@/lib/admin/admin-formatters";
 import { LIMITS, errorFor, validatePageForm } from "@/lib/admin/admin-validation";
+import type { EditorialStatus } from "@/lib/cms/content-status";
+import { pagePublishIssues, toActionBlockers } from "@/lib/cms/content-validation";
 import type { AdminPageRow, ContentBlock } from "@/lib/admin/admin-types";
 
 interface PageEditorFormProps {
@@ -52,8 +57,6 @@ const STATUS_OPTIONS = [
  * saving works, and it costs nothing to get right now.
  */
 export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
-  const isNew = !record;
-
   const [title, setTitle] = React.useState(record?.title ?? "");
   const [slug, setSlug] = React.useState(record?.slug ?? "");
   const [kind, setKind] = React.useState(record?.kind ?? "page");
@@ -89,6 +92,17 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
     event.preventDefault();
     setResult(validatePageForm({ title, slug, summary, ...seo }, otherSlugs));
   };
+
+  const publishIssues = React.useMemo(
+    () =>
+      pagePublishIssues({
+        title,
+        slug,
+        body: blocks,
+        seo: { description: seo.seoDescription },
+      }),
+    [title, slug, blocks, seo.seoDescription],
+  );
 
   const invalid = result && !result.ok;
 
@@ -202,6 +216,20 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
             }}
             fallbackTitle={title || "Page title"}
           />
+
+          <ContentValidationSummary issues={publishIssues} subject="page" />
+
+          {/* Editor-local preview of the live form state. No preview URL
+              exists, so no draft is reachable from outside this screen. */}
+          <ContentPreview
+            status={status as EditorialStatus}
+            title={title}
+            excerpt={summary}
+            body={blocks}
+            // A standalone page is not tax guidance, so it carries no
+            // tax-content disclaimer of its own.
+            showDisclaimer={false}
+          />
         </div>
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-28">
@@ -225,44 +253,20 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
               hint="Only published content is eligible to appear publicly, and the public query must enforce that on the server."
             />
 
-            {dirty ? (
-              <p className="rounded-input bg-tint/70 px-3 py-2 text-caption text-warning">
-                You have unsaved changes. They cannot be saved yet and will be lost on navigation.
-              </p>
-            ) : null}
-
-            <div className="flex flex-col gap-2">
-              <button
-                type="submit"
-                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
-              >
-                Validate form
-              </button>
-
-              <button
-                type="button"
-                disabled
-                aria-disabled
-                title="Saving requires an authorized Convex mutation, which does not exist yet"
-                className="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-1.5 rounded-input bg-action/40 px-4 text-compact font-medium text-white"
-              >
-                <Save className="h-4 w-4" aria-hidden />
-                Save {isNew ? "page" : "changes"}
-              </button>
-
-              <Link
-                href="/admin/pages"
-                className="inline-flex min-h-11 items-center justify-center rounded-input px-4 text-compact font-medium text-slate hover:bg-tint"
-              >
-                Cancel
-              </Link>
-            </div>
-
-            <p className="text-caption text-slate">
-              Save is disabled because no authorized mutation exists. Validate runs the same rules
-              the server will need to enforce.
-            </p>
+            <button
+              type="submit"
+              className="inline-flex min-h-11 items-center justify-center rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+            >
+              Check fields
+            </button>
           </fieldset>
+
+          <EditorialActionBar
+            status={status as EditorialStatus}
+            blockers={toActionBlockers(publishIssues)}
+          >
+            <UnsavedChangesDialog dirty={dirty} cancelHref="/admin/pages" />
+          </EditorialActionBar>
 
           {record ? (
             <div className="flex flex-col gap-2 rounded-card border border-border bg-white p-5">

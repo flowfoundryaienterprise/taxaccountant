@@ -20,6 +20,9 @@ import {
   statusFilterOptions,
   type AdminSearchParams,
 } from "@/lib/admin/admin-list";
+import { cmsArticles } from "@/lib/cms/content-adapter";
+import { publicRepositoryStatus } from "@/lib/cms/public-content-adapter";
+import { toPublishableArticles } from "@/lib/marketplace/content-mappers";
 import type { AdminArticleRow } from "@/lib/admin/admin-types";
 
 export const metadata: Metadata = { title: "Articles & Resources" };
@@ -41,6 +44,14 @@ export default async function AdminArticlesScreen({
   const params = await searchParams;
   const query = readParam(params, "q");
   const status = readParam(params, "status") || "all";
+
+  /*
+   * What would actually reach the public site, computed by running every
+   * CMS record through the real public projection. It is not a label on the
+   * screen — it is the same `toPublishableArticles` the public pages use, so
+   * the number below cannot drift from what a reader would see.
+   */
+  const publiclyVisible = toPublishableArticles(cmsArticles());
 
   const list = buildAdminList<AdminArticleRow>({
     rows: demoArticles,
@@ -171,6 +182,31 @@ export default async function AdminArticlesScreen({
         pageSize={list.pageSize}
         preserve={{ q: query || undefined, status: status !== "all" ? status : undefined }}
       />
+
+      <section
+        aria-labelledby="public-visibility"
+        className="flex flex-col gap-2 rounded-card border border-border bg-white p-5"
+      >
+        <h2 id="public-visibility" className="text-compact font-semibold text-navy">
+          What is publicly visible right now
+        </h2>
+        <p className="max-w-[92ch] text-caption text-slate">
+          <strong className="font-semibold text-navy">
+            {publiclyVisible.length} of {demoArticles.length} records
+          </strong>{" "}
+          would pass the public gate — published <em>and</em> carrying a recorded editorial
+          review. The figure is computed by running every record through{" "}
+          <code className="font-mono">toPublishableArticles</code>, the same projection the public
+          pages use, so it cannot disagree with what a reader would see.
+        </p>
+        <p className="max-w-[92ch] text-caption text-slate">
+          None of them is actually served:{" "}
+          <Link href="/resources" className="font-medium text-action hover:underline">
+            /resources
+          </Link>{" "}
+          reads an empty public repository, because {publicRepositoryStatus.detail.toLowerCase()}
+        </p>
+      </section>
 
       <section
         aria-labelledby="editorial-integrity"
