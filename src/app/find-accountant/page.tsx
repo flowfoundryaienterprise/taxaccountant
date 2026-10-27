@@ -16,6 +16,7 @@ import {
   parseDirectoryFilters,
   type RawSearchParams,
   searchBarKey,
+  toDirectorySearchParams,
 } from "@/lib/directory/query-params";
 
 export const metadata: Metadata = {
@@ -71,6 +72,11 @@ export default async function FindAccountantPage({ searchParams }: FindAccountan
   const cityOptions = availableCities(directoryFixtures, filters.countries);
   const allCityOptions = availableCities(directoryFixtures, []);
 
+  // Serialized once and handed to every card, so a profile opened from
+  // these results can offer a "Back to Search Results" link that restores
+  // exactly this search.
+  const returnTo = toDirectorySearchParams(filters).toString();
+
   const firstOnPage = results.total === 0 ? 0 : (results.page - 1) * results.pageSize + 1;
   const lastOnPage = Math.min(results.page * results.pageSize, results.total);
 
@@ -116,7 +122,7 @@ export default async function FindAccountantPage({ searchParams }: FindAccountan
               <EmptyResults filters={filters} cityOptions={allCityOptions} />
             ) : (
               <>
-                <ProfessionalResults results={results} />
+                <ProfessionalResults results={results} returnTo={returnTo} />
                 <DirectoryPagination filters={filters} results={results} />
               </>
             )}

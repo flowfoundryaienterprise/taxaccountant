@@ -51,7 +51,8 @@ export function DirectoryHeader({ resultCount }: { resultCount: number }) {
             These are development-only examples used to build and test the directory, not live
             listings. Designations shown are self-declared and have not been verified. No ratings,
             reviews, prices or availability are shown, because none of that data exists yet.
-            Professional profile pages are not published yet either.
+            The profile pages these cards open are excluded from search indexing for the same
+            reason.
           </span>
         </p>
       </div>

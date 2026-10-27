@@ -122,6 +122,13 @@ export const heroTrustList: HeroTrustItem[] = [
 
 export interface DemoProfessional {
   id: string;
+  /**
+   * Slug of the matching `directoryFixtures` row, so the homepage highlight
+   * and the directory card open the one canonical profile route
+   * (`/professionals/[slug]`). These four demo identities are the same four
+   * the directory fixtures carry, with the same portraits.
+   */
+  profileSlug: string;
   name: string;
   designation: string;
   city: string;
@@ -138,6 +145,7 @@ export interface DemoProfessional {
 export const demoProfessionals: DemoProfessional[] = [
   {
     id: "demo-1",
+    profileSlug: "sarah-johnson",
     name: "Sarah Johnson, CPA",
     designation: "Certified Public Accountant",
     city: "New York",
@@ -152,6 +160,7 @@ export const demoProfessionals: DemoProfessional[] = [
   },
   {
     id: "demo-2",
+    profileSlug: "michael-chen",
     name: "Michael Chen, EA",
     designation: "Enrolled Agent",
     city: "Toronto",
@@ -166,6 +175,7 @@ export const demoProfessionals: DemoProfessional[] = [
   },
   {
     id: "demo-3",
+    profileSlug: "emily-rodriguez",
     name: "Emily Rodriguez, CPA",
     designation: "Certified Public Accountant",
     city: "London",
@@ -180,6 +190,7 @@ export const demoProfessionals: DemoProfessional[] = [
   },
   {
     id: "demo-4",
+    profileSlug: "david-wilson",
     name: "David Wilson, CPA",
     designation: "Certified Public Accountant",
     city: "Sydney",
