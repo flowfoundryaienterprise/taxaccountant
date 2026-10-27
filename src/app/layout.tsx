@@ -5,6 +5,7 @@ import { SiteChrome } from "@/components/layout/site-chrome";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ConvexClientProvider } from "@/components/shared/convex-client-provider";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_ORIGIN } from "@/lib/seo/site";
 
 import "./globals.css";
 
@@ -15,15 +16,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://taxaccountant.com"),
+  metadataBase: new URL(SITE_ORIGIN),
   title: {
-    default: "TaxAccountant.com",
-    template: "%s | TaxAccountant.com",
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "TaxAccountant.com connects customers with qualified tax and accounting professionals worldwide.",
+  description: SITE_DESCRIPTION,
   openGraph: {
-    siteName: "TaxAccountant.com",
+    siteName: SITE_NAME,
     type: "website",
   },
   robots: {

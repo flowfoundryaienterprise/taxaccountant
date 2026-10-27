@@ -8,6 +8,8 @@ import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { Container } from "@/components/layout/container";
 import { ContentBlocks } from "@/components/shared/content-blocks";
 import { MarketplaceCta } from "@/components/shared/marketplace-cta";
+import { JsonLd } from "@/components/seo/json-ld";
+import { articleJsonLd } from "@/lib/seo/structured-data";
 import {
   TAX_CONTENT_DISCLAIMER,
   contentDateline,
@@ -70,9 +72,9 @@ export async function generateMetadata({ params }: ResourceDetailProps): Promise
  * subject and no internal note, so nothing administrative can be rendered
  * into this page or its metadata.
  *
- * No structured data is emitted. `Article` JSON-LD would be legitimate for
- * genuinely reviewed content, but it is only worth adding once real
- * published resources exist — emitting it now would describe nothing.
+ * `Article` JSON-LD is emitted here and is safe to emit: this component only
+ * runs for a record the public repository returned, which is published and
+ * reviewed by construction, so the structured data cannot describe a draft.
  */
 export default async function ResourceDetailPage({ params }: ResourceDetailProps) {
   const { slug } = await params;
@@ -87,6 +89,19 @@ export default async function ResourceDetailPage({ params }: ResourceDetailProps
 
   return (
     <>
+      <JsonLd
+        data={articleJsonLd({
+          title: article.title,
+          description: article.seo.description ?? article.excerpt,
+          slug: article.slug,
+          author: article.author,
+          reviewer: article.reviewer,
+          publishedAt: article.publishedAt,
+          reviewedAt: article.reviewedAt,
+          imagePath: article.featuredImage?.path,
+        })}
+      />
+
       <section className="border-b border-border bg-tint/50">
         <Container className="flex flex-col gap-6 py-10 sm:py-14">
           <Breadcrumbs

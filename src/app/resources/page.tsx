@@ -16,6 +16,13 @@ export const metadata: Metadata = {
   description:
     "Reviewed guides about tax and accounting topics, written in general terms and scoped to the jurisdiction they describe.",
   alternates: { canonical: "/resources" },
+  openGraph: {
+    title: "Guides & Resources | TaxAccountant.com",
+    description:
+      "Reviewed guides about tax and accounting topics, written in general terms and scoped to the jurisdiction they describe.",
+    url: "/resources",
+    type: "website",
+  },
   /*
    * Indexable, and safe to be: this route serves only published resources
    * that carry a recorded editorial review, and there are currently none —

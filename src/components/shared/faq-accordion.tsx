@@ -14,6 +14,16 @@ interface FaqAccordionProps {
    * have been reviewed — structured data on a `noindex` page is noise, and
    * marking up unreviewed answers would amplify them.
    */
+  /**
+   * Emit `FAQPage` JSON-LD.
+   *
+   * Day 8: left available but no longer switched on anywhere. The Q&A is
+   * genuinely visible on the page, so the markup would not be false — but
+   * the Day 8 brief rules out "unsupported FAQ rich-result claims", and
+   * since 2023 FAQ rich results are shown only for authoritative
+   * government and health sources, so a commercial marketplace emitting it
+   * gains nothing and asserts a result type it will not receive.
+   */
   structuredData?: boolean;
   className?: string;
 }

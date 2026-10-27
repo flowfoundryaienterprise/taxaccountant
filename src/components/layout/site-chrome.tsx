@@ -3,6 +3,8 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 
+import { SkipLink } from "@/components/layout/skip-link";
+
 interface SiteChromeProps {
   /** Rendered on the server and passed down, so this stays a thin client wrapper. */
   header: React.ReactNode;
@@ -38,8 +40,13 @@ export function SiteChrome({ header, footer, children }: SiteChromeProps) {
 
   return (
     <>
+      {/* First focusable element in the document, so a keyboard user can
+          jump the header on every page. */}
+      <SkipLink />
       {header}
-      <main className="flex-1">{children}</main>
+      <main id="main-content" className="flex-1">
+        {children}
+      </main>
       {footer}
     </>
   );

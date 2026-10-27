@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { SkipLink } from "@/components/layout/skip-link";
 
 /**
  * The CMS frame: sidebar rail, sticky header, scrollable content column.
@@ -37,11 +38,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen w-full bg-tint/40">
+      <SkipLink />
       <AdminSidebar pathname={pathname} open={sidebarOpen} onClose={close} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminHeader pathname={pathname} onOpenSidebar={() => setSidebarOpen(true)} />
-        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        <main id="main-content" className="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8">
+          {children}
+        </main>
       </div>
     </div>
   );
