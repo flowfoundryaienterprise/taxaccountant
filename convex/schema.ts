@@ -119,6 +119,24 @@ export default defineSchema({
       v.literal("archived"),
     ),
     remoteServices: v.boolean(),
+    /*
+     * Day 5 addition. `remoteServices` alone cannot distinguish "remote
+     * only" from "remote or in person", and a `professionalLocations` row is
+     * a statement about geography, not an offer to meet clients there — so
+     * inferring in-person availability from a location would invent a
+     * consultation preference nobody declared.
+     *
+     * Both the Day 3 directory's consultation-mode filter
+     * (`?mode=in_person`) and the Day 5 profile's consultation section are
+     * already specified against this fact (DESIGN.md section 6: "languages,
+     * location and remote indication"), and it was simply missing from the
+     * professional record.
+     *
+     * Optional, so no existing `professionals` document becomes invalid and
+     * no backfill is required — a profile that has never stated a position
+     * renders as "not stated" rather than as a guess.
+     */
+    inPersonServices: v.optional(v.boolean()),
     publicContactMode: v.union(
       v.literal("contact_form"),
       v.literal("external"),
