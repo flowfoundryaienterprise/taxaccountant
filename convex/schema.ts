@@ -223,8 +223,40 @@ export default defineSchema({
       v.literal("published"),
       v.literal("archived"),
     ),
+    /*
+     * Day 7 addition. `contentPages` could already say which country and
+     * which service a page relates to, but not which tax jurisdiction —
+     * even though that is the distinction this whole product is built on.
+     *
+     * It matters most for editorial content: an article describing one tax
+     * authority's treatment of something, rendered without saying which
+     * authority, reads as a universal statement. That is the specific harm
+     * the Day 7 brief's tax-content rules exist to prevent ("No unreviewed
+     * jurisdiction-specific tax advice", section 10), and it cannot be
+     * prevented if the record has nowhere to say what it applies to.
+     *
+     * Optional: most pages are genuinely not jurisdiction-specific, and an
+     * absent value means "not jurisdiction-specific" rather than "unknown".
+     */
+    jurisdictionId: v.optional(v.id("taxJurisdictions")),
     authorSubject: v.optional(v.string()),
     reviewerSubject: v.optional(v.string()),
+    /*
+     * Day 7 addition. `reviewerSubject` records *who* reviewed; `publishedAt`
+     * records when the content went live. Neither answers "when was this
+     * last checked against current practice", which for tax content is a
+     * different and more important question — content can be published for a
+     * year after its last review.
+     *
+     * The Day 7 brief requires the two to be distinguishable (section 10:
+     * "Distinguish publish date from last-reviewed date"), and the public
+     * resource pages are expected to show a reviewed date where one exists.
+     *
+     * Optional, so no existing document becomes invalid: an absent value
+     * means no review has been recorded, which the UI must render as
+     * "not reviewed" rather than falling back to the publish date.
+     */
+    reviewedAt: v.optional(v.number()),
     publishedAt: v.optional(v.number()),
     updatedAt: v.number(),
   })
