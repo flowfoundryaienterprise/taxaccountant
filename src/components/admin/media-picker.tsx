@@ -69,7 +69,7 @@ export function MediaPicker({ value, onChange, label, hint, disabled }: MediaPic
             disabled={disabled}
             onClick={() => onChange(undefined)}
             aria-label="Remove selected image"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-input border border-border text-slate hover:bg-tint disabled:opacity-40"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-input border border-control text-slate hover:bg-tint disabled:opacity-40"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>

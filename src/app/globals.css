@@ -25,7 +25,36 @@
   --color-slate: #4c6178;
 
   /* Derived tokens (pending approval, see DESIGN.md) */
+
+  /*
+   * Structural and decorative edges: card outlines, dividers, panel rules,
+   * badge outlines. 1.32:1 against white, which is correct for what it
+   * does — WCAG 1.4.11 covers "visual information required to identify
+   * user interface components and states", and a card edge or a divider is
+   * neither. Nearly all ~200 uses are this kind, including cards that are
+   * wrapped in a link: what identifies those is the heading, the image and
+   * the text, not the outline.
+   */
   --color-border: #d8e1eb;
+
+  /*
+   * The boundary of a control that has nothing else to identify it — a
+   * text input, a select, a bordered button sitting on white. That *is*
+   * covered by 1.4.11 and needs 3:1 against the colours either side of it.
+   *
+   * Day 9: these all used --color-border, so their only visible boundary
+   * measured 1.32:1. This value sits on the line between --color-border
+   * and --color-slate, 70% of the way along, so it stays inside the
+   * palette instead of introducing a hue: 211.7 degrees, against 211.6 for
+   * the border it came from and 211.4 for slate. It measures 3.68:1 on
+   * white and 3.33:1 on --color-tint, and stays lighter than
+   * --color-slate so a field outline never competes with the text in it.
+   *
+   * Use it only where the border carries that meaning. Decorative edges
+   * stay on --color-border: darkening those would redraw every card on the
+   * site to satisfy a rule that does not apply to them.
+   */
+  --color-control: #76879a;
   --color-success: #18794e;
   --color-danger: #b42318;
   --color-warning: #9a6700;

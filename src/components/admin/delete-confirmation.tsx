@@ -53,7 +53,7 @@ export function DeleteConfirmation({
         type="button"
         onClick={open}
         className={cn(
-          "inline-flex min-h-9 items-center gap-1.5 rounded-input border border-border bg-white px-3 text-caption font-medium text-danger transition-colors duration-150 hover:bg-tint",
+          "inline-flex min-h-9 items-center gap-1.5 rounded-input border border-control bg-white px-3 text-caption font-medium text-danger transition-colors duration-150 hover:bg-tint",
           className,
         )}
       >
@@ -103,7 +103,7 @@ export function DeleteConfirmation({
               value={typed}
               onChange={(event) => setTyped(event.target.value)}
               placeholder={recordName}
-              className="w-full rounded-input border border-border bg-white px-3 py-2.5 text-compact text-navy placeholder:text-slate focus-visible:border-action"
+              className="w-full rounded-input border border-control bg-white px-3 py-2.5 text-compact text-navy placeholder:text-slate focus-visible:border-action"
             />
           </div>
 
@@ -118,7 +118,7 @@ export function DeleteConfirmation({
             <button
               type="button"
               onClick={close}
-              className="inline-flex min-h-11 items-center justify-center rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
             >
               Cancel
             </button>

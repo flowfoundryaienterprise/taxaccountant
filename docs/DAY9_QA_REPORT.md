@@ -136,13 +136,13 @@ production build** with `CMS_PREVIEW` unset. Reviewed under
 | Images & assets | 20 | 20 | 0 | — |
 | SEO / sitemap / robots | 14 | 14 | 0 | — |
 | Responsive (9 routes × 4 widths) | 22 | 22 | 0 | — |
-| Accessibility | 21 | 13 | 6 (BUG-03/04/05/07/10) | 2 (BUG-08 brand, BUG-11 cosmetic) |
+| Accessibility | 25 | 14 | 10 (BUG-03/04/05/07/08/10) | 1 (BUG-11 cosmetic) |
 | CMS (isolated preview) | 12 | 12 | 0 | 1 (no auth — see 9) |
 | Convex integration | 6 | 4 | 0 | 2 (no backend yet) |
 | Performance | 7 | 6 | 1 (BUG-06) | — |
-| **Total** | **182** | **170** | **9** | **5** |
+| **Total** | **186** | **171** | **10** | **4** |
 
-Automated unit tests added this session: **48, all passing** (section 11).
+Automated unit tests added this session: **50, all passing** (section 11).
 
 ---
 
@@ -425,13 +425,56 @@ rather than drift. Raise it if the brand wants them re-united.
 
 ---
 
-### BUG-08 — Form control borders fail WCAG 1.4.11 · **LOW** · NOT FIXED (same token decision)
+### BUG-08 — Control borders failed WCAG 1.4.11 · **LOW** · FIXED
 
-`--color-border: #d8e1eb` against white is **1.32:1**; WCAG 2.2 AA 1.4.11
-requires **3:1** for the visual boundary of a UI component. The search
-bar's text input and its two selects rely on `border-border` as their only
-boundary. `globals.css` already marks this a "derived token pending
-brand/contrast sign-off", so it is flagged there rather than changed here.
+`--color-border: #d8e1eb` measures **1.32:1** against white. WCAG 2.2 AA
+1.4.11 requires **3:1** for the visual boundary of a user interface
+component, and that token was the only boundary on every text input,
+select and textarea in the app.
+
+**Why this was not a one-line token change.** `--color-border` has ~200
+uses, and almost all of them are decorative: card outlines, dividers, panel
+rules, badge edges. 1.4.11 covers "visual information required to identify
+user interface components and states", which a card edge is not — and a
+card wrapped in a `<Link>` is still identified by its heading, image and
+text, not by its outline. Darkening the token globally would have redrawn
+every card on the site to satisfy a rule that does not apply to them, which
+is the redesign section 6 rules out.
+
+**Fix.** A second token, `--color-control: #76879a`, used only where the
+border *is* the control:
+
+| | vs white | vs `--color-tint` | 1.4.11 needs |
+|---|---|---|---|
+| `--color-border` (decorative, unchanged) | 1.32 | 1.20 | n/a |
+| `--color-control` (controls) | **3.68** | **3.33** | 3.0 |
+
+The value is not invented: it sits on the line between `--color-border` and
+`--color-slate`, 70% along, so it stays inside the existing palette —
+211.7 degrees of hue against 211.6 for the border it derives from and 211.4
+for slate. It is also still lighter than `--color-slate`, so a field
+outline never competes with the text typed into it.
+
+**Where it was applied.** The rule used was: *a control whose fill does not
+separate it from the surface behind it, so the border is the only
+boundary.* That is 14 form controls (inputs, selects, textareas) plus 15
+controls of the same kind — the `outline` button variant, directory and
+admin pagination links, filter chips, the "Popular:" pills, and icon-only
+buttons with no text label. Cards, badges, panels, dividers and menu items
+inside an already-bordered popover were deliberately left on
+`--color-border`.
+
+An earlier pass of this recoloured every interactive element and was
+reverted: it caught `country-card` and `service-card`, whose borders are
+card chrome, and would have darkened the card grid on every listing page.
+
+**Verification.** Measured in the live production build on
+`/find-accountant`: all 4 controls render `rgb(118,135,154)` at **3.68:1**
+against both their own fill and the surface behind them, **0 failing**; a
+card border still measures `rgb(216,225,235)`, unchanged. `border-control`
+was also checked through `cn()` — it merges as a colour, keeps the separate
+`border` width utility, and still loses correctly to the `border-danger`
+error state, so it is not a repeat of BUG-01.
 
 ---
 
@@ -700,7 +743,7 @@ One script added, matching existing conventions:
 "test": "node --import ./scripts/test-resolver.mjs --test \"src/**/*.test.ts\""
 ```
 
-**48 tests, all passing**, covering what section 18 of the brief asks for:
+**50 tests, all passing**, covering what section 18 of the brief asks for:
 
 | File | Tests | Covers |
 |---|---|---|
@@ -708,7 +751,7 @@ One script added, matching existing conventions:
 | `directory-search.test.ts` | 10 | keyword semantics, empty results, country/service/mode filters, **jurisdiction as its own axis**, sorting, non-overlapping pages, out-of-range clamping, city options derived from data |
 | `public-data-boundary.test.ts` | 10 | invalid/unpublished slugs indistinguishable, every public profile approved+published, **no credential claims verification without a review record**, empty public repository, invalid country/service codes, catalogue ≠ discoverable, **sitemap excludes every noindex route**, no fabricated timestamps |
 | `class-merge.test.ts` | 7 | **BUG-01 regression** — all 35 size×colour pairs survive, button base keeps its size through a variant colour, real conflicts still resolve, radii, conditional overrides |
-| `palette-contrast.test.ts` | 6 | **BUG-07 regression** — token ratios read out of `globals.css` itself: body/secondary text, action as text *and* as a button background, the hover shade's legibility and darkness, status colours, focus ring, checkbox accent |
+| `palette-contrast.test.ts` | 8 | **BUG-07 and BUG-08 regression** — including an assertion that `--color-border` still *fails* 3:1, so "fix the contrast" is never re-read as "darken every border on the site"; — token ratios read out of `globals.css` itself: body/secondary text, action as text *and* as a button background, the hover shade's legibility and darkness, status colours, focus ring, checkbox accent |
 | `globals-layers.test.ts` | 3 | **BUG-10 regression** — element defaults are inside `@layer base`, no bare element rule is left unlayered, and the reduced-motion override stays unlayered and `!important` |
 
 Each of the three regression files was checked to actually fail against the
@@ -755,6 +798,18 @@ Commit 2 — the contrast work (BUG-07), and BUG-10 which it uncovered
  docs/DAY9_QA_REPORT.md                         |  this report
 ```
 
+Commit 3 — control-border contrast (BUG-08)
+
+```
+ src/app/globals.css                            |  new --color-control token
+ 14 form controls across 9 files                |  border-border -> border-control
+ 15 bordered controls across 11 files           |  same, where the border is the
+                                                |  only boundary (outline buttons,
+                                                |  pagination, chips, icon buttons)
+ src/lib/__tests__/palette-contrast.test.ts     |  +2 tests
+ docs/DAY9_QA_REPORT.md                         |  this report
+```
+
 No Convex function, schema, migration, environment variable, Cloudflare
 configuration or deployment setting was touched. `package-lock.json` is
 unchanged. No database operation of any kind was performed.
@@ -767,7 +822,7 @@ unchanged. No database operation of any kind was performed.
 |---|---|
 | `npm run typecheck` | **PASS** (exit 0) |
 | `npm run lint` | **PASS** (exit 0) |
-| `npm test` | **PASS** — 48/48 |
+| `npm test` | **PASS** — 50/50 |
 | `npm run build` | **PASS** (exit 0) |
 | `npm run start` + production sweep | **PASS** — 14 routes, `/admin` 404, filter counts identical to baseline |
 
@@ -819,7 +874,6 @@ and it needs a product owner, not a QA pass.
 | ID | Item | Severity | Owner |
 |---|---|---|---|
 | BUG-11 | Focus ring renders `currentColor` (navy, 13.82:1) instead of `--color-focus` — hue wrong, visibility fine | Low | Day 10 |
-| BUG-08 | `--color-border` 1.32:1 on form controls vs 3:1 required (1.4.11) | Low | Design/brand |
 | BUG-09 | Soft 404s on three dynamic routes (vinext limitation; `noindex` mitigates) | Medium | Upstream / Day 10 |
 | — | Screen-reader pass with a real AT (NVDA/VoiceOver) not performed | — | Day 10 |
 | — | Firefox, Safari/WebKit, Edge **NOT TESTED** — unavailable here | — | Day 10 |
@@ -863,11 +917,11 @@ white in the first place.
 | CMS UI reviewed safely | PASS (deployment BLOCKED — no auth) |
 | Convex integration verified where possible | PARTIAL — server-side filtering BLOCKED |
 | Responsive layouts tested | PASS (375/768/1024/1440, zero overflow) |
-| Accessibility issues reviewed | PASS with findings (5 fixed; 1 brand token, 1 cosmetic outstanding) |
+| Accessibility issues reviewed | PASS with findings (6 fixed; 1 cosmetic outstanding) |
 | SEO functionality verified | PASS |
 | Images and assets checked | PASS |
 | Performance measured where possible | PASS (production build; no field data) |
-| Confirmed frontend bugs fixed | PASS — 8 of 11; 3 outstanding (1 brand token, 1 cosmetic, 1 upstream) |
+| Confirmed frontend bugs fixed | PASS — 9 of 11; 2 outstanding (1 cosmetic, 1 upstream) |
 | Regression tests completed | PASS |
 | QA report created | PASS |
 | No destructive database operations | PASS — none performed |
@@ -879,6 +933,6 @@ white in the first place.
 | Cross-browser (Firefox/Safari/Edge) | **NOT TESTED** — unavailable |
 | Screen-reader pass with real AT | **NOT TESTED** |
 
-**Day 9 status: COMPLETE**, with three items explicitly carried forward
+**Day 9 status: COMPLETE**, with two items explicitly carried forward
 because they belong to backend, product and upstream owners rather than to a
 frontend QA pass.

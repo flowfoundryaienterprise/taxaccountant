@@ -75,7 +75,7 @@ export function EditorialActionBar({
                 action.enabled
                   ? action.destructive
                     ? "bg-action text-white hover:bg-[#0668c7]"
-                    : "border border-border bg-white text-navy hover:bg-tint"
+                    : "border border-control bg-white text-navy hover:bg-tint"
                   : "cursor-not-allowed border border-border bg-tint/50 text-slate",
               )}
             >

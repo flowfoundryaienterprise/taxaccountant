@@ -94,7 +94,7 @@ export function AdminHeader({ pathname, onOpenSidebar, lastCrumbLabel }: AdminHe
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search this section by title or slug"
-            className="h-11 w-full rounded-input border border-border bg-white pr-3 pl-9 text-compact text-navy placeholder:text-slate focus-visible:border-action"
+            className="h-11 w-full rounded-input border border-control bg-white pr-3 pl-9 text-compact text-navy placeholder:text-slate focus-visible:border-action"
           />
         </div>
       </form>

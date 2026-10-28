@@ -104,6 +104,42 @@ test("the focus ring is visible against every surface it lands on", () => {
   }
 });
 
+test("a control boundary clears the 3:1 non-text threshold", () => {
+  // WCAG 1.4.11. `--color-control` is the border on inputs, selects and any
+  // button whose fill does not separate it from the page, so it is the only
+  // thing marking where the control is. It has to clear 3:1 against both
+  // surfaces a control sits on.
+  const control = token("control");
+
+  assert.ok(
+    contrast(control, WHITE) >= AA_NON_TEXT,
+    `control border on white is ${contrast(control, WHITE).toFixed(2)}:1`,
+  );
+  assert.ok(
+    contrast(control, token("tint")) >= AA_NON_TEXT,
+    `control border on tint is ${contrast(control, token("tint")).toFixed(2)}:1`,
+  );
+
+  // It must stay lighter than body text, or a field outline competes with
+  // the value typed into it.
+  assert.ok(
+    luminance(control) > luminance(token("slate")),
+    "the control border must stay lighter than --color-slate",
+  );
+
+  // And the decorative token is deliberately NOT held to this: it draws
+  // card edges and dividers, which 1.4.11 does not cover. Asserted so that
+  // "fix the contrast" is never read as "darken every border on the site".
+  assert.ok(
+    contrast(token("border"), WHITE) < AA_NON_TEXT,
+    "--color-border is the decorative token; if it now passes 3:1 the two have been merged",
+  );
+});
+
+test("the error state stays distinguishable on a control", () => {
+  assert.ok(contrast(token("danger"), WHITE) >= AA_NON_TEXT);
+});
+
 test("the checkbox accent is distinguishable from its white field", () => {
   // `accent-action` colours the checked state; 1.4.11 governs it.
   assert.ok(contrast(token("action"), WHITE) >= AA_NON_TEXT);

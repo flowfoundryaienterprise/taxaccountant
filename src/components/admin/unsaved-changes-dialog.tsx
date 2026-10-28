@@ -103,7 +103,7 @@ export function UnsavedChangesDialog({
             <button
               type="button"
               onClick={() => dialogRef.current?.close()}
-              className="inline-flex min-h-11 items-center justify-center rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
             >
               Keep editing
             </button>

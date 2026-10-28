@@ -93,7 +93,7 @@ export function AccountantSearchBar({ filters }: AccountantSearchBarProps) {
             maxLength={MAX_QUERY_LENGTH}
             onChange={(event) => setKeyword(event.target.value)}
             placeholder="Name, firm, city or specialty"
-            className="h-11 rounded-input border border-border bg-white px-3 text-compact text-navy transition-colors duration-150 placeholder:text-slate/70 hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            className="h-11 rounded-input border border-control bg-white px-3 text-compact text-navy transition-colors duration-150 placeholder:text-slate/70 hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           />
         </div>
 
@@ -105,7 +105,7 @@ export function AccountantSearchBar({ filters }: AccountantSearchBarProps) {
             id="directory-country"
             value={country}
             onChange={(event) => setCountry(event.target.value)}
-            className="h-11 rounded-input border border-border bg-white px-3 text-compact text-navy transition-colors duration-150 hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            className="h-11 rounded-input border border-control bg-white px-3 text-compact text-navy transition-colors duration-150 hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           >
             <option value="">Any country</option>
             {filters.countries.length > 1 ? (
@@ -127,7 +127,7 @@ export function AccountantSearchBar({ filters }: AccountantSearchBarProps) {
             id="directory-service"
             value={service}
             onChange={(event) => setService(event.target.value)}
-            className="h-11 rounded-input border border-border bg-white px-3 text-compact text-navy transition-colors duration-150 hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            className="h-11 rounded-input border border-control bg-white px-3 text-compact text-navy transition-colors duration-150 hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
           >
             <option value="">Any service</option>
             {filters.services.length > 1 ? (

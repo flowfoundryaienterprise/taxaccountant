@@ -43,7 +43,7 @@ export function DirectoryPagination({ filters, results }: DirectoryPaginationPro
           href={buildDirectoryHref(filters, { page: page - 1 })}
           scroll={false}
           rel="prev"
-          className={cn(linkBase, "border-border bg-white text-navy hover:border-action hover:bg-tint")}
+          className={cn(linkBase, "border-control bg-white text-navy hover:border-action hover:bg-tint")}
         >
           <ChevronLeft className="h-4 w-4" aria-hidden />
           Previous
@@ -51,7 +51,7 @@ export function DirectoryPagination({ filters, results }: DirectoryPaginationPro
       ) : (
         <span
           aria-disabled
-          className={cn(linkBase, "cursor-not-allowed border-border bg-white text-slate/50")}
+          className={cn(linkBase, "cursor-not-allowed border-control bg-white text-slate/50")}
         >
           <ChevronLeft className="h-4 w-4" aria-hidden />
           Previous
@@ -84,7 +84,7 @@ export function DirectoryPagination({ filters, results }: DirectoryPaginationPro
                   aria-label={`Go to page ${candidate}`}
                   className={cn(
                     linkBase,
-                    "border-border bg-white text-navy hover:border-action hover:bg-tint",
+                    "border-control bg-white text-navy hover:border-action hover:bg-tint",
                   )}
                 >
                   {candidate}
@@ -100,7 +100,7 @@ export function DirectoryPagination({ filters, results }: DirectoryPaginationPro
           href={buildDirectoryHref(filters, { page: page + 1 })}
           scroll={false}
           rel="next"
-          className={cn(linkBase, "border-border bg-white text-navy hover:border-action hover:bg-tint")}
+          className={cn(linkBase, "border-control bg-white text-navy hover:border-action hover:bg-tint")}
         >
           Next
           <ChevronRight className="h-4 w-4" aria-hidden />
@@ -108,7 +108,7 @@ export function DirectoryPagination({ filters, results }: DirectoryPaginationPro
       ) : (
         <span
           aria-disabled
-          className={cn(linkBase, "cursor-not-allowed border-border bg-white text-slate/50")}
+          className={cn(linkBase, "cursor-not-allowed border-control bg-white text-slate/50")}
         >
           Next
           <ChevronRight className="h-4 w-4" aria-hidden />

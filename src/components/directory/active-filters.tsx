@@ -69,7 +69,7 @@ export function ActiveFilters({ filters, cityOptions }: ActiveFiltersProps) {
             <Link
               href={hrefWithout(chip)}
               scroll={false}
-              className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-tint px-3 py-1 text-caption font-medium text-navy transition-all duration-150 hover:border-action hover:bg-white"
+              className="group inline-flex items-center gap-1.5 rounded-full border border-control bg-tint px-3 py-1 text-caption font-medium text-navy transition-all duration-150 hover:border-action hover:bg-white"
             >
               <span className="text-slate">{chip.groupLabel}:</span>
               {chip.label}
