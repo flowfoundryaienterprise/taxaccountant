@@ -92,7 +92,7 @@ export function AccountantSearch() {
         <Button
           type="submit"
           size="lg"
-          className="transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-18px_rgba(8,121,233,0.6)] active:translate-y-0 active:scale-[0.98] sm:w-auto"
+          className="transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-18px_rgba(7,110,212,0.6)] active:translate-y-0 active:scale-[0.98] sm:w-auto"
         >
           <Search className="h-4 w-4" aria-hidden />
           Find an Accountant

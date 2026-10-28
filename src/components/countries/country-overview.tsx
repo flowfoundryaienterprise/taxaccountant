@@ -107,7 +107,7 @@ export function CountryOverview({ country }: { country: CountryEntry }) {
                 aria-hidden
               >
                 <span className="animate-marker-pulse absolute inset-0 rounded-full bg-action" />
-                <span className="relative block h-3 w-3 rounded-full border-2 border-white bg-action shadow-[0_0_0_4px_rgba(8,121,233,0.25)]" />
+                <span className="relative block h-3 w-3 rounded-full border-2 border-white bg-action shadow-[0_0_0_4px_rgba(7,110,212,0.25)]" />
               </span>
             </div>
           </div>

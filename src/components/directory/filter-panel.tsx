@@ -122,7 +122,7 @@ function CheckOption({ id, name, label, hint, checked, disabled, onChange }: Che
         checked={checked}
         disabled={disabled}
         onChange={onChange}
-        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[#0879e9] disabled:cursor-not-allowed"
+        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-action disabled:cursor-not-allowed"
       />
       <span>
         {label}
@@ -289,7 +289,7 @@ export function FilterPanel({ filters, cityOptions, idPrefix, onChange }: Filter
                 type="radio"
                 checked={filters.mode === option.value}
                 onChange={() => onChange({ mode: option.value as ConsultationMode })}
-                className="h-4 w-4 shrink-0 cursor-pointer accent-[#0879e9]"
+                className="h-4 w-4 shrink-0 cursor-pointer accent-action"
               />
               {option.label}
             </label>

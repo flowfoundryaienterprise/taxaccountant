@@ -136,13 +136,13 @@ production build** with `CMS_PREVIEW` unset. Reviewed under
 | Images & assets | 20 | 20 | 0 | — |
 | SEO / sitemap / robots | 14 | 14 | 0 | — |
 | Responsive (9 routes × 4 widths) | 22 | 22 | 0 | — |
-| Accessibility | 17 | 12 | 3 (BUG-03/04/05) | 2 (BUG-07/08, brand sign-off) |
+| Accessibility | 21 | 13 | 6 (BUG-03/04/05/07/10) | 2 (BUG-08 brand, BUG-11 cosmetic) |
 | CMS (isolated preview) | 12 | 12 | 0 | 1 (no auth — see 9) |
 | Convex integration | 6 | 4 | 0 | 2 (no backend yet) |
 | Performance | 7 | 6 | 1 (BUG-06) | — |
-| **Total** | **178** | **169** | **6** | **5** |
+| **Total** | **182** | **170** | **9** | **5** |
 
-Automated unit tests added this session: **39, all passing** (section 11).
+Automated unit tests added this session: **48, all passing** (section 11).
 
 ---
 
@@ -372,7 +372,7 @@ rather than left to drift.
 
 ---
 
-### BUG-07 — `--color-action` fails WCAG AA for normal text · **MEDIUM** · NOT FIXED (needs brand sign-off)
+### BUG-07 — `--color-action` failed WCAG AA for normal text · **MEDIUM** · FIXED
 
 | | |
 |---|---|
@@ -391,14 +391,37 @@ WCAG, so 4.5:1 is required. Everything else in the palette passes: navy on
 white 13.82, slate on white 6.39, slate on tint 5.78, success 5.41, danger
 6.57, warning 4.87, focus ring 6.72.
 
-**Not fixed deliberately.** `--color-action` is the approved master-plan
-brand colour and the brief requires brand colours to be preserved. Changing
-it is a design decision, not a frontend bug fix.
+**Fix (authorised by the product owner after the first pass).** The token
+was darkened along the same hue to **`#076ed4`**. Measured after:
 
-**Concrete remedy for sign-off.** Darkening the same hue to **`#076ed4`**
-clears AA everywhere: on-white 5.01, white-on-it 5.01, on-tint 4.54. The
-palette already contains `--color-focus: #1459b5` at 6.72:1, so a darker
-blue is evidently already acceptable to the brand.
+| Pair | Before | After | AA normal |
+|---|---|---|---|
+| action on white | 4.27 | **5.01** | PASS |
+| white on action (button labels) | 4.27 | **5.01** | PASS |
+| action on tint | 3.86 | **4.54** | PASS |
+| white on the `#0668c7` hover shade | — | **5.51** | PASS |
+
+The hover shade was checked rather than assumed: it is still darker than the
+new base (luminance 0.1406 vs 0.1595), so the button does not light up on
+hover. The palette already contained `--color-focus: #1459b5` at 6.72:1, so
+a darker blue was evidently already acceptable to the brand.
+
+**Two related things were cleaned up at the same time.** Two checkboxes in
+`filter-panel.tsx` hard-coded `accent-[#0879e9]` instead of using the token,
+and six decorative glow shadows carried the old colour as a raw
+`rgba(8,121,233,…)` triple. Both now follow the token — the checkboxes via
+`accent-action`, which was verified to compile to
+`accent-color:var(--color-action)`. The served production CSS now contains
+**zero** occurrences of the old hex or its RGB triple.
+
+**The brand mark was deliberately left at `#0879E9`.** WCAG 1.4.3 exempts a
+logotype from contrast requirements, so the tile in `brand-logo.tsx`,
+`public/favicon.svg` and `scripts/generate-icons.mjs` keeps the original
+brand value rather than being changed as a side effect of an accessibility
+fix — re-uniting them would also mean regenerating committed icon binaries.
+The divergence is (1, 11, 21) of 255 and is not visible in the header where
+the two sit side by side. Both files now say so, so it reads as a decision
+rather than drift. Raise it if the brand wants them re-united.
 
 ---
 
@@ -409,6 +432,76 @@ requires **3:1** for the visual boundary of a UI component. The search
 bar's text input and its two selects rely on `border-border` as their only
 boundary. `globals.css` already marks this a "derived token pending
 brand/contrast sign-off", so it is flagged there rather than changed here.
+
+---
+
+### BUG-10 — An unlayered `a { color: inherit }` overrode the text colour of 38 of 63 anchors · **HIGH** · FIXED
+
+| | |
+|---|---|
+| Route/component | Global — `src/app/globals.css` |
+| Severity | High (site-wide; produced a 2.76:1 contrast failure on every primary button) |
+
+Found while verifying BUG-07, by checking what the browser actually
+*rendered* rather than what the token was set to.
+
+**Reproduction.** Load `/`, read the computed `color` of the Sign Up link.
+
+**Expected** `rgb(255,255,255)` — it carries `text-white` via
+`buttonVariants`. **Actual** `rgb(16,44,87)`, navy. Measured across the
+homepage: **38 of the 63 anchors carrying a text-colour utility rendered the
+wrong colour**, including every nav link, every action-coloured link, and
+every primary button rendered as a `<Link>`.
+
+**Root cause.** Tailwind v4 emits its output as `@layer theme, base,
+components, utilities`. CSS cascade layers rank **unlayered** declarations
+above every layered one, *regardless of specificity*. `globals.css` declared
+`a { color: inherit }` at the top level, so it outranked `.text-white` in
+`@layer utilities` — even though the class is more specific. Tailwind's own
+preflight sets the identical rule, but inside `@layer base`, where a utility
+correctly overrides it.
+
+This is the hardest class of bug to see: the class was in the DOM, the rule
+was in the stylesheet, the type checker and the build were happy, and the
+cascade discarded it silently.
+
+**Why it mattered more than cosmetics.** Primary buttons rendered a navy
+label on the action-blue fill: **2.76:1**, far below AA. Darkening the token
+for BUG-07 made the *rendered* figure worse, not better (3.24 → 2.76),
+because the label was never white to begin with. Fixing BUG-07 alone would
+have been counterproductive.
+
+**Fix.** Moved `:root`, `body`, `a` and `:focus-visible` into `@layer base`,
+which is where element defaults belong and is exactly what Tailwind's
+preflight does. The `prefers-reduced-motion` override stays unlayered and
+`!important` on purpose — that one *must* outrank utilities.
+
+**Verification.** Anchors rendering the wrong colour: **38 → 0**. Sign Up is
+`rgb(255,255,255)` on `rgb(7,110,212)` = **5.01:1**, at 14px. Confirmed
+visually at high zoom, and in the production build. Guarded by 3 tests in
+`src/lib/__tests__/globals-layers.test.ts`, which were checked to fail when
+the rule is moved back out.
+
+---
+
+### BUG-11 — The focus ring renders `currentColor`, not `--color-focus` · **LOW** · NOT FIXED (pre-existing, cosmetic)
+
+`globals.css` declares `:focus-visible { outline: 2px solid
+var(--color-focus) }` (`#1459b5`). The rule reaches the served CSS intact
+and its width and offset apply, but the **colour** resolves to
+`currentColor` — navy on most surfaces — so focus rings are navy rather than
+the intended focus blue.
+
+**Confirmed pre-existing, not caused by BUG-10's fix.** Measured on a build
+of the committed baseline and on the fixed build: byte-identical results
+(`2px solid rgb(16,44,87) offset 2px` on a nav link; the Chrome UA ring
+`2.66667px solid … offset 0` on an element the rule does not reach).
+
+**Low severity, deliberately.** Navy on white is **13.82:1**, so the focus
+indicator is *more* visible than the intended `#1459b5` (6.72:1) — WCAG
+2.4.7 and 1.4.11 are satisfied either way. What is wrong is the hue, not the
+visibility. Root cause not isolated; it is below the Day 9 bar and would be
+a speculative change to chase now. Recorded for Day 10.
 
 ---
 
@@ -607,7 +700,7 @@ One script added, matching existing conventions:
 "test": "node --import ./scripts/test-resolver.mjs --test \"src/**/*.test.ts\""
 ```
 
-**39 tests, all passing**, covering what section 18 of the brief asks for:
+**48 tests, all passing**, covering what section 18 of the brief asks for:
 
 | File | Tests | Covers |
 |---|---|---|
@@ -615,13 +708,20 @@ One script added, matching existing conventions:
 | `directory-search.test.ts` | 10 | keyword semantics, empty results, country/service/mode filters, **jurisdiction as its own axis**, sorting, non-overlapping pages, out-of-range clamping, city options derived from data |
 | `public-data-boundary.test.ts` | 10 | invalid/unpublished slugs indistinguishable, every public profile approved+published, **no credential claims verification without a review record**, empty public repository, invalid country/service codes, catalogue ≠ discoverable, **sitemap excludes every noindex route**, no fabricated timestamps |
 | `class-merge.test.ts` | 7 | **BUG-01 regression** — all 35 size×colour pairs survive, button base keeps its size through a variant colour, real conflicts still resolve, radii, conditional overrides |
+| `palette-contrast.test.ts` | 6 | **BUG-07 regression** — token ratios read out of `globals.css` itself: body/secondary text, action as text *and* as a button background, the hover shade's legibility and darkness, status colours, focus ring, checkbox accent |
+| `globals-layers.test.ts` | 3 | **BUG-10 regression** — element defaults are inside `@layer base`, no bare element rule is left unlayered, and the reduced-motion override stays unlayered and `!important` |
 
-`class-merge.test.ts` is the one that would have caught BUG-01: the old
-config failed 42/42 of those combinations.
+Each of the three regression files was checked to actually fail against the
+defect it covers, rather than assumed to: `class-merge` fails 42/42
+combinations on the old `cn()` config, `palette-contrast` reports
+"action on white is 4.27:1" on the old token, and `globals-layers` names `a`
+as the offender when the rule is moved back out of the layer.
 
 ---
 
 ## 12. Files changed
+
+Commit 1 — `1d40370` *fix: stabilize marketplace frontend and resolve Day 9 QA issues*
 
 ```
  package.json                                   |   1 +   (test script)
@@ -637,6 +737,24 @@ config failed 42/42 of those combinations.
  src/lib/__tests__/ (4 files)                   | new
 ```
 
+Commit 2 — the contrast work (BUG-07), and BUG-10 which it uncovered
+
+```
+ src/app/globals.css                            |  BUG-07 token + BUG-10 @layer base
+ src/components/directory/filter-panel.tsx      |  accent-[#0879e9] -> accent-action
+ src/components/countries/countries-hero.tsx    |  glow shadow follows the token
+ src/components/countries/country-overview.tsx  |  glow shadow follows the token
+ src/components/directory/accountant-search-bar.tsx | glow shadow follows the token
+ src/components/home/global-coverage.tsx        |  glow shadow follows the token
+ src/components/home/professional-cta.tsx       |  glow shadow follows the token
+ src/components/shared/accountant-search.tsx    |  glow shadow follows the token
+ src/components/shared/brand-logo.tsx           |  documents the deliberate divergence
+ scripts/generate-icons.mjs                     |  documents the deliberate divergence
+ src/lib/__tests__/palette-contrast.test.ts     | new (BUG-07 regression)
+ src/lib/__tests__/globals-layers.test.ts       | new (BUG-10 regression)
+ docs/DAY9_QA_REPORT.md                         |  this report
+```
+
 No Convex function, schema, migration, environment variable, Cloudflare
 configuration or deployment setting was touched. `package-lock.json` is
 unchanged. No database operation of any kind was performed.
@@ -649,7 +767,7 @@ unchanged. No database operation of any kind was performed.
 |---|---|
 | `npm run typecheck` | **PASS** (exit 0) |
 | `npm run lint` | **PASS** (exit 0) |
-| `npm test` | **PASS** — 39/39 |
+| `npm test` | **PASS** — 48/48 |
 | `npm run build` | **PASS** (exit 0) |
 | `npm run start` + production sweep | **PASS** — 14 routes, `/admin` 404, filter counts identical to baseline |
 
@@ -657,6 +775,13 @@ Regression check against the pre-fix baseline: directory counts match
 exactly (16 / 3 / 5 / 1 / 15 / 16 / 0-empty-state), navigation intact, all
 images 200, console clean, sitemap still 11 URLs, CMS still absent from the
 production build.
+
+After the contrast work specifically: anchors rendering the wrong colour
+**38 → 0**; Sign Up measured in the live production build at white on
+`rgb(7,110,212)` = **5.01:1** at 14px; "Home" and "View All Professionals"
+both 5.01:1; zero occurrences of the old hex or its RGB triple in the served
+CSS; and the focus-ring behaviour confirmed byte-identical to a build of the
+committed baseline, so the layer change introduced no focus regression.
 
 Not deployed to Cloudflare.
 
@@ -693,7 +818,7 @@ and it needs a product owner, not a QA pass.
 
 | ID | Item | Severity | Owner |
 |---|---|---|---|
-| BUG-07 | `--color-action` fails AA (4.27:1) for all button labels and action links; `#076ed4` fixes it | Medium | Design/brand |
+| BUG-11 | Focus ring renders `currentColor` (navy, 13.82:1) instead of `--color-focus` — hue wrong, visibility fine | Low | Day 10 |
 | BUG-08 | `--color-border` 1.32:1 on form controls vs 3:1 required (1.4.11) | Low | Design/brand |
 | BUG-09 | Soft 404s on three dynamic routes (vinext limitation; `noindex` mitigates) | Medium | Upstream / Day 10 |
 | — | Screen-reader pass with a real AT (NVDA/VoiceOver) not performed | — | Day 10 |
@@ -713,8 +838,10 @@ and it needs a product owner, not a QA pass.
    is served.
 3. **OPEN-01 — fabricated ratings, reviews, stats and testimonials on an
    indexable page under a real brand.** Product.
-4. **BUG-07 — WCAG AA contrast failure on every primary button label.**
-   Design sign-off.
+BUG-07 is **resolved** and no longer a blocker: the contrast failure on
+primary button labels was fixed in this pass (token darkened to `#076ed4`),
+together with BUG-10, which was the reason those labels were not actually
+white in the first place.
 
 ---
 
@@ -736,11 +863,11 @@ and it needs a product owner, not a QA pass.
 | CMS UI reviewed safely | PASS (deployment BLOCKED — no auth) |
 | Convex integration verified where possible | PARTIAL — server-side filtering BLOCKED |
 | Responsive layouts tested | PASS (375/768/1024/1440, zero overflow) |
-| Accessibility issues reviewed | PASS with findings (3 fixed, 2 need brand sign-off) |
+| Accessibility issues reviewed | PASS with findings (5 fixed; 1 brand token, 1 cosmetic outstanding) |
 | SEO functionality verified | PASS |
 | Images and assets checked | PASS |
 | Performance measured where possible | PASS (production build; no field data) |
-| Confirmed frontend bugs fixed | PASS — 6 of 9; 3 need other owners |
+| Confirmed frontend bugs fixed | PASS — 8 of 11; 3 outstanding (1 brand token, 1 cosmetic, 1 upstream) |
 | Regression tests completed | PASS |
 | QA report created | PASS |
 | No destructive database operations | PASS — none performed |
@@ -752,6 +879,6 @@ and it needs a product owner, not a QA pass.
 | Cross-browser (Firefox/Safari/Edge) | **NOT TESTED** — unavailable |
 | Screen-reader pass with real AT | **NOT TESTED** |
 
-**Day 9 status: COMPLETE**, with four items explicitly carried forward
-because they belong to backend, product and design owners rather than to a
+**Day 9 status: COMPLETE**, with three items explicitly carried forward
+because they belong to backend, product and upstream owners rather than to a
 frontend QA pass.
