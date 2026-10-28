@@ -11,6 +11,8 @@ import { ServiceBenefits } from "@/components/services/service-benefits";
 import { ServiceDetailHero } from "@/components/services/service-detail-hero";
 import { ServiceFaq } from "@/components/services/service-faq";
 import { ServiceGrid } from "@/components/services/service-grid";
+import { JsonLd } from "@/components/seo/json-ld";
+import { serviceJsonLd } from "@/lib/seo/structured-data";
 import { ServiceNeeds } from "@/components/services/service-needs";
 import { filterProfessionals } from "@/lib/directory/filters";
 import { directoryFixtures } from "@/lib/directory/fixtures";
@@ -89,6 +91,23 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
 
   return (
     <>
+      {/*
+        `Service` only. No Offer, no price, no provider rating: this page
+        describes what a category of work involves and claims nothing about
+        who performs it or what it costs.
+
+        No BreadcrumbList here — `ServiceDetailHero` already emits one
+        alongside the visible trail, and two BreadcrumbList blocks on one
+        page are contradictory structured data rather than twice the signal.
+      */}
+      <JsonLd
+        data={serviceJsonLd({
+          name: service.title,
+          description: service.overview,
+          slug: service.slug,
+        })}
+      />
+
       <ServiceDetailHero service={service} />
       <ServiceBenefits service={service} />
       <ServiceNeeds service={service} />
@@ -115,7 +134,6 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
         title={`${service.title} — frequently asked questions`}
         description="General information about this category of work. Nothing here is advice about your own tax position."
         tone="tinted"
-        structuredData
       />
 
       {related.length ? (

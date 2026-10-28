@@ -3,10 +3,26 @@ import Link from "next/link";
 import { BadgeCheck, FileCheck2, UserCog } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
+import { PHASE_GATED, robotsFor } from "@/lib/seo/indexing";
 
 export const metadata: Metadata = {
   title: "For Professionals",
   description: "How professional onboarding and verification will work once Phase 2 opens.",
+  alternates: { canonical: "/for-professionals" },
+  openGraph: {
+    title: "For Tax Professionals | TaxAccountant.com",
+    description:
+      "How professional onboarding and credential verification will work when Phase 2 opens.",
+    url: "/for-professionals",
+    type: "website",
+  },
+  /*
+   * Day 8: this page explains a capability that has not launched — there is
+   * no onboarding to begin and no account to create. Indexing it would put
+   * a page in search results that cannot do what a searcher arriving on it
+   * would be looking for.
+   */
+  robots: robotsFor(PHASE_GATED),
 };
 
 const steps = [

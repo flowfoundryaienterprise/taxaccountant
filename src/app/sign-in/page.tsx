@@ -7,6 +7,7 @@ import { Container } from "@/components/layout/container";
 export const metadata: Metadata = {
   title: "Sign In",
   description: "Public customer and professional accounts launch in Phase 2.",
+  alternates: { canonical: "/sign-in" },
   robots: { index: false, follow: true },
 };
 

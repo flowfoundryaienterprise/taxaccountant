@@ -39,9 +39,10 @@ export interface ProfessionalCardModel {
 interface ProfessionalCardProps {
   professional: ProfessionalCardModel;
   /**
-   * Where "View Profile" goes. `/professionals/[slug]` is
-   * IMPLEMENTATION_PLAN.md Day 10, so callers without a real profile route
-   * pass `cta="pending"` instead of linking somewhere that cannot answer.
+   * Where "View Profile" goes. Build it with `professionalHref` so every
+   * caller uses the one canonical `/professionals/[slug]` route. The
+   * `cta="pending"` escape hatch remains for any future caller holding a
+   * professional with no published profile page to link to.
    */
   profileHref?: string;
   cta?: "link" | "pending";

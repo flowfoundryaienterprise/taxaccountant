@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 
+import { JsonLd } from "@/components/seo/json-ld";
+import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo/structured-data";
+
 import { FeaturedProfessionals } from "@/components/home/featured-professionals";
 import { GlobalCoverage } from "@/components/home/global-coverage";
 import { HeroSection } from "@/components/home/hero-section";
@@ -12,9 +15,9 @@ import { TestimonialsSection } from "@/components/home/testimonials-section";
 import { WhyChooseUs } from "@/components/home/why-choose-us";
 
 export const metadata: Metadata = {
-  title: "Find Trusted Tax Accountants Anywhere in the World",
+  title: "Find Tax Accountants Worldwide",
   description:
-    "Search tax and accounting professionals by country, tax jurisdiction and service. A Phase 1 public marketplace preview from TaxAccountant.com.",
+    "Discover tax and accounting professionals by service, location, language, and tax jurisdiction on TaxAccountant.com.",
   openGraph: {
     title: "TaxAccountant.com — Global Tax & Accounting Marketplace",
     description:
@@ -30,6 +33,13 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <>
+      {/*
+        Organization and WebSite only. No SearchAction (it would advertise a
+        search over fixture listings), no AggregateRating, no Person — see
+        the note in `@/lib/seo/structured-data` for what is excluded and why.
+      */}
+      <JsonLd data={[organizationJsonLd(), webSiteJsonLd()]} />
+
       <HeroSection />
       <ServicesSection />
       <MarketplaceTrust />

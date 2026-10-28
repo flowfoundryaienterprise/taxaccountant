@@ -6,6 +6,7 @@ import { ProfessionalCard } from "@/components/shared/professional-card";
 import { Reveal } from "@/components/shared/reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { demoProfessionals } from "@/lib/home-content";
+import { professionalHref } from "@/lib/marketplace/query-params";
 
 export function FeaturedProfessionals() {
   return (
@@ -49,6 +50,8 @@ export function FeaturedProfessionals() {
                   photo: professional.photo,
                   photoAlt: professional.photoAlt,
                 }}
+                /* One canonical profile route, shared with the directory. */
+                profileHref={professionalHref(professional.profileSlug)}
               />
             </Reveal>
           ))}

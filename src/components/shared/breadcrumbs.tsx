@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
+import { absoluteUrl } from "@/lib/seo/site";
 import { cn } from "@/lib/utils";
 
 export interface Crumb {
@@ -19,8 +20,6 @@ interface BreadcrumbsProps {
   structuredData?: boolean;
   className?: string;
 }
-
-const SITE_ORIGIN = "https://taxaccountant.com";
 
 /**
  * Shared breadcrumb trail.
@@ -81,7 +80,7 @@ export function Breadcrumbs({ items, structuredData = false, className }: Breadc
                 "@type": "ListItem",
                 position: index + 1,
                 name: item.label,
-                ...(item.href ? { item: `${SITE_ORIGIN}${item.href}` } : {}),
+                ...(item.href ? { item: absoluteUrl(item.href) } : {}),
               })),
             }),
           }}

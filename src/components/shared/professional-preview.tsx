@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ProfessionalCard } from "@/components/shared/professional-card";
 import { buttonVariants } from "@/components/ui/button";
 import { toCardModel } from "@/lib/directory/card-model";
+import { professionalHref } from "@/lib/marketplace/query-params";
 import type { DirectoryProfessional } from "@/lib/directory/types";
 import { cn } from "@/lib/utils";
 
@@ -28,8 +29,8 @@ interface ProfessionalPreviewProps {
  * Renders the same `ProfessionalCard` the directory renders, through the
  * same `toCardModel` projection, so nothing can appear here that the
  * directory would not show — including the absence of ratings, prices and
- * availability. `cta="pending"` because `/professionals/[slug]` does not
- * exist yet (IMPLEMENTATION_PLAN.md day 10).
+ * availability. Each card links to the canonical profile route through
+ * `professionalHref`, the same helper the directory uses.
  *
  * The preview notice is required, not decorative: these rows are Day 3
  * development fixtures, not published listings.
@@ -68,7 +69,8 @@ export function ProfessionalPreview({
             Development preview — {matched} example {matched === 1 ? "profile" : "profiles"}.
           </strong>{" "}
           These are development-only examples used to build and test discovery, not live listings.
-          Designations are self-declared and unverified, and profile pages are not published yet.
+          Designations are self-declared and unverified, and the profile pages they link to are
+          excluded from search indexing for the same reason.
         </span>
       </p>
 
@@ -77,7 +79,7 @@ export function ProfessionalPreview({
           <li key={professional.slug} className="flex">
             <ProfessionalCard
               professional={toCardModel(professional)}
-              cta="pending"
+              profileHref={professionalHref(professional.slug)}
               saveable={false}
               className="h-full w-full"
               sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
+import { SiteChrome } from "@/components/layout/site-chrome";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ConvexClientProvider } from "@/components/shared/convex-client-provider";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_ORIGIN } from "@/lib/seo/site";
 
 import "./globals.css";
 
@@ -14,15 +16,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://taxaccountant.com"),
+  metadataBase: new URL(SITE_ORIGIN),
   title: {
-    default: "TaxAccountant.com",
-    template: "%s | TaxAccountant.com",
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "TaxAccountant.com connects customers with qualified tax and accounting professionals worldwide.",
+  description: SITE_DESCRIPTION,
   openGraph: {
-    siteName: "TaxAccountant.com",
+    siteName: SITE_NAME,
     type: "website",
   },
   robots: {
@@ -53,9 +54,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={inter.variable}>
       <body className="flex min-h-screen flex-col">
         <ConvexClientProvider>
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
+          {/*
+            `SiteChrome` renders the public header/footer for every public
+            route and steps aside for the CMS at `/admin`, which brings its
+            own full-height layout. Both are rendered here on the server and
+            handed down as props, so they stay Server Components.
+          */}
+          <SiteChrome header={<SiteHeader />} footer={<SiteFooter />}>
+            {children}
+          </SiteChrome>
         </ConvexClientProvider>
       </body>
     </html>
