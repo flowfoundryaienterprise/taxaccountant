@@ -3,13 +3,24 @@
  *
  * A checkmark whose long arm keeps rising past the corner — "verified" and
  * "growth" in one shape, which is the whole proposition of a vetted tax
- * marketplace. Action blue `#0879E9` tile with a white glyph: the signature
- * brand color (DESIGN.md section 2), and the only combination in the palette
- * that stays legible at 16px against both a white page and dark browser
- * chrome.
+ * marketplace. A blue tile with a white glyph: the only combination in the
+ * palette that stays legible at 16px against both a white page and dark
+ * browser chrome.
  *
- * Geometry is kept identical to `public/favicon.svg` and
- * `scripts/generate-icons.mjs` — change one, change all three.
+ * ## Why the tile is #0879E9 and `--color-action` is not, as of Day 9
+ * These were the same value. The token was darkened to #076ed4 so that
+ * white button labels and action-coloured links clear WCAG 2.2 AA (the old
+ * value measured 4.27:1). A logotype carries **no** contrast requirement —
+ * WCAG 1.4.3 exempts it explicitly — so the mark was left at the original
+ * brand value rather than changed as a side effect of an accessibility fix.
+ *
+ * That is a deliberate divergence, not drift, and it is deliberately small:
+ * the two blues differ by (1, 11, 21) of 255. Re-uniting them is a brand
+ * decision, and it would mean regenerating the committed favicon and icon
+ * binaries too. Tracked in docs/DAY9_QA_REPORT.md.
+ *
+ * Geometry **and tile colour** are kept identical to `public/favicon.svg`
+ * and `scripts/generate-icons.mjs` — change one, change all three.
  */
 
 interface BrandLogoProps {

@@ -65,7 +65,7 @@ export function GlobalCoverage() {
                 className="animate-marker-pulse absolute inset-0 rounded-full bg-action"
                 style={{ animationDelay: `${index * 0.3}s` }}
               />
-              <span className="relative block h-2.5 w-2.5 rounded-full border-2 border-white bg-action shadow-[0_0_0_3px_rgba(8,121,233,0.25)]" />
+              <span className="relative block h-2.5 w-2.5 rounded-full border-2 border-white bg-action shadow-[0_0_0_3px_rgba(7,110,212,0.25)]" />
             </span>
           ))}
 

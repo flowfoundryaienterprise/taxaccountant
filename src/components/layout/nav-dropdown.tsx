@@ -34,6 +34,7 @@ interface NavDropdownProps {
 export function NavDropdown({ label, items, activePrefix }: NavDropdownProps) {
   const [open, setOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
   const pathname = usePathname() ?? "/";
 
   const active = Boolean(
@@ -49,7 +50,11 @@ export function NavDropdown({ label, items, activePrefix }: NavDropdownProps) {
       }
     }
     function handleKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      // Escape must hand focus back to the trigger, or it lands on <body>
+      // and the next Tab restarts from the top of the document.
+      triggerRef.current?.focus();
     }
 
     document.addEventListener("mousedown", handleClick);
@@ -63,6 +68,7 @@ export function NavDropdown({ label, items, activePrefix }: NavDropdownProps) {
   return (
     <div ref={containerRef} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}

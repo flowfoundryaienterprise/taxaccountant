@@ -29,7 +29,11 @@ const POINTS = [
   [13.5, 22],
   [23.5, 10.5],
 ];
-const TILE = [0x08, 0x79, 0xe9]; // --color-action #0879E9
+const TILE = [0x08, 0x79, 0xe9]; // brand mark blue #0879E9 — see below
+// NOTE: this is intentionally *not* --color-action any more. Day 9 darkened
+// that token to #076ed4 for WCAG AA contrast; a logotype has no contrast
+// requirement, so the mark keeps the original brand blue. Keep this in step
+// with src/components/shared/brand-logo.tsx and public/favicon.svg.
 const GLYPH = [0xff, 0xff, 0xff]; // white
 const SAMPLES = 4; // supersampling factor per axis
 

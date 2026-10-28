@@ -19,7 +19,7 @@ export function ProfessionalCTA() {
             </p>
             <Link
               href="/for-professionals"
-              className="group inline-flex h-12 shrink-0 items-center gap-2 rounded-input bg-action px-6 text-body font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0668c7] hover:shadow-[0_16px_32px_-18px_rgba(8,121,233,0.6)] active:translate-y-0 active:scale-[0.98]"
+              className="group inline-flex h-12 shrink-0 items-center gap-2 rounded-input bg-action px-6 text-body font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0668c7] hover:shadow-[0_16px_32px_-18px_rgba(7,110,212,0.6)] active:translate-y-0 active:scale-[0.98]"
             >
               Join as a Professional
               <ArrowRight

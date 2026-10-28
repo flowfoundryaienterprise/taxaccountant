@@ -42,13 +42,30 @@ function FilterSection({
   children,
   note,
 }: FilterSectionProps) {
+  /*
+   * Day 9: the options were a bare list of checkboxes inside the
+   * disclosure, so a screen reader tabbing between them announced only
+   * "Singapore, checkbox" — and "Singapore" is an option in *both* the
+   * Country group and the City group of the current data, which made the
+   * two indistinguishable by ear. Country, city and tax jurisdiction being
+   * separate axes is a correctness requirement for this directory, so the
+   * grouping has to be conveyed, not just drawn.
+   *
+   * `role="group"` named by the summary text gives each option its axis.
+   * A `<fieldset>`/`<legend>` would be the other way, but the legend has to
+   * be the first child of the fieldset, which this disclosure layout (the
+   * summary is the heading *and* the toggle) cannot satisfy without
+   * restructuring the section.
+   */
+  const titleId = React.useId();
+
   return (
     <details
       open={defaultOpen}
       className="group border-b border-border py-4 last:border-b-0 [&_summary::-webkit-details-marker]:hidden"
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-input text-compact font-semibold text-navy">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2" id={titleId}>
           {title}
           {selectedCount > 0 ? (
             <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-action px-1.5 text-caption font-semibold text-white">
@@ -69,7 +86,9 @@ function FilterSection({
         </p>
       ) : null}
 
-      <div className="mt-3 flex flex-col gap-2">{children}</div>
+      <div role="group" aria-labelledby={titleId} className="mt-3 flex flex-col gap-2">
+        {children}
+      </div>
     </details>
   );
 }
@@ -103,7 +122,7 @@ function CheckOption({ id, name, label, hint, checked, disabled, onChange }: Che
         checked={checked}
         disabled={disabled}
         onChange={onChange}
-        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[#0879e9] disabled:cursor-not-allowed"
+        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-action disabled:cursor-not-allowed"
       />
       <span>
         {label}
@@ -270,7 +289,7 @@ export function FilterPanel({ filters, cityOptions, idPrefix, onChange }: Filter
                 type="radio"
                 checked={filters.mode === option.value}
                 onChange={() => onChange({ mode: option.value as ConsultationMode })}
-                className="h-4 w-4 shrink-0 cursor-pointer accent-[#0879e9]"
+                className="h-4 w-4 shrink-0 cursor-pointer accent-action"
               />
               {option.label}
             </label>

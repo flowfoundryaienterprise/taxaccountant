@@ -8,13 +8,53 @@
 @theme {
   /* Brand colors */
   --color-navy: #102c57;
-  --color-action: #0879e9;
+  /*
+   * Day 9: was #0879e9, the original master-plan value. It measured 4.27:1
+   * against white and 3.86:1 against --color-tint — below the 4.5:1 WCAG
+   * 2.2 AA needs for normal-size text, which this is: it carries every
+   * action-coloured link and eyebrow, and `buttonVariants` puts white
+   * labels on it at text-compact (14px) for every primary button on the
+   * site. Darkened along the same hue until both directions clear AA.
+   *
+   * Measured after the change: 5.01:1 on white, 5.01:1 for white on it,
+   * 4.54:1 on tint, and 5.51:1 for white on the #0668c7 hover state.
+   */
+  --color-action: #076ed4;
   --color-tint: #eaf5ff;
   --color-white: #ffffff;
   --color-slate: #4c6178;
 
   /* Derived tokens (pending approval, see DESIGN.md) */
+
+  /*
+   * Structural and decorative edges: card outlines, dividers, panel rules,
+   * badge outlines. 1.32:1 against white, which is correct for what it
+   * does — WCAG 1.4.11 covers "visual information required to identify
+   * user interface components and states", and a card edge or a divider is
+   * neither. Nearly all ~200 uses are this kind, including cards that are
+   * wrapped in a link: what identifies those is the heading, the image and
+   * the text, not the outline.
+   */
   --color-border: #d8e1eb;
+
+  /*
+   * The boundary of a control that has nothing else to identify it — a
+   * text input, a select, a bordered button sitting on white. That *is*
+   * covered by 1.4.11 and needs 3:1 against the colours either side of it.
+   *
+   * Day 9: these all used --color-border, so their only visible boundary
+   * measured 1.32:1. This value sits on the line between --color-border
+   * and --color-slate, 70% of the way along, so it stays inside the
+   * palette instead of introducing a hue: 211.7 degrees, against 211.6 for
+   * the border it came from and 211.4 for slate. It measures 3.68:1 on
+   * white and 3.33:1 on --color-tint, and stays lighter than
+   * --color-slate so a field outline never competes with the text in it.
+   *
+   * Use it only where the border carries that meaning. Decorative edges
+   * stay on --color-border: darkening those would redraw every card on the
+   * site to satisfy a rule that does not apply to them.
+   */
+  --color-control: #76879a;
   --color-success: #18794e;
   --color-danger: #b42318;
   --color-warning: #9a6700;
@@ -43,25 +83,48 @@
   --radius-panel: 1rem;
 }
 
-:root {
-  color-scheme: light;
-}
+/*
+ * These element defaults MUST stay inside `@layer base`.
+ *
+ * Tailwind v4 emits its own output as `@layer theme, base, components,
+ * utilities`. CSS cascade layers rank *unlayered* styles above every
+ * layered one, regardless of selector specificity — so the same rules
+ * written at the top level of this file outrank every Tailwind utility
+ * rather than being overridden by them.
+ *
+ * That is not theoretical. `a { color: inherit }` sat unlayered here, and
+ * it beat the `text-*` utility on every anchor in the app: measured on the
+ * homepage, 38 of the 63 anchors carrying a text-colour utility rendered
+ * the wrong colour. `buttonVariants` puts `text-white` on a `<Link>`, so
+ * every primary button rendered a navy label on the action-blue fill at
+ * 2.76:1 instead of the intended white at 5.01:1 — the markup, the class
+ * list and the stylesheet were all correct, and the cascade threw it away.
+ *
+ * Inside `@layer base` these behave the way Tailwind's own preflight does
+ * (preflight sets this very `a { color: inherit }` in its base layer):
+ * they provide the default, and a utility class overrides it.
+ */
+@layer base {
+  :root {
+    color-scheme: light;
+  }
 
-body {
-  margin: 0;
-  background: var(--color-white);
-  color: var(--color-navy);
-  font-family: var(--font-sans);
-}
+  body {
+    margin: 0;
+    background: var(--color-white);
+    color: var(--color-navy);
+    font-family: var(--font-sans);
+  }
 
-a {
-  color: inherit;
-}
+  a {
+    color: inherit;
+  }
 
-/* Visible, accessible focus state (WCAG 2.2 AA, DESIGN.md section 10) */
-:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
+  /* Visible, accessible focus state (WCAG 2.2 AA, DESIGN.md section 10) */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

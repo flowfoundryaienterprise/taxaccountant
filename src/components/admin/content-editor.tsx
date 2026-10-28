@@ -72,10 +72,10 @@ export function ContentEditor({ blocks, onChange, disabled }: ContentEditorProps
   const append = (type: ContentBlock["type"]) => onChange([...blocks, newBlock(type)]);
 
   const controlClass =
-    "w-full rounded-input border border-border bg-white px-3 py-2 text-compact text-navy placeholder:text-slate focus-visible:border-action disabled:cursor-not-allowed disabled:bg-tint/50";
+    "w-full rounded-input border border-control bg-white px-3 py-2 text-compact text-navy placeholder:text-slate focus-visible:border-action disabled:cursor-not-allowed disabled:bg-tint/50";
 
   const iconButtonClass =
-    "flex h-9 w-9 items-center justify-center rounded-input border border-border bg-white text-slate transition-colors duration-150 hover:bg-tint disabled:cursor-not-allowed disabled:opacity-40";
+    "flex h-9 w-9 items-center justify-center rounded-input border border-control bg-white text-slate transition-colors duration-150 hover:bg-tint disabled:cursor-not-allowed disabled:opacity-40";
 
   return (
     <div className="flex flex-col gap-4">
@@ -250,7 +250,7 @@ export function ContentEditor({ blocks, onChange, disabled }: ContentEditorProps
               type="button"
               disabled={disabled}
               onClick={() => append(type)}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-input border border-border bg-white px-3 text-caption font-medium text-navy transition-colors duration-150 hover:bg-tint disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-input border border-control bg-white px-3 text-caption font-medium text-navy transition-colors duration-150 hover:bg-tint disabled:cursor-not-allowed disabled:opacity-40"
             >
               <meta.icon className="h-3.5 w-3.5 text-action" aria-hidden />
               {meta.label}

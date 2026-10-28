@@ -208,7 +208,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
             <div className="flex flex-col gap-2">
               <button
                 type="submit"
-                className="inline-flex min-h-11 items-center justify-center rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+                className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
               >
                 Validate form
               </button>

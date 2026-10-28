@@ -83,7 +83,7 @@ export function CountrySearch({ countries, regionOrder }: CountrySearchProps) {
             placeholder="Country name or code — e.g. India or IN"
             autoComplete="off"
             aria-describedby="country-search-status"
-            className="h-12 w-full rounded-input border border-border bg-white pl-11 pr-11 text-compact text-navy transition-colors duration-150 placeholder:text-slate/70 hover:border-action/60 focus:border-action focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+            className="h-12 w-full rounded-input border border-control bg-white pl-11 pr-11 text-compact text-navy transition-colors duration-150 placeholder:text-slate/70 hover:border-action/60 focus:border-action focus:outline-none [&::-webkit-search-cancel-button]:hidden"
           />
           {query ? (
             <button

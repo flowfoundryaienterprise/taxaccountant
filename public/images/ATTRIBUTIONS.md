@@ -25,9 +25,21 @@ anyway as good practice. Downloaded at build time via direct CDN URLs
 `world-map.svg` is from Wikimedia Commons —
 [World_location_map.svg](https://commons.wikimedia.org/wiki/File:World_location_map.svg),
 by STyx, released into the public domain. Recolored (`.sea`/`.land` fill and
-stroke in the embedded `<style>` block only — no path geometry changed) to
-match this project's brand tokens (`--color-tint` / a lighter tint of
-`--color-action`); a `viewBox` was added so it scales responsively.
+stroke in the embedded `<style>` block) to match this project's brand tokens
+(`--color-tint` / a lighter tint of `--color-action`); a `viewBox` was added
+so it scales responsively.
+
+Day 9: the file was 594.6 KB, the largest asset on the site by some margin
+and bigger than any JavaScript chunk — 98% of it was path data carried at
+five decimal places by the Inkscape export it came from. Coordinates are now
+rounded to two decimals and the editor's own metadata (`<metadata>`,
+`sodipodi:namedview`, `inkscape:*`) is dropped, which takes it to 404.0 KB.
+
+The `viewBox` is `0 0 800 400`, so two decimals is a hundredth of a user
+unit — well under a thousandth of a pixel at the size this ever renders.
+Verified rather than assumed: rasterizing the before and after at 1600x800
+(twice the natural size) gives **zero** differing pixels out of 1,280,000.
+Path geometry is therefore changed in the file but not in the output.
 
 ## Known gap
 

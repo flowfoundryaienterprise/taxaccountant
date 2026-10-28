@@ -131,7 +131,7 @@ export function AdminTextField({
          */
         className={cn(
           controlClass,
-          error ? "border-danger" : "border-border focus-visible:border-action",
+          error ? "border-danger" : "border-control focus-visible:border-action",
         )}
       />
     </FieldFrame>
@@ -163,7 +163,7 @@ export function AdminTextArea({
         className={cn(
           controlClass,
           "resize-y",
-          error ? "border-danger" : "border-border focus-visible:border-action",
+          error ? "border-danger" : "border-control focus-visible:border-action",
         )}
       />
     </FieldFrame>
@@ -192,7 +192,7 @@ export function AdminSelectField({
         className={cn(
           controlClass,
           "h-11 py-0",
-          error ? "border-danger" : "border-border focus-visible:border-action",
+          error ? "border-danger" : "border-control focus-visible:border-action",
         )}
       >
         {options.map((option) => (

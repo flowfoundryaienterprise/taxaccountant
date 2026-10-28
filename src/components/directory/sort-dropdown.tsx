@@ -33,7 +33,7 @@ export function SortDropdown({ filters }: SortDropdownProps) {
             { scroll: false },
           )
         }
-        className="h-10 rounded-input border border-border bg-white px-3 text-compact font-medium text-navy transition-colors duration-150 hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        className="h-10 rounded-input border border-control bg-white px-3 text-compact font-medium text-navy transition-colors duration-150 hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
       >
         {sortOptions.map((option) => (
           <option key={option.value} value={option.value}>
