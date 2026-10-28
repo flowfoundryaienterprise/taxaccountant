@@ -46,7 +46,19 @@ interface ProfessionalCardProps {
    */
   profileHref?: string;
   cta?: "link" | "pending";
-  /** Favorites are a Phase 2 collection; the directory opts out. */
+  /**
+   * Favorites are a Phase 2 collection. The heart renders no handler and
+   * saves nothing, so it defaults to **off**: a button that announces
+   * itself as "Save <name>" and then does nothing is the "pretending to
+   * work" that DESIGN.md rules out, and it is also a focusable control with
+   * no action for keyboard and screen reader users.
+   *
+   * Day 9: the default used to be `true`. The directory, the related-
+   * professionals rail and the profile preview each passed `false`
+   * explicitly, so the only surface that ever rendered the dead control was
+   * the homepage, which simply never passed the prop. Opt **in** when
+   * favorites actually exist.
+   */
   saveable?: boolean;
   sizes?: string;
   className?: string;
@@ -87,7 +99,7 @@ export function ProfessionalCard({
   professional,
   profileHref = "/find-accountant",
   cta = "link",
-  saveable = true,
+  saveable = false,
   sizes,
   className,
 }: ProfessionalCardProps) {
