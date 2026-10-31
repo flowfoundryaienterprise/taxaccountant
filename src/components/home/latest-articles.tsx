@@ -12,12 +12,19 @@ export function LatestArticles() {
     <section id="articles" className="py-16 sm:py-24">
       <Container className="flex flex-col gap-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <SectionHeading eyebrow="Tax resources & guides" title="Latest Articles & Tax Tips" />
+          {/*
+            Both links here pointed at `/find-accountant` — an article card
+            and a "View All Articles" link that opened the professional
+            directory. `/resources` is where guides live; it publishes
+            nothing yet and says so, which is the honest destination for a
+            link that promises articles.
+          */}
+          <SectionHeading eyebrow="Resources" title="Guides in preparation" />
           <Link
-            href="/find-accountant"
-            className="inline-flex shrink-0 items-center gap-1.5 text-compact font-semibold text-action"
+            href="/resources"
+            className="inline-flex shrink-0 items-center gap-1.5 text-compact font-medium text-action transition-colors duration-150 hover:text-navy"
           >
-            View All Articles
+            All resources
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </div>

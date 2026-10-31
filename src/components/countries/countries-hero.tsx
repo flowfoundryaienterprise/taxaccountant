@@ -47,12 +47,12 @@ export function CountriesHero({ markers }: { markers: CountryMarker[] }) {
                 href={directoryHref()}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "group transition-transform duration-150 hover:-translate-y-0.5",
+                  "group transition-transform duration-150",
                 )}
               >
                 Find an Accountant
                 <ArrowRight
-                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+                  className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5"
                   aria-hidden
                 />
               </Link>
@@ -81,19 +81,17 @@ export function CountriesHero({ markers }: { markers: CountryMarker[] }) {
                 className="object-contain"
               />
 
-              {markers.map((marker, index) => (
+              {markers.map((marker) => (
+                /* The pulse ring that used to sit under each marker is
+                   gone: nothing on this map is live, and a ring beating
+                   forever under eight dots reads as activity the site does
+                   not have. The marker is the marker. */
                 <span
                   key={marker.code}
-                  className="absolute -translate-x-1/2 -translate-y-1/2"
+                  className="absolute block h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-action ring-2 ring-white"
                   style={{ left: `${marker.mapX}%`, top: `${marker.mapY}%` }}
                   aria-hidden
-                >
-                  <span
-                    className="animate-marker-pulse absolute inset-0 rounded-full bg-action"
-                    style={{ animationDelay: `${index * 0.25}s` }}
-                  />
-                  <span className="relative block h-2.5 w-2.5 rounded-full border-2 border-white bg-action shadow-[0_0_0_3px_rgba(7,110,212,0.25)]" />
-                </span>
+                />
               ))}
             </div>
           </div>

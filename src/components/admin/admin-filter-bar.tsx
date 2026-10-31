@@ -110,7 +110,7 @@ export function AdminFilterBar({
                   "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 py-1 text-caption font-medium transition-colors duration-150",
                   isActive
                     ? "border-action bg-action text-white"
-                    : "border-border bg-white text-slate hover:bg-tint",
+                    : "border-border bg-white text-slate hover:bg-subtle",
                 )}
               >
                 {option.label}
@@ -133,7 +133,7 @@ export function AdminFilterBar({
         {hasActive ? (
           <Link
             href={action}
-            className="inline-flex items-center gap-1 text-caption font-semibold text-action hover:underline"
+            className="inline-flex items-center gap-1 text-caption font-medium text-action hover:underline"
           >
             <X className="h-3 w-3" aria-hidden />
             Clear filters

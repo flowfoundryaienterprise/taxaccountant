@@ -54,7 +54,7 @@ export function EditorialActionBar({
   return (
     <div className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
       <div className="flex flex-col gap-1">
-        <h2 className="text-compact font-semibold text-navy">Editorial workflow</h2>
+        <h2 className="text-compact font-medium text-navy">Editorial workflow</h2>
         <p className="text-caption text-slate">
           Current state: <span className="font-medium text-navy">{statusLabel(status)}</span>.{" "}
           {statusVisibility(status)}
@@ -75,8 +75,8 @@ export function EditorialActionBar({
                 action.enabled
                   ? action.destructive
                     ? "bg-action text-white hover:bg-[#0668c7]"
-                    : "border border-control bg-white text-navy hover:bg-tint"
-                  : "cursor-not-allowed border border-border bg-tint/50 text-slate",
+                    : "border border-control bg-white text-navy hover:bg-subtle"
+                  : "cursor-not-allowed border border-border bg-subtle text-slate",
               )}
             >
               {!action.enabled ? <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden /> : null}

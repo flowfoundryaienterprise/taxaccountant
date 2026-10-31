@@ -6,7 +6,7 @@ import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
 import { ReadOnlyNotice } from "@/components/admin/admin-notices";
 import { settingGroups } from "@/lib/admin/admin-fixtures";
 
-export const metadata: Metadata = { title: "Site Settings" };
+export const metadata: Metadata = { title: "Site settings" };
 
 /**
  * Website settings.
@@ -35,7 +35,7 @@ export default function AdminSettingsScreen() {
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        title="Site Settings"
+        title="Site settings"
         description={`Site identity, navigation and display configuration. ${implemented} settings reflect live values; ${pending} have no storage yet.`}
       />
 
@@ -45,7 +45,7 @@ export default function AdminSettingsScreen() {
       >
         <KeyRound className="mt-0.5 h-5 w-5 shrink-0 text-action" aria-hidden />
         <div className="flex min-w-0 flex-col gap-1.5">
-          <h2 id="secrets-note" className="text-compact font-semibold text-navy">
+          <h2 id="secrets-note" className="text-compact font-medium text-navy">
             Secrets are not configurable here and never will be
           </h2>
           <p className="max-w-[92ch] text-caption text-slate">
@@ -65,7 +65,7 @@ export default function AdminSettingsScreen() {
           className="flex flex-col gap-4 rounded-card border border-border bg-white p-5"
         >
           <div className="flex flex-col gap-1">
-            <h2 id={`settings-${group.id}`} className="text-compact font-semibold text-navy">
+            <h2 id={`settings-${group.id}`} className="text-compact font-medium text-navy">
               {group.title}
             </h2>
             <p className="max-w-[80ch] text-caption text-slate">{group.description}</p>
@@ -88,7 +88,7 @@ export default function AdminSettingsScreen() {
 
                 <dd className="flex flex-col gap-1.5">
                   {field.value ? (
-                    <div className="flex items-center gap-2 rounded-input border border-border bg-tint/50 px-3 py-2.5">
+                    <div className="flex items-center gap-2 rounded-input border border-border bg-subtle px-3 py-2.5">
                       <Lock className="h-3.5 w-3.5 shrink-0 text-slate" aria-hidden />
                       <span className="min-w-0 break-words text-compact text-slate">
                         {field.value}
@@ -112,7 +112,7 @@ export default function AdminSettingsScreen() {
         aria-labelledby="settings-authorization"
         className="flex flex-col gap-2 rounded-card border border-warning/40 bg-white p-5"
       >
-        <h2 id="settings-authorization" className="text-compact font-semibold text-navy">
+        <h2 id="settings-authorization" className="text-compact font-medium text-navy">
           Why every field is read-only
         </h2>
         <p className="max-w-[92ch] text-caption text-slate">

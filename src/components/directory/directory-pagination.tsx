@@ -11,7 +11,7 @@ interface DirectoryPaginationProps {
 }
 
 const linkBase =
-  "inline-flex h-10 min-w-10 items-center justify-center gap-1 rounded-input border px-3 text-compact font-medium transition-all duration-150";
+  "inline-flex h-10 min-w-10 items-center justify-center gap-1 rounded-input border px-3 text-compact font-medium transition-colors duration-150";
 
 /**
  * Page links, not buttons — every page is a real shareable URL and

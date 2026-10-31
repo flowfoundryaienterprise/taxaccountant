@@ -43,7 +43,7 @@ export function AdminPagination({
   const last = Math.min(page * pageSize, total);
 
   const linkClass =
-    "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-input border border-control bg-white px-3 text-compact font-medium text-navy transition-colors duration-150 hover:bg-tint";
+    "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-input border border-control bg-white px-3 text-compact font-medium text-navy transition-colors duration-150 hover:bg-subtle";
 
   return (
     <nav

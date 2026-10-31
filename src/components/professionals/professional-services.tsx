@@ -58,7 +58,7 @@ export function ProfessionalServices({ profile }: { profile: ProfessionalProfile
 
             return (
               <li key={service.serviceSlug} className="flex">
-                <article className="group flex w-full flex-col gap-4 rounded-card border border-border bg-white p-5 shadow-[0_20px_40px_-32px_rgba(16,44,87,0.3)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_28px_48px_-30px_rgba(16,44,87,0.35)]">
+                <article className="group flex w-full flex-col gap-4 rounded-card border border-border bg-white p-5 shadow-[0_20px_40px_-32px_rgba(16,44,87,0.3)] transition-colors duration-200 hover:shadow-[0_28px_48px_-30px_rgba(16,44,87,0.35)]">
                   <span className="flex h-10 w-10 items-center justify-center rounded-input bg-tint text-action">
                     <Icon className="h-5 w-5" aria-hidden />
                   </span>

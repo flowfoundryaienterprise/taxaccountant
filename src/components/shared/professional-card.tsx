@@ -25,8 +25,10 @@ export interface ProfessionalCardModel {
   countryName: string;
   services: string[];
   languages?: string[];
-  /** Short tax-jurisdiction labels; distinct from `countryName`. */
+  /** Tax-jurisdiction codes (`US-NY`, `CA-ON`); distinct from `countryName`. */
   jurisdictions?: string[];
+  /** The same jurisdictions spelled out, for the row's tooltip. */
+  jurisdictionsLabel?: string;
   consultation?: { remote: boolean; inPerson: boolean };
   rating?: number;
   reviewCount?: number;
@@ -116,7 +118,7 @@ export function ProfessionalCard({
   return (
     <article
       className={cn(
-        "group flex flex-col overflow-hidden rounded-card border border-border bg-white shadow-[0_20px_40px_-28px_rgba(16,44,87,0.25)] transition-all duration-200 hover:-translate-y-1.5 hover:shadow-[0_28px_48px_-28px_rgba(16,44,87,0.35)]",
+        "group flex flex-col overflow-hidden rounded-card border border-border bg-white transition-colors duration-150 hover:border-action",
         className,
       )}
     >
@@ -132,11 +134,11 @@ export function ProfessionalCard({
           <div
             role="img"
             aria-label={professional.photoAlt}
-            className="relative flex aspect-[4/5] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-tint via-white to-tint"
+            className="relative flex aspect-[4/5] w-full items-center justify-center overflow-hidden bg-tint"
           >
             <span
               aria-hidden
-              className="flex h-20 w-20 items-center justify-center rounded-full bg-navy text-heading-sm font-semibold text-white transition-transform duration-300 ease-out group-hover:scale-105"
+              className="flex h-20 w-20 items-center justify-center rounded-full bg-navy text-heading-sm font-medium text-white"
             >
               {initialsOf(professional.name)}
             </span>
@@ -147,7 +149,7 @@ export function ProfessionalCard({
           <button
             type="button"
             aria-label={`Save ${professional.name}`}
-            className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate shadow-[0_8px_16px_-8px_rgba(16,44,87,0.4)] transition-colors duration-150 hover:text-danger"
+            className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate shadow-raised transition-colors duration-150 hover:text-danger"
           >
             <Heart className="h-4 w-4" aria-hidden />
           </button>
@@ -156,7 +158,7 @@ export function ProfessionalCard({
 
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div>
-          <h3 className="text-compact font-semibold text-navy">{professional.name}</h3>
+          <h3 className="text-compact font-medium text-navy">{professional.name}</h3>
 
           {professional.designation ? (
             <p
@@ -189,8 +191,14 @@ export function ProfessionalCard({
         </p>
 
         {professional.jurisdictions?.length ? (
+          /* The signature detail: authorised jurisdictions set in mono, so
+             the one fact that distinguishes this directory from a local
+             listings site is also the one thing on the card that looks
+             different from running text. */
           <MetaRow icon={Scale} label="Advises on tax jurisdictions">
-            {professional.jurisdictions.join(" · ")}
+            <span className="font-mono" title={professional.jurisdictionsLabel}>
+              {professional.jurisdictions.join(" · ")}
+            </span>
           </MetaRow>
         ) : null}
 
@@ -234,9 +242,9 @@ export function ProfessionalCard({
         {cta === "link" ? (
           <Link
             href={profileHref}
-            className="mt-auto inline-flex h-10 items-center justify-center rounded-input bg-action text-compact font-medium text-white transition-all duration-150 hover:-translate-y-0.5 hover:bg-[#0668c7] active:translate-y-0 active:scale-[0.98]"
+            className="mt-auto inline-flex h-10 items-center justify-center rounded-input bg-action text-compact font-medium text-white transition-colors duration-150 hover:bg-[#0668c7] active:scale-[0.98]"
           >
-            View Profile
+            View profile
           </Link>
         ) : (
           <button
@@ -249,7 +257,7 @@ export function ProfessionalCard({
               "rounded-input bg-tint text-compact font-medium text-navy/70",
             )}
           >
-            View Profile
+            View profile
           </button>
         )}
       </div>

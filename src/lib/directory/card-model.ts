@@ -28,7 +28,19 @@ export function toCardModel(professional: DirectoryProfessional): ProfessionalCa
     countryName: countryLabel(professional.countryCode),
     services: professional.serviceSlugs.map(serviceLabel),
     languages: professional.languageCodes.map(languageLabel),
-    jurisdictions: professional.jurisdictionCodes.map(jurisdictionShortLabel),
+    /*
+     * The codes themselves, not their expanded names. On a card, three
+     * short labels joined together ("Canada Federal Ontario US Federal")
+     * read as one run-on phrase, and the reader cannot tell where one
+     * jurisdiction ends and the next begins. `CA-FED · CA-ON · US-FED` is
+     * unambiguous, and it is the vocabulary the filters and the URL
+     * already use, so what the card shows is what the user types.
+     *
+     * The expanded names are kept on `jurisdictionsLabel` for the row's
+     * tooltip, so nothing is lost for a reader who does not know a code.
+     */
+    jurisdictions: professional.jurisdictionCodes,
+    jurisdictionsLabel: professional.jurisdictionCodes.map(jurisdictionShortLabel).join(", "),
     consultation: { remote: professional.remote, inPerson: professional.inPerson },
     photo: professional.photo,
     photoAlt:

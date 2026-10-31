@@ -59,7 +59,7 @@ export function AdminSidebar({ pathname, open, onClose }: AdminSidebarProps) {
             type="button"
             onClick={onClose}
             aria-label="Close navigation"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-input text-slate hover:bg-tint lg:hidden"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-input text-slate hover:bg-subtle lg:hidden"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
@@ -80,7 +80,7 @@ export function AdminSidebar({ pathname, open, onClose }: AdminSidebarProps) {
                       "flex min-h-11 items-center gap-3 rounded-input px-3 py-2 text-compact font-medium transition-colors duration-150",
                       isActive
                         ? "bg-tint text-action"
-                        : "text-slate hover:bg-tint/60 hover:text-navy",
+                        : "text-slate hover:bg-subtle hover:text-navy",
                     )}
                   >
                     <item.icon className="h-4 w-4 shrink-0" aria-hidden />

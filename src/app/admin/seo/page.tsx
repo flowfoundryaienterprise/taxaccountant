@@ -20,7 +20,7 @@ import {
 import { demoArticles, demoPages } from "@/lib/admin/admin-fixtures";
 import type { AdminSeoRow } from "@/lib/admin/admin-types";
 
-export const metadata: Metadata = { title: "SEO Management" };
+export const metadata: Metadata = { title: "SEO management" };
 
 /**
  * Central SEO overview.
@@ -274,7 +274,7 @@ export default async function AdminSeoScreen({
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        title="SEO Management"
+        title="SEO management"
         description="Titles, descriptions, canonical paths and indexing eligibility across every route and content record."
       />
 
@@ -308,7 +308,7 @@ export default async function AdminSeoScreen({
 
       {duplicates.length ? (
         <div role="alert" className="flex flex-col gap-2 rounded-card border border-danger/40 bg-white p-4">
-          <h2 className="text-compact font-semibold text-danger">Duplicate canonical paths</h2>
+          <h2 className="text-compact font-medium text-danger">Duplicate canonical paths</h2>
           <ul className="flex list-disc flex-col gap-1 pl-5 text-caption text-slate">
             {duplicates.map(([path, count]) => (
               <li key={path}>
@@ -358,7 +358,7 @@ export default async function AdminSeoScreen({
         aria-labelledby="indexing-rules"
         className="flex flex-col gap-2 rounded-card border border-warning/40 bg-white p-5"
       >
-        <h2 id="indexing-rules" className="text-compact font-semibold text-navy">
+        <h2 id="indexing-rules" className="text-compact font-medium text-navy">
           Indexing rules this project enforces
         </h2>
         <ul className="flex list-disc flex-col gap-1 pl-5 text-caption text-slate">

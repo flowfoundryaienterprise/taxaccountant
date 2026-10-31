@@ -4,7 +4,14 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 export const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-input text-compact font-medium transition-all duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50",
+  /*
+   * `transition-colors`, not `transition-colors`: this base class is on every
+   * button on the site, and `all` animates layout properties too — width,
+   * height and margins stutter on weak devices (ARCHITECTURE.md
+   * performance guidance). A button's hover is a colour change and its
+   * press is a 2% scale, so those are the only two things named.
+   */
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-input text-compact font-medium transition-colors duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {

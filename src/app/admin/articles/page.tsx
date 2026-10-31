@@ -25,7 +25,7 @@ import { publicRepositoryStatus } from "@/lib/cms/public-content-adapter";
 import { toPublishableArticles } from "@/lib/marketplace/content-mappers";
 import type { AdminArticleRow } from "@/lib/admin/admin-types";
 
-export const metadata: Metadata = { title: "Articles & Resources" };
+export const metadata: Metadata = { title: "Articles and resources" };
 
 /**
  * Article and resource management.
@@ -94,7 +94,7 @@ export default async function AdminArticlesScreen({
         row.reviewer && row.reviewedAt ? (
           <span className="flex flex-col gap-0.5">
             <span className="text-caption text-navy">{row.reviewer}</span>
-            <span className="text-caption text-slate">{formatDate(row.reviewedAt)}</span>
+            <span className="font-mono text-caption tabular-nums text-slate">{formatDate(row.reviewedAt)}</span>
           </span>
         ) : (
           <AdminStatusBadge status="not_reviewed" tone="warning" label="Not reviewed" />
@@ -105,7 +105,9 @@ export default async function AdminArticlesScreen({
       key: "published",
       header: "Published",
       hideOnMobile: true,
-      render: (row) => formatDate(row.publishedAt) ?? "—",
+      render: (row) => (
+        <span className="font-mono tabular-nums">{formatDate(row.publishedAt) ?? "—"}</span>
+      ),
     },
     {
       key: "actions",
@@ -114,7 +116,7 @@ export default async function AdminArticlesScreen({
       render: (row) => (
         <Link
           href={`/admin/articles/${row.id}/edit`}
-          className="text-caption font-semibold text-action hover:underline"
+          className="text-caption font-medium text-action hover:underline"
         >
           Edit
         </Link>
@@ -125,7 +127,7 @@ export default async function AdminArticlesScreen({
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        title="Articles & Resources"
+        title="Articles and resources"
         description="Editorial content with author and reviewer attribution. Tax content is not published without a recorded review."
         actions={
           <Link
@@ -187,7 +189,7 @@ export default async function AdminArticlesScreen({
         aria-labelledby="public-visibility"
         className="flex flex-col gap-2 rounded-card border border-border bg-white p-5"
       >
-        <h2 id="public-visibility" className="text-compact font-semibold text-navy">
+        <h2 id="public-visibility" className="text-compact font-medium text-navy">
           What is publicly visible right now
         </h2>
         <p className="max-w-[92ch] text-caption text-slate">
@@ -212,7 +214,7 @@ export default async function AdminArticlesScreen({
         aria-labelledby="editorial-integrity"
         className="flex flex-col gap-2 rounded-card border border-warning/40 bg-white p-5"
       >
-        <h2 id="editorial-integrity" className="text-compact font-semibold text-navy">
+        <h2 id="editorial-integrity" className="text-compact font-medium text-navy">
           Editorial review is a publication requirement
         </h2>
         <p className="max-w-[92ch] text-caption text-slate">

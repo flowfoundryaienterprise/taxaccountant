@@ -91,7 +91,7 @@ export function SiteHeader() {
         <Link
           href="/"
           aria-label="TaxAccountant home"
-          className="flex items-center gap-2.5 text-heading-sm font-semibold text-navy transition-transform duration-200 hover:-translate-y-0.5"
+          className="flex items-center gap-2.5 text-heading-sm font-semibold text-navy transition-transform duration-200"
         >
           <BrandLogo size={32} className="shrink-0" />
           TaxAccountant
@@ -115,7 +115,7 @@ export function SiteHeader() {
             href="/sign-in?intent=signup"
             className={cn(
               buttonVariants({ variant: "primary", size: "sm" }),
-              "transition-transform duration-150 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]",
+              "transition-transform duration-150 active:scale-[0.98]",
             )}
           >
             Sign Up

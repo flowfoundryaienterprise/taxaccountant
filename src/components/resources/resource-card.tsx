@@ -21,7 +21,7 @@ export function ResourceCard({ resource }: { resource: ResourceCardModel }) {
   const published = formatContentDate(resource.publishedAt);
 
   return (
-    <article className="group flex w-full flex-col overflow-hidden rounded-card border border-border bg-white shadow-[0_20px_40px_-32px_rgba(16,44,87,0.3)] transition-all duration-200 hover:-translate-y-1">
+    <article className="group flex w-full flex-col overflow-hidden rounded-card border border-border bg-white shadow-[0_20px_40px_-32px_rgba(16,44,87,0.3)] transition-colors duration-200">
       {resource.image ? (
         <PortraitImage
           src={resource.image.path}

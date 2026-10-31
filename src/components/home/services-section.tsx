@@ -11,7 +11,7 @@ export function ServicesSection() {
         <SectionHeading
           eyebrow="Services"
           title="Every service, matched to the right jurisdiction"
-          description="Pick a category to start a search filtered to professionals who cover it."
+          description="Pick a category to read what the work involves, then filter the directory to professionals who cover it."
         />
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

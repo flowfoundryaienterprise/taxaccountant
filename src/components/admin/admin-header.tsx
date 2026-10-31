@@ -43,13 +43,13 @@ export function AdminHeader({ pathname, onOpenSidebar, lastCrumbLabel }: AdminHe
   }, [crumbs]);
 
   return (
-    <header className="sticky top-0 z-30 flex flex-col gap-3 border-b border-border bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
+    <header className="sticky top-0 z-30 flex flex-col gap-3 border-b border-border bg-white px-4 py-3 sm:px-6">
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onOpenSidebar}
           aria-label="Open navigation"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-input text-slate hover:bg-tint lg:hidden"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-input text-slate hover:bg-subtle lg:hidden"
         >
           <Menu className="h-5 w-5" aria-hidden />
         </button>
@@ -71,7 +71,7 @@ export function AdminHeader({ pathname, onOpenSidebar, lastCrumbLabel }: AdminHe
 
         <Link
           href="/"
-          className="hidden shrink-0 items-center gap-1.5 rounded-input px-3 py-2 text-caption font-semibold text-action hover:bg-tint sm:inline-flex"
+          className="hidden shrink-0 items-center gap-1.5 rounded-input px-3 py-2 text-caption font-medium text-action transition-colors duration-150 hover:bg-subtle sm:inline-flex"
         >
           View public site
           <ExternalLink className="h-3.5 w-3.5" aria-hidden />

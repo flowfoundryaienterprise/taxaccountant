@@ -115,7 +115,7 @@ export function ProfileHeader({ profile, backHref, backLabel }: ProfileHeaderPro
               <div
                 role="img"
                 aria-label={`${name} has no profile photograph in this listing`}
-                className="flex aspect-[4/5] w-full items-center justify-center bg-gradient-to-br from-tint via-white to-tint"
+                className="flex aspect-[4/5] w-full items-center justify-center bg-tint"
               >
                 <span
                   aria-hidden

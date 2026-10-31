@@ -92,7 +92,7 @@ export function AccountantSearch() {
         <Button
           type="submit"
           size="lg"
-          className="transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-18px_rgba(7,110,212,0.6)] active:translate-y-0 active:scale-[0.98] sm:w-auto"
+          className="transition-colors duration-150 active:scale-[0.98] sm:w-auto"
         >
           <Search className="h-4 w-4" aria-hidden />
           Find an Accountant
@@ -112,7 +112,7 @@ export function AccountantSearch() {
             key={item.slug}
             type="button"
             onClick={() => navigate({ service: item.slug })}
-            className="rounded-full border border-control px-3 py-1 text-caption font-medium text-navy transition-all duration-150 hover:-translate-y-0.5 hover:border-action hover:bg-tint active:translate-y-0"
+            className="rounded-full border border-control px-3 py-1 text-caption font-medium text-navy transition-colors duration-150 hover:border-action hover:bg-tint"
           >
             {item.title}
           </button>

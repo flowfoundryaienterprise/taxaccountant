@@ -55,6 +55,30 @@
    * site to satisfy a rule that does not apply to them.
    */
   --color-control: #76879a;
+  /*
+   * CMS surfaces.
+   *
+   * The admin shell used `--color-tint` for its page ground, its table
+   * headers and its row hovers — a light *blue* behind an interface staff
+   * read for hours. Tint is a highlight on the marketing site, where it
+   * marks a section; spread across a working tool it tints everything and
+   * leaves the accent nothing to be brighter than.
+   *
+   * These two are near-neutral greys carrying the same 210-degree hue as
+   * the rest of the ramp, so the CMS reads grey while still belonging to
+   * the palette rather than introducing a second one. `canvas` is the page
+   * ground, `subtle` is the step above it: table headers, row hover, the
+   * neutral status chip.
+   *
+   * Both are held to the same contrast bar as white and tint by
+   * `palette-contrast.test.ts`. `--color-action` measures 4.63:1 on canvas
+   * and 4.54:1 on subtle, so an action-coloured link still clears AA on a
+   * hovered table row — the case that fails first and is easiest to miss.
+   * `--color-warning` does not clear 4.5:1 on either, which is why the
+   * warning badge keeps its white background.
+   */
+  --color-canvas: #f4f6f8;
+  --color-subtle: #f1f4f7;
   --color-success: #18794e;
   --color-danger: #b42318;
   --color-warning: #9a6700;
@@ -62,6 +86,14 @@
 
   /* Typography */
   --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /*
+   * Figures, dates and tax jurisdiction codes. The codes (`US-NY`, `CA-ON`,
+   * `GB-HMRC`) are the one piece of vocabulary this marketplace has and a
+   * generic directory does not, so they are set apart from running text
+   * rather than blended into it. Mono also gives the counts and dates
+   * tabular figures without a second weight.
+   */
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   --text-caption: 0.75rem;
   --text-caption--line-height: 1.4;
   --text-compact: 0.875rem;
@@ -76,6 +108,16 @@
   --text-heading-lg--line-height: 1.2;
   --text-hero: clamp(2rem, 1.6rem + 2vw, 3.25rem);
   --text-hero--line-height: 1.1;
+
+  /*
+   * Elevation. Two steps, both tinted with the ink of the ramp (navy) and
+   * nothing else — the action-blue glows these replaced read as a light
+   * source that does not exist. Depth on this site comes from the hairline
+   * border first; a shadow is only for something that genuinely floats
+   * over content, like the search panel or a map label.
+   */
+  --shadow-raised: 0 1px 2px rgba(16, 44, 87, 0.04), 0 8px 24px -16px rgba(16, 44, 87, 0.18);
+  --shadow-float: 0 2px 4px rgba(16, 44, 87, 0.04), 0 16px 32px -20px rgba(16, 44, 87, 0.24);
 
   /* Radii */
   --radius-input: 0.5rem;
@@ -142,41 +184,17 @@
  * Shared motion primitives (transform/opacity only, see ARCHITECTURE.md
  * performance guidance). Reduced-motion rule above already neutralizes all
  * of these for users who request it.
+ *
+ * Two animations, both of which end. The three that looped forever are
+ * gone: `float-y` bobbed three cards next to the hero headline,
+ * `marker-pulse` beat under every map marker on three pages, and
+ * `marquee-scroll` was declared and never used at all. Nothing on this
+ * site is live, so nothing on it should move on its own.
+ *
+ * One easing curve, cubic-bezier(0.16, 1, 0.3, 1), and three durations:
+ * 150ms for feedback, 200ms for a state change, 600ms for the single
+ * entrance. DESIGN.md section 8 asks for 120-200ms transitions.
  */
-@keyframes marker-pulse {
-  0% {
-    transform: scale(0.9);
-    opacity: 0.55;
-  }
-  70% {
-    transform: scale(2.2);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(2.2);
-    opacity: 0;
-  }
-}
-
-@keyframes marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes float-y {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -201,18 +219,6 @@
 
 .animate-menu-pop {
   animation: menu-pop 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.animate-marker-pulse {
-  animation: marker-pulse 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-}
-
-.animate-marquee {
-  animation: marquee-scroll 28s linear infinite;
-}
-
-.animate-float {
-  animation: float-y 5s ease-in-out infinite;
 }
 
 .animate-fade-up {

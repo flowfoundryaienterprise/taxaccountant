@@ -38,7 +38,7 @@ export function EmptyResults({ filters, cityOptions }: EmptyResultsProps) {
 
       {chips.length ? (
         <div className="flex max-w-[52ch] flex-col gap-2">
-          <p className="text-caption font-semibold uppercase tracking-wide text-slate">
+          <p className="text-caption text-slate">
             Currently filtering by
           </p>
           <ul className="flex flex-wrap justify-center gap-2">

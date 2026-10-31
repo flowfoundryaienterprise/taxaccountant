@@ -134,7 +134,7 @@ export function CountrySearch({ countries, regionOrder }: CountrySearchProps) {
         <div className="flex flex-col gap-10">
           {grouped.map((group) => (
             <section key={group.region} className="flex flex-col gap-5">
-              <h3 className="text-caption font-semibold uppercase tracking-wide text-slate">
+              <h3 className="text-caption text-slate">
                 {group.region}
               </h3>
               <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

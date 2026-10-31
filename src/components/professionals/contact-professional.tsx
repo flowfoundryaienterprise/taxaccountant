@@ -59,12 +59,12 @@ export function ContactProfessional({ profile }: { profile: ProfessionalProfile 
                 href={`/contact?professional=${profile.slug}`}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "group h-auto max-w-full whitespace-normal py-3 text-left transition-transform duration-150 hover:-translate-y-0.5",
+                  "group h-auto max-w-full whitespace-normal py-3 text-left transition-transform duration-150",
                 )}
               >
                 Contact {name}
                 <ArrowRight
-                  className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+                  className="h-4 w-4 shrink-0 transition-transform duration-150 group-hover:translate-x-0.5"
                   aria-hidden
                 />
               </Link>
@@ -101,12 +101,12 @@ export function ContactProfessional({ profile }: { profile: ProfessionalProfile 
                   )}
                   className={cn(
                     buttonVariants({ size: "lg" }),
-                    "group h-auto max-w-full whitespace-normal py-3 text-left transition-transform duration-150 hover:-translate-y-0.5",
+                    "group h-auto max-w-full whitespace-normal py-3 text-left transition-transform duration-150",
                   )}
                 >
                   Find professionals for this tax jurisdiction
                   <ArrowRight
-                    className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+                    className="h-4 w-4 shrink-0 transition-transform duration-150 group-hover:translate-x-0.5"
                     aria-hidden
                   />
                 </Link>

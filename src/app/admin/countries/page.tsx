@@ -74,7 +74,7 @@ export default async function AdminCountriesScreen({
         <div className="flex min-w-0 items-center gap-2">
           <span
             aria-hidden
-            className="inline-flex h-7 w-9 shrink-0 items-center justify-center rounded-input border border-border bg-tint text-caption font-semibold text-navy"
+            className="inline-flex h-7 w-9 shrink-0 items-center justify-center rounded-input border border-border bg-subtle font-mono text-caption text-slate"
           >
             {row.code}
           </span>
@@ -131,7 +131,7 @@ export default async function AdminCountriesScreen({
       render: (row) => (
         <Link
           href={`/admin/countries/${row.code}`}
-          className="text-caption font-semibold text-action hover:underline"
+          className="text-caption font-medium text-action hover:underline"
         >
           View
         </Link>
@@ -192,7 +192,7 @@ export default async function AdminCountriesScreen({
         aria-labelledby="activation-note"
         className="flex flex-col gap-2 rounded-card border border-warning/40 bg-white p-5"
       >
-        <h2 id="activation-note" className="text-compact font-semibold text-navy">
+        <h2 id="activation-note" className="text-compact font-medium text-navy">
           Why activation is not editable here
         </h2>
         <p className="max-w-[92ch] text-caption text-slate">

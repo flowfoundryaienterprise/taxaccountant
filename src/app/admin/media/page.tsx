@@ -18,7 +18,7 @@ import {
 } from "@/lib/admin/admin-list";
 import type { AdminMediaAsset } from "@/lib/admin/admin-types";
 
-export const metadata: Metadata = { title: "Media Library" };
+export const metadata: Metadata = { title: "Media library" };
 
 /**
  * Media library.
@@ -58,7 +58,7 @@ export default async function AdminMediaScreen({
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        title="Media Library"
+        title="Media library"
         description="Approved public website assets. Private document storage is deliberately not part of this interface."
         actions={
           <button
@@ -86,7 +86,7 @@ export default async function AdminMediaScreen({
       >
         <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden />
         <div className="flex min-w-0 flex-col gap-2">
-          <h2 id="upload-requirements" className="text-compact font-semibold text-navy">
+          <h2 id="upload-requirements" className="text-compact font-medium text-navy">
             Why upload is disabled
           </h2>
           <p className="max-w-[92ch] text-caption text-slate">
@@ -146,7 +146,7 @@ export default async function AdminMediaScreen({
               key={asset.id}
               className="flex flex-col overflow-hidden rounded-card border border-border bg-white"
             >
-              <div className="relative aspect-[4/3] w-full bg-tint">
+              <div className="relative aspect-[4/3] w-full bg-subtle">
                 <Image
                   src={asset.path}
                   alt={asset.altText ?? ""}

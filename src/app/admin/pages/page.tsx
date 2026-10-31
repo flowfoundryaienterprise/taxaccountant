@@ -97,7 +97,9 @@ export default async function AdminPagesScreen({
       key: "updated",
       header: "Updated",
       hideOnMobile: true,
-      render: (row) => formatDate(row.updatedAt) ?? "—",
+      render: (row) => (
+        <span className="font-mono tabular-nums">{formatDate(row.updatedAt) ?? "—"}</span>
+      ),
     },
     {
       key: "actions",
@@ -106,7 +108,7 @@ export default async function AdminPagesScreen({
       render: (row) => (
         <Link
           href={`/admin/pages/${row.id}/edit`}
-          className="text-caption font-semibold text-action hover:underline"
+          className="text-caption font-medium text-action hover:underline"
         >
           Edit
         </Link>

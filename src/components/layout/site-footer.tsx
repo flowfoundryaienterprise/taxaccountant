@@ -110,7 +110,7 @@ export function SiteFooter() {
 function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) {
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-caption font-semibold uppercase tracking-wide text-navy">{title}</h3>
+      <h3 className="text-caption font-medium text-navy">{title}</h3>
       <ul className="flex flex-col gap-2">
         {links.map((link) =>
           "href" in link ? (

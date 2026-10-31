@@ -113,7 +113,7 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
           role="alert"
           className="flex flex-col gap-2 rounded-card border border-danger/40 bg-white p-4"
         >
-          <h2 className="text-compact font-semibold text-danger">
+          <h2 className="text-compact font-medium text-danger">
             {result.errors.length === 1
               ? "There is 1 problem with this form"
               : `There are ${result.errors.length} problems with this form`}
@@ -149,7 +149,7 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
         <div className="flex min-w-0 flex-col gap-6">
           <fieldset className="flex flex-col gap-5 rounded-card border border-border bg-white p-5">
-            <legend className="px-1 text-compact font-semibold text-navy">Page details</legend>
+            <legend className="px-1 text-compact font-medium text-navy">Page details</legend>
 
             <AdminTextField
               id="title"
@@ -179,7 +179,7 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
                 type="button"
                 onClick={() => setSlug(toSlug(title))}
                 disabled={!title.trim()}
-                className="inline-flex w-fit items-center gap-1.5 text-caption font-semibold text-action disabled:opacity-40"
+                className="inline-flex w-fit items-center gap-1.5 text-caption font-medium text-action disabled:opacity-40"
               >
                 <Wand2 className="h-3.5 w-3.5" aria-hidden />
                 Generate from title
@@ -199,7 +199,7 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
           </fieldset>
 
           <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
-            <legend className="px-1 text-compact font-semibold text-navy">Page content</legend>
+            <legend className="px-1 text-compact font-medium text-navy">Page content</legend>
             <p className="text-caption text-slate">
               Structured blocks of plain text. No HTML is stored or rendered, so CMS content
               cannot carry markup or script into a public page.
@@ -234,7 +234,7 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-28">
           <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
-            <legend className="px-1 text-compact font-semibold text-navy">Publication</legend>
+            <legend className="px-1 text-compact font-medium text-navy">Publication</legend>
 
             <AdminSelectField
               id="kind"
@@ -255,7 +255,7 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
 
             <button
               type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-subtle"
             >
               Check fields
             </button>
@@ -270,7 +270,7 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
 
           {record ? (
             <div className="flex flex-col gap-2 rounded-card border border-border bg-white p-5">
-              <h2 className="text-compact font-semibold text-navy">Danger zone</h2>
+              <h2 className="text-compact font-medium text-navy">Danger zone</h2>
               <p className="text-caption text-slate">
                 Deleting a published page breaks any link pointing at it.
               </p>

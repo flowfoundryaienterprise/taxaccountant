@@ -37,7 +37,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [sidebarOpen, close]);
 
   return (
-    <div className="flex min-h-screen w-full bg-tint/40">
+    <div className="flex min-h-screen w-full bg-canvas">
       <SkipLink />
       <AdminSidebar pathname={pathname} open={sidebarOpen} onClose={close} />
 
