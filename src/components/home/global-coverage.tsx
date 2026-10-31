@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { CountryBadge } from "@/components/countries/country-badge";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { mapMarkers } from "@/lib/home-content";
@@ -55,7 +56,10 @@ export function GlobalCoverage() {
                   key={country.code}
                   className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border py-3 first:pt-0"
                 >
-                  <span className="text-compact text-navy">{country.name}</span>
+                  <span className="flex items-center gap-2.5 text-compact text-navy">
+                    <CountryBadge code={country.code} countryName={country.name} size="sm" />
+                    {country.name}
+                  </span>
                   <span className="font-mono text-caption text-slate">
                     {country.codes.join(" · ")}
                   </span>
