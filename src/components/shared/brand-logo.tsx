@@ -1,26 +1,38 @@
 /**
  * TaxAccountant brand mark.
  *
- * A checkmark whose long arm keeps rising past the corner — "verified" and
- * "growth" in one shape, which is the whole proposition of a vetted tax
- * marketplace. A blue tile with a white glyph: the only combination in the
- * palette that stays legible at 16px against both a white page and dark
- * browser chrome.
+ * A navy shield carrying a gold check: verified filing, which is the whole
+ * proposition of a vetted tax marketplace.
  *
- * ## Why the tile is #0879E9 and `--color-action` is not, as of Day 9
- * These were the same value. The token was darkened to #076ed4 so that
- * white button labels and action-coloured links clear WCAG 2.2 AA (the old
- * value measured 4.27:1). A logotype carries **no** contrast requirement —
- * WCAG 1.4.3 exempts it explicitly — so the mark was left at the original
- * brand value rather than changed as a side effect of an accessibility fix.
+ * ## Why this is the simplified mark
+ * The master artwork (`public/logo.png`, 1254px) puts a document inside the
+ * shield — four gold bullet squares and four navy text bars above the
+ * check. That reads at poster size and falls apart below roughly 64px: at
+ * the 32px this component renders, the bars and bullets collapse into a
+ * grey smudge and the shield stops reading as a shield.
  *
- * That is a deliberate divergence, not drift, and it is deliberately small:
- * the two blues differ by (1, 11, 21) of 255. Re-uniting them is a brand
- * decision, and it would mean regenerating the committed favicon and icon
- * binaries too. Tracked in docs/DAY9_QA_REPORT.md.
+ * So every small size carries the mark reduced to what survives, in the
+ * same two brand colours and the same silhouette. The outline measured
+ * against the master is within 0.022 of the mark's width at its worst row,
+ * which is 0.7px at 32px — the two are the same shape at any size this
+ * renders. Use the master artwork wherever the mark is shown large.
  *
- * Geometry **and tile colour** are kept identical to `public/favicon.svg`
- * and `scripts/generate-icons.mjs` — change one, change all three.
+ * ## Colour
+ * The master's navy measures #082E5B, 1.02:1 from `--color-navy` — the same
+ * navy to any eye. The token value is used instead so the mark and the
+ * interface cannot drift apart. Gold is #CB9F36, sampled from the master,
+ * and measures 5.63:1 against this navy.
+ *
+ * This replaces the previous mark, a blue rounded tile with a white check,
+ * and with it the Day 9 divergence where the tile kept #0879E9 after
+ * `--color-action` was darkened to #076ed4 for AA. There is no divergence
+ * now: the mark is navy, the accent is action blue, and they are separate
+ * colours doing separate jobs.
+ *
+ * Geometry **and colours** are generated into `public/favicon.svg` and the
+ * raster icons by `scripts/generate-icons.mjs` from its own constants. The
+ * path below is the same one that script emits — if you change the mark,
+ * change it there and paste the emitted path here.
  */
 
 interface BrandLogoProps {
@@ -41,11 +53,15 @@ export function BrandLogo({ size = 32, className }: BrandLogoProps) {
       aria-hidden
       focusable="false"
     >
-      <rect width="32" height="32" rx="7" fill="#0879E9" />
       <path
-        d="M8.5 17 13.5 22 23.5 10.5"
-        stroke="#FFFFFF"
-        strokeWidth="3.2"
+        d="M16 2.4 C15.3 2.6 13.6 3.3 11.94 4.48 C10.28 5.66 5.4 6.6 4.83 8 L4.83 16.6 C4.83 22 9.4 26.6 16 29.4 C22.6 26.6 27.17 22 27.17 16.6 L27.17 8 C26.6 6.6 21.72 5.66 20.06 4.48 C18.4 3.3 16.7 2.6 16 2.4Z"
+        fill="#102C57"
+      />
+      <path
+        d="M10.6 16 14.2 19.8 21.6 10.6"
+        fill="none"
+        stroke="#CB9F36"
+        strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

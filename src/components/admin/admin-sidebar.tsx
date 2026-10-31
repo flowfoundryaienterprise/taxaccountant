@@ -46,13 +46,24 @@ export function AdminSidebar({ pathname, open, onClose }: AdminSidebarProps) {
         )}
       >
         <div className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
+          {/*
+            The mark with its wordmark, matching the public header. The
+            previous brand block was the mark alone: the old square tile
+            filled its box and held the 64px rail head on its own, but the
+            shield is inset within the same box and read as a small shape
+            floating in white. Naming the product also tells a staff member
+            which site's CMS they have open, which the rail never said.
+          */}
           <Link
             href="/admin"
             onClick={onClose}
             className="flex min-w-0 items-center gap-2"
             aria-label="CMS overview"
           >
-            <BrandLogo />
+            <BrandLogo size={28} className="shrink-0" />
+            <span className="min-w-0 truncate text-compact font-medium text-navy">
+              TaxAccountant <span className="text-slate">CMS</span>
+            </span>
           </Link>
 
           <button

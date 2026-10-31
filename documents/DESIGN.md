@@ -21,6 +21,11 @@
 | Pale blue `--tint` | `#EAF5FF` | Section backgrounds, filter panels, subtle highlights |
 | White `--white` | `#FFFFFF` | Primary canvas and cards |
 | Slate `--slate` | `#4C6178` | Secondary body text, metadata |
+| Brand gold `--gold` | `#CB9F36` | **Mark only.** Sampled from the brand mark (`public/logo.png`), where it is the check and the bullet squares. 5.63:1 on navy; 2.46:1 on white, so it may never carry text, mark a link, or be the only thing identifying a control. In the mark it means *checked* — reserve it for a verified state that has actually been reviewed. Distinct from warning `#9A6700` (1.98:1 against it); the two are not interchangeable. |
+
+**CMS surfaces:** canvas `#F4F6F8` (page ground) and subtle `#F1F4F7` (table headers, row hover, neutral chips). Near-neutral greys on the same 210-degree hue as the ramp. The admin shell previously used `--tint` for all of these — a light blue behind an interface staff read for hours. Both are held to the same contrast bar as white and tint by `palette-contrast.test.ts`.
+
+**Brand mark:** a navy shield carrying a gold check. The master artwork is `public/logo.png`; it holds a document with four gold bullet squares and four navy text bars inside the shield, which is legible at poster size and not below ~64px. `src/components/shared/brand-logo.tsx`, `public/favicon.svg` and the raster icons carry the mark simplified to the shield and the check, within 0.022 of the master's width at its worst row. The master's navy measures `#082E5B`, 1.02:1 from `--navy`; the token is used so mark and interface cannot drift.
 
 **Derived tokens (proposals, test and approve):** neutral borders `#D8E1EB`; success `#18794E`; danger `#B42318`; warning `#9A6700`; focus outline `#1459B5`. Text on saturated blue must meet AA; adjust blue shade rather than accepting failed contrast. Never use color alone to convey status.
 
