@@ -41,6 +41,42 @@ Verified rather than assumed: rasterizing the before and after at 1600x800
 (twice the natural size) gives **zero** differing pixels out of 1,280,000.
 Path geometry is therefore changed in the file but not in the output.
 
+## Country flags
+
+`images/flags/*.svg` are the Wikimedia Commons flag SVGs, all ten **public
+domain** — verified per file through the Commons API (`extmetadata`
+`LicenseShortName`) before download, not assumed from the fact that they are
+flags. Rendered by `src/components/countries/country-badge.tsx`.
+
+| File | Commons file | Ratio | Author credited on Commons |
+|---|---|---|---|
+| `us.svg` | [Flag of the United States.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_United_States.svg) | 10:19 | Dbenbenn, Zscout370, Jacobolus, Indolences, Technion |
+| `ca.svg` | [Flag of Canada (Pantone).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Canada_(Pantone).svg) | 1:2 | Original design George F. G. Stanley |
+| `gb.svg` | [Flag of the United Kingdom (1-2).svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_United_Kingdom_(1-2).svg) | 1:2 | Acts of Union 1800; vector Zscout370 |
+| `de.svg` | [Flag of Germany.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Germany.svg) | 3:5 | SKopp, Madden and others |
+| `in.svg` | [Flag of India.svg](https://commons.wikimedia.org/wiki/File:Flag_of_India.svg) | 2:3 | Government of India |
+| `sg.svg` | [Flag of Singapore.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Singapore.svg) | 2:3 | Government of Singapore; vector Zscout370 |
+| `au.svg` | [Flag of Australia (converted).svg](https://commons.wikimedia.org/wiki/File:Flag_of_Australia_(converted).svg) | 1:2 | Vector by Ian Fieggen |
+| `ae.svg` | [Flag of the United Arab Emirates.svg](https://commons.wikimedia.org/wiki/File:Flag_of_the_United_Arab_Emirates.svg) | 1:2 | Abdulla Mohammed Al Maainah |
+| `fr.svg` | [Flag of France.svg](https://commons.wikimedia.org/wiki/File:Flag_of_France.svg) | 2:3 | Vector SKopp |
+| `jp.svg` | [Flag of Japan.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Japan.svg) | 2:3 | Various |
+
+The ten are exactly the countries in `src/lib/marketplace/countries.ts`,
+including the two that are deliberately not discoverable (`FR`, `JP`) — the
+badge is also used on professional profiles, which can cite a location in a
+country the public directory does not list.
+
+Each file is the Commons original with the XML prolog, any `DOCTYPE`,
+comments and inter-tag whitespace stripped, and a `viewBox` added to `fr.svg`
+and `jp.svg`, which carried only `width`/`height` and so would not scale.
+No path data, colour or geometry was touched: the flags are the published
+drawings, not redrawings. All ten together are 5.8 KB.
+
+Not emoji: regional-indicator pairs render as bare letters on Windows, which
+is why `country-badge.tsx` shipped an ISO-code tile until these files
+existed. That tile is still the fallback for any country code without a file
+here.
+
 ## Known gap
 
 All `professional-*.jpg` and `testimonial-*.jpg` files are confirmed
