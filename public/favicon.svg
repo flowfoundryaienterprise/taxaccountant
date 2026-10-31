@@ -1,4 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="TaxAccountant">
-  <rect width="32" height="32" rx="7" fill="#0879E9"/>
-  <path d="M8.5 17 13.5 22 23.5 10.5" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M16 2.4 C15.3 2.6 13.6 3.3 11.94 4.48 C10.28 5.66 5.4 6.6 4.83 8 L4.83 16.6 C4.83 22 9.4 26.6 16 29.4 C22.6 26.6 27.17 22 27.17 16.6 L27.17 8 C26.6 6.6 21.72 5.66 20.06 4.48 C18.4 3.3 16.7 2.6 16 2.4Z" fill="#102C57"/>
+  <path d="M10.6 16 14.2 19.8 21.6 10.6" fill="none" stroke="#CB9F36" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

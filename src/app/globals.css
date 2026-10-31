@@ -21,6 +21,32 @@
    */
   --color-action: #076ed4;
   --color-tint: #eaf5ff;
+
+  /*
+   * Brand gold, sampled from the master mark (`public/logo.png`): the
+   * check and the bullet squares inside the shield.
+   *
+   * ## It is a graphic colour, not an interface colour
+   * Gold measures 2.46:1 on white, 2.27:1 on --color-canvas and 2.22:1 on
+   * --color-tint. All three are far below the 4.5:1 AA needs for text and
+   * below even the 3:1 for a control boundary, so gold may never carry
+   * text, mark a link, or be the only thing identifying a control. On the
+   * navy of the mark it measures 5.63:1, which is why it works there and
+   * only there.
+   *
+   * ## Why it is not used in the chrome yet
+   * In the mark, gold means *checked* — a filing verified. This platform
+   * has verified nothing: `verificationStatus` is `not_reviewed` on every
+   * record, and the homepage was rewritten specifically to stop implying
+   * otherwise. Spending the colour on decoration now would spend the one
+   * signal that should mean something later. It belongs on the verified
+   * badge, when a verified state exists.
+   *
+   * Distinct from --color-warning (#9a6700), which is a status colour and
+   * measures 1.98:1 against this. The two must never be used as if they
+   * were the same thing.
+   */
+  --color-gold: #cb9f36;
   --color-white: #ffffff;
   --color-slate: #4c6178;
 
