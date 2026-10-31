@@ -46,12 +46,12 @@ export function ServiceDetailHero({ service }: { service: ServiceCatalogEntry })
                 href={findHref}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "group transition-transform duration-150 hover:-translate-y-0.5",
+                  "group transition-transform duration-150",
                 )}
               >
                 Find specialists
                 <ArrowRight
-                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+                  className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5"
                   aria-hidden
                 />
               </Link>

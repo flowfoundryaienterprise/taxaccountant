@@ -62,7 +62,7 @@ export function UnsavedChangesDialog({
       <button
         type="button"
         onClick={() => (dirty ? dialogRef.current?.showModal() : router.push(cancelHref))}
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-input px-4 text-compact font-medium text-slate hover:bg-tint"
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-input px-4 text-compact font-medium text-slate hover:bg-subtle"
       >
         {label}
       </button>
@@ -75,11 +75,11 @@ export function UnsavedChangesDialog({
         <div className="flex flex-col gap-4 p-6">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tint text-warning">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-subtle text-warning">
                 <AlertTriangle className="h-5 w-5" aria-hidden />
               </span>
               <div className="flex flex-col gap-1">
-                <h2 id="unsaved-title" className="text-compact font-semibold text-navy">
+                <h2 id="unsaved-title" className="text-compact font-medium text-navy">
                   Discard your changes?
                 </h2>
                 <p className="text-caption text-slate">
@@ -93,7 +93,7 @@ export function UnsavedChangesDialog({
               type="button"
               onClick={() => dialogRef.current?.close()}
               aria-label="Close dialog"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-input text-slate hover:bg-tint"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-input text-slate hover:bg-subtle"
             >
               <X className="h-4 w-4" aria-hidden />
             </button>
@@ -103,7 +103,7 @@ export function UnsavedChangesDialog({
             <button
               type="button"
               onClick={() => dialogRef.current?.close()}
-              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-subtle"
             >
               Keep editing
             </button>

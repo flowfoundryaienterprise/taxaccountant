@@ -79,7 +79,7 @@ export function ContentPreview({
       className="flex flex-col gap-4 rounded-card border border-border bg-white p-5"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id="content-preview-heading" className="text-compact font-semibold text-navy">
+        <h2 id="content-preview-heading" className="text-compact font-medium text-navy">
           Preview
         </h2>
 
@@ -103,7 +103,7 @@ export function ContentPreview({
                 "inline-flex min-h-9 items-center gap-1.5 rounded-[6px] px-3 text-caption font-medium transition-colors duration-150",
                 viewport === option.value
                   ? "bg-tint text-action"
-                  : "text-slate hover:bg-tint/60",
+                  : "text-slate hover:bg-subtle",
               )}
             >
               <option.icon className="h-3.5 w-3.5" aria-hidden />
@@ -126,7 +126,7 @@ export function ContentPreview({
       ) : null}
 
       {!reviewer || !reviewedAt ? (
-        <p className="flex gap-2 rounded-card border border-border bg-tint/60 px-4 py-3 text-caption text-slate">
+        <p className="flex gap-2 rounded-card border border-border bg-subtle px-4 py-3 text-caption text-slate">
           <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" aria-hidden />
           <span>
             No editorial review is recorded, so this content is not eligible for publication
@@ -135,7 +135,7 @@ export function ContentPreview({
         </p>
       ) : null}
 
-      <div className="overflow-x-auto rounded-card border border-border bg-tint/30 p-4">
+      <div className="overflow-x-auto rounded-card border border-border bg-subtle p-4">
         <article
           className={cn(
             "mx-auto flex flex-col gap-5 rounded-card bg-white p-6 transition-[max-width] duration-200",
@@ -197,7 +197,7 @@ export function ContentPreview({
           </dl>
 
           {featuredImage?.path ? (
-            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-card bg-tint">
+            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-card bg-subtle">
               {imageFailed ? (
                 <span className="flex h-full w-full items-center justify-center text-caption text-slate">
                   Image unavailable
@@ -224,7 +224,7 @@ export function ContentPreview({
           )}
 
           {jurisdictionLabel ? (
-            <p className="rounded-card border border-border bg-tint/60 px-4 py-3 text-caption text-slate">
+            <p className="rounded-card border border-border bg-subtle px-4 py-3 text-caption text-slate">
               {jurisdictionNotice(jurisdictionLabel)}
             </p>
           ) : null}

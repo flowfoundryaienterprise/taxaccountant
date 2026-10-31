@@ -11,7 +11,6 @@ import { LatestArticles } from "@/components/home/latest-articles";
 import { MarketplaceTrust } from "@/components/home/marketplace-trust";
 import { ProfessionalCTA } from "@/components/home/professional-cta";
 import { ServicesSection } from "@/components/home/services-section";
-import { TestimonialsSection } from "@/components/home/testimonials-section";
 import { WhyChooseUs } from "@/components/home/why-choose-us";
 
 export const metadata: Metadata = {
@@ -40,6 +39,14 @@ export default function Home() {
       */}
       <JsonLd data={[organizationJsonLd(), webSiteJsonLd()]} />
 
+      {/*
+        `TestimonialsSection` removed. Three quotes attributed to three
+        named people, each with five filled stars, for a platform that has
+        never had a client or a review. Unlike the stats band there is no
+        honest version of that section to write, so it is gone rather than
+        rewritten — restore it from git history once `reviews` exists in
+        Convex and has rows. See the note in `@/lib/home-content`.
+      */}
       <HeroSection />
       <ServicesSection />
       <MarketplaceTrust />
@@ -47,7 +54,6 @@ export default function Home() {
       <HowItWorks />
       <GlobalCoverage />
       <WhyChooseUs />
-      <TestimonialsSection />
       <LatestArticles />
       <ProfessionalCTA />
     </>

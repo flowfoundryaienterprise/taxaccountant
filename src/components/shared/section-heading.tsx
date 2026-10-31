@@ -23,11 +23,15 @@ export function SectionHeading({
         className,
       )}
     >
-      {eyebrow ? (
-        <p className="text-caption font-semibold uppercase tracking-wide text-action">
-          {eyebrow}
-        </p>
-      ) : null}
+      {/*
+        Sentence case, slate, normal tracking. This was 12px semibold
+        uppercase with wide tracking in action blue — the single most
+        repeated styling tell on the site (nine components used it). Small
+        text does not get tracked out and shouted; it gets read. The eyebrow
+        is context, so it takes the muted role and leaves the accent to
+        things that are actually actionable.
+      */}
+      {eyebrow ? <p className="text-caption text-slate">{eyebrow}</p> : null}
       <h2 className="text-heading-lg font-semibold text-navy">{title}</h2>
       {description ? <p className="text-lead text-slate">{description}</p> : null}
     </div>

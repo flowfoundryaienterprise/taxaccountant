@@ -107,13 +107,13 @@ export default async function AdminServicesScreen({
         <div className="flex items-center justify-end gap-3">
           <Link
             href={`/admin/services/${row.id}/edit`}
-            className="text-caption font-semibold text-action hover:underline"
+            className="text-caption font-medium text-action hover:underline"
           >
             Edit
           </Link>
           <Link
             href={`/services/${row.slug}`}
-            className="text-caption font-semibold text-slate hover:text-action hover:underline"
+            className="text-caption font-medium text-slate hover:text-action hover:underline"
           >
             View
           </Link>
@@ -172,7 +172,7 @@ export default async function AdminServicesScreen({
         aria-labelledby="service-sync"
         className="flex flex-col gap-2 rounded-card border border-border bg-white p-5"
       >
-        <h2 id="service-sync" className="text-compact font-semibold text-navy">
+        <h2 id="service-sync" className="text-compact font-medium text-navy">
           Where a service change would appear
         </h2>
         <p className="max-w-[92ch] text-caption text-slate">

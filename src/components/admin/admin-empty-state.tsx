@@ -37,7 +37,7 @@ export function AdminEmptyState({
         <Icon className="h-5 w-5" aria-hidden />
       </span>
       <div className="flex max-w-[56ch] flex-col gap-1.5">
-        <h3 className="text-compact font-semibold text-navy">{title}</h3>
+        <h3 className="text-compact font-medium text-navy">{title}</h3>
         <p className="text-caption text-slate">{description}</p>
       </div>
       {children}

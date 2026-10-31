@@ -137,7 +137,7 @@ export default async function AdminProfessionalsScreen({
       render: (row) => (
         <Link
           href={`/admin/professionals/${row.slug}`}
-          className="text-caption font-semibold text-action hover:underline"
+          className="text-caption font-medium text-action hover:underline"
         >
           View details
         </Link>
@@ -186,7 +186,7 @@ export default async function AdminProfessionalsScreen({
         aria-labelledby="verification-scope"
         className="flex flex-col gap-2 rounded-card border border-warning/40 bg-white p-5"
       >
-        <h2 id="verification-scope" className="text-compact font-semibold text-navy">
+        <h2 id="verification-scope" className="text-compact font-medium text-navy">
           Verification is out of scope here
         </h2>
         <p className="max-w-[92ch] text-caption text-slate">

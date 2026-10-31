@@ -73,12 +73,12 @@ export function CountryOverview({ country }: { country: CountryEntry }) {
                 href={directoryHref({ country: country.code })}
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "group h-auto max-w-full whitespace-normal py-3 text-left transition-transform duration-150 hover:-translate-y-0.5",
+                  "group h-auto max-w-full whitespace-normal py-3 text-left transition-transform duration-150",
                 )}
               >
                 Find professionals in {country.shortName ?? country.name}
                 <ArrowRight
-                  className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+                  className="h-4 w-4 shrink-0 transition-transform duration-150 group-hover:translate-x-0.5"
                   aria-hidden
                 />
               </Link>
@@ -102,13 +102,10 @@ export function CountryOverview({ country }: { country: CountryEntry }) {
                 className="object-contain"
               />
               <span
-                className="absolute -translate-x-1/2 -translate-y-1/2"
+                className="absolute block h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-action ring-2 ring-white"
                 style={{ left: `${country.mapX}%`, top: `${country.mapY}%` }}
                 aria-hidden
-              >
-                <span className="animate-marker-pulse absolute inset-0 rounded-full bg-action" />
-                <span className="relative block h-3 w-3 rounded-full border-2 border-white bg-action shadow-[0_0_0_4px_rgba(7,110,212,0.25)]" />
-              </span>
+              />
             </div>
           </div>
         </div>

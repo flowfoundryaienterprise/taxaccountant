@@ -19,7 +19,7 @@ import {
 } from "@/lib/admin/admin-list";
 import type { AdminJurisdictionRow } from "@/lib/admin/admin-types";
 
-export const metadata: Metadata = { title: "Tax Jurisdictions" };
+export const metadata: Metadata = { title: "Tax jurisdictions" };
 
 const LEVEL_LABELS: Record<AdminJurisdictionRow["level"], string> = {
   national: "National",
@@ -126,7 +126,7 @@ export default async function AdminJurisdictionsScreen({
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        title="Tax Jurisdictions"
+        title="Tax jurisdictions"
         description="The tax authorities the marketplace distinguishes between, grouped by the country that administers them."
       />
 
@@ -173,7 +173,7 @@ export default async function AdminJurisdictionsScreen({
         aria-labelledby="jurisdiction-scope"
         className="flex flex-col gap-2 rounded-card border border-warning/40 bg-white p-5"
       >
-        <h2 id="jurisdiction-scope" className="text-compact font-semibold text-navy">
+        <h2 id="jurisdiction-scope" className="text-compact font-medium text-navy">
           What this screen does not record
         </h2>
         <p className="max-w-[92ch] text-caption text-slate">

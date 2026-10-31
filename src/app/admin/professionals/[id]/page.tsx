@@ -39,7 +39,7 @@ function Panel({
       aria-labelledby={id}
       className="flex flex-col gap-3 rounded-card border border-border bg-white p-5"
     >
-      <h2 id={id} className="text-compact font-semibold text-navy">
+      <h2 id={id} className="text-compact font-medium text-navy">
         {title}
       </h2>
       {description ? <p className="text-caption text-slate">{description}</p> : null}
@@ -90,7 +90,7 @@ export default async function AdminProfessionalDetailScreen({
             {isPublished ? (
               <Link
                 href={`/professionals/${record.slug}`}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-subtle"
               >
                 View public profile
                 <ExternalLink className="h-3.5 w-3.5" aria-hidden />
@@ -98,7 +98,7 @@ export default async function AdminProfessionalDetailScreen({
             ) : (
               <span
                 title="This listing is not published, so it has no public page"
-                className="inline-flex min-h-11 cursor-not-allowed items-center gap-1.5 rounded-input border border-border bg-tint/50 px-4 text-compact font-medium text-slate"
+                className="inline-flex min-h-11 cursor-not-allowed items-center gap-1.5 rounded-input border border-border bg-subtle px-4 text-compact font-medium text-slate"
               >
                 No public page
               </span>
@@ -187,7 +187,7 @@ export default async function AdminProfessionalDetailScreen({
               {record.services.map((service) => (
                 <li
                   key={service.serviceSlug}
-                  className="flex flex-col gap-1 rounded-input bg-tint/50 px-3 py-2"
+                  className="flex flex-col gap-1 rounded-input bg-subtle px-3 py-2"
                 >
                   <span className="text-caption font-medium text-navy">
                     {serviceName(service.serviceSlug)}
@@ -202,7 +202,7 @@ export default async function AdminProfessionalDetailScreen({
         </Panel>
 
         <Panel id="listing-locations" title="Locations and languages">
-          <h3 className="text-caption font-semibold text-navy">Practice locations</h3>
+          <h3 className="text-caption font-medium text-navy">Practice locations</h3>
           <ul className="flex flex-col gap-1">
             {record.locations.map((location, index) => (
               <li key={index} className="text-caption text-slate">
@@ -214,14 +214,14 @@ export default async function AdminProfessionalDetailScreen({
             ))}
           </ul>
 
-          <h3 className="mt-2 text-caption font-semibold text-navy">Languages</h3>
+          <h3 className="mt-2 text-caption font-medium text-navy">Languages</h3>
           <p className="text-caption text-slate">
             {record.languageCodes.length
               ? record.languageCodes.map(languageName).join(", ")
               : "None recorded"}
           </p>
 
-          <h3 className="mt-2 text-caption font-semibold text-navy">Tax jurisdictions (all)</h3>
+          <h3 className="mt-2 text-caption font-medium text-navy">Tax jurisdictions (all)</h3>
           <p className="text-caption text-slate">
             {jurisdictions.length ? jurisdictions.map(jurisdictionName).join(" · ") : "None"}
           </p>
@@ -240,7 +240,7 @@ export default async function AdminProfessionalDetailScreen({
             {record.credentials.map((credential, index) => (
               <li
                 key={index}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-input bg-tint/50 px-3 py-2"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-input bg-subtle px-3 py-2"
               >
                 <span className="text-caption font-medium text-navy">
                   {credential.designation}
@@ -267,7 +267,7 @@ export default async function AdminProfessionalDetailScreen({
           </ul>
         )}
 
-        <p className="rounded-input bg-tint/70 px-3 py-2 text-caption text-slate">
+        <p className="rounded-input bg-subtle px-3 py-2 text-caption text-slate">
           {reviewedCredentials.length === 0
             ? "No credential on this listing has a completed review record, so the public profile shows none of them as verified."
             : `${reviewedCredentials.length} credential(s) carry a completed review record.`}{" "}

@@ -75,7 +75,7 @@ export default async function AdminCountryDetailScreen({ params }: CountryDetail
             />
             <Link
               href={`/countries/${record.code}`}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-subtle"
             >
               View public page
               <ExternalLink className="h-3.5 w-3.5" aria-hidden />
@@ -91,7 +91,7 @@ export default async function AdminCountryDetailScreen({ params }: CountryDetail
           aria-labelledby="country-info"
           className="flex flex-col gap-4 rounded-card border border-border bg-white p-5"
         >
-          <h2 id="country-info" className="text-compact font-semibold text-navy">
+          <h2 id="country-info" className="text-compact font-medium text-navy">
             Country information
           </h2>
           <dl className="grid grid-cols-2 gap-4">
@@ -111,7 +111,7 @@ export default async function AdminCountryDetailScreen({ params }: CountryDetail
           aria-labelledby="country-activation"
           className="flex flex-col gap-4 rounded-card border border-border bg-white p-5"
         >
-          <h2 id="country-activation" className="text-compact font-semibold text-navy">
+          <h2 id="country-activation" className="text-compact font-medium text-navy">
             Marketplace activation
           </h2>
           <p className="text-caption text-slate">
@@ -142,7 +142,7 @@ export default async function AdminCountryDetailScreen({ params }: CountryDetail
           aria-labelledby="country-jurisdictions"
           className="flex flex-col gap-3 rounded-card border border-border bg-white p-5"
         >
-          <h2 id="country-jurisdictions" className="text-compact font-semibold text-navy">
+          <h2 id="country-jurisdictions" className="text-compact font-medium text-navy">
             Tax jurisdictions
           </h2>
           <p className="text-caption text-slate">
@@ -157,7 +157,7 @@ export default async function AdminCountryDetailScreen({ params }: CountryDetail
               {jurisdictions.map((jurisdiction) => (
                 <li
                   key={jurisdiction.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-input bg-tint/50 px-3 py-2"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-input bg-subtle px-3 py-2"
                 >
                   <span className="flex min-w-0 items-center gap-2">
                     <Scale className="h-3.5 w-3.5 shrink-0 text-action" aria-hidden />
@@ -176,7 +176,7 @@ export default async function AdminCountryDetailScreen({ params }: CountryDetail
           aria-labelledby="country-services"
           className="flex flex-col gap-3 rounded-card border border-border bg-white p-5"
         >
-          <h2 id="country-services" className="text-compact font-semibold text-navy">
+          <h2 id="country-services" className="text-compact font-medium text-navy">
             Service categories represented
           </h2>
           <p className="text-caption text-slate">
@@ -193,7 +193,7 @@ export default async function AdminCountryDetailScreen({ params }: CountryDetail
               {record.serviceSlugs.map((slug) => (
                 <li
                   key={slug}
-                  className="rounded-full bg-tint px-2.5 py-1 text-caption font-medium text-navy"
+                  className="rounded-full bg-subtle px-2.5 py-1 text-caption text-slate"
                 >
                   {serviceName(slug)}
                 </li>
@@ -201,7 +201,7 @@ export default async function AdminCountryDetailScreen({ params }: CountryDetail
             </ul>
           )}
 
-          <h3 className="mt-2 text-caption font-semibold text-navy">Languages represented</h3>
+          <h3 className="mt-2 text-caption font-medium text-navy">Languages represented</h3>
           {record.languageCodes.length === 0 ? (
             <p className="text-caption text-slate">None recorded.</p>
           ) : (
@@ -216,7 +216,7 @@ export default async function AdminCountryDetailScreen({ params }: CountryDetail
         aria-labelledby="country-listings"
         className="flex flex-col gap-3 rounded-card border border-border bg-white p-5"
       >
-        <h2 id="country-listings" className="text-compact font-semibold text-navy">
+        <h2 id="country-listings" className="text-compact font-medium text-navy">
           Professional listings based here
         </h2>
         <p className="text-caption text-slate">
@@ -233,7 +233,7 @@ export default async function AdminCountryDetailScreen({ params }: CountryDetail
             {listings.map((listing) => (
               <li
                 key={listing.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-input bg-tint/50 px-3 py-2"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-input bg-subtle px-3 py-2"
               >
                 <Link
                   href={`/admin/professionals/${listing.slug}`}
@@ -257,7 +257,7 @@ export default async function AdminCountryDetailScreen({ params }: CountryDetail
         aria-labelledby="country-seo"
         className="flex flex-col gap-3 rounded-card border border-border bg-white p-5"
       >
-        <h2 id="country-seo" className="text-compact font-semibold text-navy">
+        <h2 id="country-seo" className="text-compact font-medium text-navy">
           SEO metadata
         </h2>
         <dl className="grid gap-4 sm:grid-cols-2">

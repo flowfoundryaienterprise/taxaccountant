@@ -139,7 +139,7 @@ export function ArticleEditorForm({
     <form onSubmit={onSubmit} className="flex flex-col gap-6">
       {invalid ? (
         <div role="alert" className="flex flex-col gap-2 rounded-card border border-danger/40 bg-white p-4">
-          <h2 className="text-compact font-semibold text-danger">
+          <h2 className="text-compact font-medium text-danger">
             {result.errors.length === 1
               ? "There is 1 problem with this form"
               : `There are ${result.errors.length} problems with this form`}
@@ -164,7 +164,7 @@ export function ArticleEditorForm({
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
         <div className="flex min-w-0 flex-col gap-6">
           <fieldset className="flex flex-col gap-5 rounded-card border border-border bg-white p-5">
-            <legend className="px-1 text-compact font-semibold text-navy">Article details</legend>
+            <legend className="px-1 text-compact font-medium text-navy">Article details</legend>
 
             <AdminTextField
               id="title"
@@ -192,7 +192,7 @@ export function ArticleEditorForm({
                 type="button"
                 onClick={() => setSlug(toSlug(title))}
                 disabled={!title.trim()}
-                className="inline-flex w-fit items-center gap-1.5 text-caption font-semibold text-action disabled:opacity-40"
+                className="inline-flex w-fit items-center gap-1.5 text-caption font-medium text-action disabled:opacity-40"
               >
                 <Wand2 className="h-3.5 w-3.5" aria-hidden />
                 Generate from title
@@ -212,12 +212,12 @@ export function ArticleEditorForm({
           </fieldset>
 
           <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
-            <legend className="px-1 text-compact font-semibold text-navy">Article content</legend>
+            <legend className="px-1 text-compact font-medium text-navy">Article content</legend>
             <ContentEditor blocks={blocks} onChange={setBlocks} />
           </fieldset>
 
           <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
-            <legend className="px-1 text-compact font-semibold text-navy">Featured image</legend>
+            <legend className="px-1 text-compact font-medium text-navy">Featured image</legend>
             <MediaPicker
               label="Featured image"
               hint="Choose from approved assets. New uploads require the R2 integration."
@@ -273,7 +273,7 @@ export function ArticleEditorForm({
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-28">
           <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
-            <legend className="px-1 text-compact font-semibold text-navy">Classification</legend>
+            <legend className="px-1 text-compact font-medium text-navy">Classification</legend>
 
             <AdminSelectField
               id="category"
@@ -310,7 +310,7 @@ export function ArticleEditorForm({
           </fieldset>
 
           <fieldset className="flex flex-col gap-3 rounded-card border border-border bg-white p-5">
-            <legend className="px-1 text-compact font-semibold text-navy">Editorial review</legend>
+            <legend className="px-1 text-compact font-medium text-navy">Editorial review</legend>
 
             {reviewed ? (
               <p className="text-caption text-slate">
@@ -318,7 +318,7 @@ export function ArticleEditorForm({
                 <span className="font-medium text-navy">{record?.reviewedAt?.slice(0, 10)}</span>.
               </p>
             ) : (
-              <p className="flex gap-2 rounded-input bg-tint/70 px-3 py-2 text-caption text-slate">
+              <p className="flex gap-2 rounded-input bg-subtle px-3 py-2 text-caption text-slate">
                 <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" aria-hidden />
                 <span>
                   Not reviewed. Tax content must be reviewed by an authorized professional before
@@ -330,7 +330,7 @@ export function ArticleEditorForm({
           </fieldset>
 
           <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
-            <legend className="px-1 text-compact font-semibold text-navy">Publication</legend>
+            <legend className="px-1 text-compact font-medium text-navy">Publication</legend>
 
             <AdminSelectField
               id="status"
@@ -343,7 +343,7 @@ export function ArticleEditorForm({
 
             <button
               type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-subtle"
             >
               Check fields
             </button>
@@ -363,7 +363,7 @@ export function ArticleEditorForm({
 
           {record ? (
             <div className="flex flex-col gap-2 rounded-card border border-border bg-white p-5">
-              <h2 className="text-compact font-semibold text-navy">Danger zone</h2>
+              <h2 className="text-compact font-medium text-navy">Danger zone</h2>
               <DeleteConfirmation
                 recordName={record.title}
                 recordType="article"

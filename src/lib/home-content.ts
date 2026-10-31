@@ -2,33 +2,28 @@ import type { LucideIcon } from "lucide-react";
 import {
   Building2,
   Calculator,
-  CalendarCheck,
-  CalendarClock,
-  CheckCircle2,
-  Clock3,
-  Eye,
-  FileCheck2,
   FileText,
   Globe2,
-  GraduationCap,
-  Headphones,
-  Lock,
   MessageSquareText,
   RotateCcw,
   Scale,
-  Search,
   ShieldCheck,
-  Star,
-  Users,
   Wallet,
 } from "lucide-react";
 
 /**
- * Homepage fixtures built as a direct content replica of the supplied
- * reference template (ratings, prices, stats, testimonials included per
- * explicit instruction). Nothing here is backed by Convex — see
- * IMPLEMENTATION_PLAN.md Day 5/9/10 for when real `convex/professionals`
- * and `convex/taxonomy` queries replace these fixtures.
+ * Homepage content.
+ *
+ * Originally a direct content replica of the supplied reference template,
+ * ratings, prices, stats and testimonials included. Those are gone: every
+ * figure and quote in that set was invented, and this is the one indexable
+ * page on the site. What remains either describes a capability that exists
+ * in this repository, or is derived from the catalogues and fixtures so it
+ * cannot drift from them.
+ *
+ * Nothing here is backed by Convex yet — see IMPLEMENTATION_PLAN.md Day
+ * 5/9/10 for when real `convex/professionals` and `convex/taxonomy` queries
+ * replace these fixtures.
  */
 
 export interface ServiceItem {
@@ -42,37 +37,37 @@ export const services: ServiceItem[] = [
   {
     slug: "individual-tax-preparation",
     title: "Individual Tax Preparation",
-    description: "Annual filing support for residents, expatriates and dual-status filers.",
+    description: "Annual filing support for residents, expatriates and dual-status filers",
     icon: FileText,
   },
   {
     slug: "business-tax-services",
     title: "Business Tax Services",
-    description: "Corporate, partnership and entity-level filing across jurisdictions.",
+    description: "Corporate, partnership and entity-level filing across jurisdictions",
     icon: Building2,
   },
   {
     slug: "bookkeeping-accounting",
     title: "Bookkeeping & Accounting",
-    description: "Ongoing ledgers, reconciliations and financial statement preparation.",
+    description: "Ongoing ledgers, reconciliations and financial statement preparation",
     icon: Calculator,
   },
   {
     slug: "payroll-services",
     title: "Payroll Services",
-    description: "Multi-jurisdiction payroll processing, withholding and filings.",
+    description: "Multi-jurisdiction payroll processing, withholding and filings",
     icon: Wallet,
   },
   {
     slug: "tax-planning-advisory",
     title: "Tax Planning & Advisory",
-    description: "Forward-looking structuring and liability planning with a licensed advisor.",
+    description: "Forward-looking structuring and liability planning with a licensed advisor",
     icon: Scale,
   },
   {
     slug: "international-tax-services",
     title: "International Tax Services",
-    description: "Cross-border income, treaty positions and foreign reporting obligations.",
+    description: "Cross-border income, treaty positions and foreign reporting obligations",
     icon: Globe2,
   },
   {
@@ -81,161 +76,130 @@ export const services: ServiceItem[] = [
     // category is offered across jurisdictions, not only in the US.
     slug: "irs-tax-audit-support",
     title: "Tax Audit Support",
-    description: "Representation and documentation support through an active audit.",
+    description: "Representation and documentation support through an active audit",
     icon: ShieldCheck,
   },
   {
     slug: "amended-tax-returns",
     title: "Amended Tax Returns",
-    description: "Corrections and refiling for previously submitted returns.",
+    description: "Corrections and refiling for previously submitted returns",
     icon: RotateCcw,
   },
 ];
 
-export interface StatItem {
-  icon: LucideIcon;
-  value: string;
-  label: string;
-}
-
-export const statsBand: StatItem[] = [
-  { icon: ShieldCheck, value: "10,000+", label: "Verified Professionals" },
-  { icon: Globe2, value: "50+", label: "Countries Covered" },
-  { icon: Users, value: "100,000+", label: "Happy Clients" },
-  { icon: Star, value: "4.9/5", label: "Average Rating" },
-  { icon: Clock3, value: "24/7", label: "Customer Support" },
-];
+/*
+ * `StatItem`/`statsBand` removed.
+ *
+ * The five figures it carried — "10,000+ Verified Professionals",
+ * "50+ Countries Covered", "100,000+ Happy Clients", "4.9/5 Average
+ * Rating", "24/7 Customer Support" — were replicated from the reference
+ * template and not one of them was backed by anything in this codebase.
+ * No profile has been verified (`verificationStatus` is `not_reviewed`
+ * throughout), no rating or review data exists, and there is no support
+ * desk. `MarketplaceTrust` now counts the catalogues instead, so every
+ * number on that band is derived from data this repository actually holds
+ * and cannot go stale.
+ */
 
 export interface HeroTrustItem {
-  icon: LucideIcon;
   title: string;
   description: string;
 }
 
+/**
+ * What the directory actually does, replacing five claims it could not
+ * support: "Background & credential checks" (nothing is checked —
+ * designations are self-declared and carry status "unverified"),
+ * "Transparent Pricing / No hidden fees" (no price data exists anywhere in
+ * this codebase), "Your data is protected", and "Support Anytime / We're
+ * here to help" (there is no support channel).
+ *
+ * Each line below is a statement about a filter or a field that exists and
+ * can be checked by opening `/find-accountant`. Icons dropped with the
+ * claims: a shield next to an unverified claim is the claim again, drawn.
+ */
 export const heroTrustList: HeroTrustItem[] = [
-  { icon: ShieldCheck, title: "Verified Professionals", description: "Background & credential checks" },
-  { icon: Eye, title: "Transparent Pricing", description: "No hidden fees" },
-  { icon: FileCheck2, title: "Secure Document Sharing", description: "Your data is protected" },
-  { icon: CalendarClock, title: "Online Consultations", description: "Video, chat or in-person" },
-  { icon: Headphones, title: "Support Anytime", description: "We're here to help" },
-];
-
-export interface DemoProfessional {
-  id: string;
-  /**
-   * Slug of the matching `directoryFixtures` row, so the homepage highlight
-   * and the directory card open the one canonical profile route
-   * (`/professionals/[slug]`). These four demo identities are the same four
-   * the directory fixtures carry, with the same portraits.
-   */
-  profileSlug: string;
-  name: string;
-  designation: string;
-  city: string;
-  countryName: string;
-  services: string[];
-  rating: number;
-  reviewCount: number;
-  rate: string;
-  availability: string;
-  photo: string;
-  photoAlt: string;
-}
-
-export const demoProfessionals: DemoProfessional[] = [
   {
-    id: "demo-1",
-    profileSlug: "sarah-johnson",
-    name: "Sarah Johnson, CPA",
-    designation: "Certified Public Accountant",
-    city: "New York",
-    countryName: "USA",
-    services: ["Individual Tax", "Business Tax", "Tax Planning"],
-    rating: 4.9,
-    reviewCount: 124,
-    rate: "$99/hr",
-    availability: "Available Today",
-    photo: "/images/professional-1.jpg",
-    photoAlt: "Portrait of Sarah Johnson, a demo professional profile",
+    title: "Filter by tax jurisdiction",
+    description: "Separately from country — an accountant in Toronto may be authorised for US federal filings",
   },
   {
-    id: "demo-2",
-    profileSlug: "michael-chen",
-    name: "Michael Chen, EA",
-    designation: "Enrolled Agent",
-    city: "Toronto",
-    countryName: "Canada",
-    services: ["Business Tax", "Bookkeeping", "Payroll Services"],
-    rating: 4.8,
-    reviewCount: 96,
-    rate: "$85/hr",
-    availability: "Available Today",
-    photo: "/images/professional-2.jpg",
-    photoAlt: "Portrait of Michael Chen, a demo professional profile",
+    title: "Credentials shown as declared",
+    description: "With their review status, never as a verification this marketplace has not performed",
   },
   {
-    id: "demo-3",
-    profileSlug: "emily-rodriguez",
-    name: "Emily Rodriguez, CPA",
-    designation: "Certified Public Accountant",
-    city: "London",
-    countryName: "UK",
-    services: ["Individual Tax", "International Tax", "Tax Advisory"],
-    rating: 4.9,
-    reviewCount: 118,
-    rate: "$120/hr",
-    availability: "Available Tomorrow",
-    photo: "/images/professional-3.jpg",
-    photoAlt: "Portrait of Emily Rodriguez, a demo professional profile",
+    title: "Remote or in person",
+    description: "Recorded per professional, so distance is a filter and not a guess",
   },
   {
-    id: "demo-4",
-    profileSlug: "david-wilson",
-    name: "David Wilson, CPA",
-    designation: "Certified Public Accountant",
-    city: "Sydney",
-    countryName: "Australia",
-    services: ["Business Tax", "Bookkeeping", "Tax Planning"],
-    rating: 4.8,
-    reviewCount: 102,
-    rate: "$95/hr",
-    availability: "Available Today",
-    photo: "/images/professional-4.jpg",
-    photoAlt: "Portrait of David Wilson, a demo professional profile",
+    title: "Eight languages",
+    description: "Matched on the language the professional actually advises in",
   },
 ];
+
+/**
+ * The four profiles the homepage highlights, by fixture slug.
+ *
+ * Only the slugs live here. The projection to card props happens in
+ * `FeaturedProfessionals` through `toCardModel`, because `card-model`
+ * imports `directory/taxonomy`, and `directory/taxonomy` imports the
+ * service and country vocabularies from *this* module — deriving the cards
+ * here closes that loop and the module graph deadlocks at import time.
+ *
+ * The four used to be a hand-written copy carrying a rating, a review
+ * count, an hourly rate and an availability line. None of those fields
+ * exists on `DirectoryProfessional`, and none of the values was real:
+ * `/find-accountant` says of these very same four records that "No
+ * ratings, reviews, prices or availability are shown, because none of that
+ * data exists yet", while the homepage, the one indexable page of the
+ * three, stated them as fact under a real brand. Going through the
+ * directory's own projection removes the fields by construction rather
+ * than by discipline — there is no longer anywhere for a fabricated rating
+ * to live.
+ */
+export const featuredSlugs = ["sarah-johnson", "michael-chen", "emily-rodriguez", "david-wilson"];
 
 export interface HowItWorksStep {
   step: number;
   title: string;
   description: string;
-  icon: LucideIcon;
 }
 
+/**
+ * The four steps now describe the Phase 1 flow that is actually built.
+ *
+ * They previously described a product that does not exist: step 2 offered
+ * "reviews and pricing" (no review or price data exists in this codebase),
+ * and step 3 was "Choose a time and book online or request a quote" —
+ * booking is Phase 3 (PRD.md), and `publicContactMode` is `"none"` on every
+ * profile today, so there is no time to choose and no quote to request.
+ *
+ * Icons dropped: a magnifying glass beside the word "Search" is the word
+ * again. The step numbers carry the sequence on their own.
+ */
 export const howItWorksSteps: HowItWorksStep[] = [
   {
     step: 1,
-    title: "Search & Compare",
-    description: "Find professionals based on your needs, location and budget.",
-    icon: Search,
+    title: "Set the jurisdiction",
+    description:
+      "Start from the authority you file with — IRS, HMRC, CRA, ATO — rather than from a city",
   },
   {
     step: 2,
-    title: "View Profiles",
-    description: "Check qualifications, reviews, services and pricing.",
-    icon: Users,
+    title: "Narrow by service and language",
+    description: "Eight service categories and eight languages, combined in a shareable URL",
   },
   {
     step: 3,
-    title: "Book a Consultation",
-    description: "Choose a time and book online or request a quote.",
-    icon: CalendarCheck,
+    title: "Compare the records",
+    description:
+      "Declared designations, authorised jurisdictions and consultation mode, side by side",
   },
   {
     step: 4,
-    title: "Get Expert Help",
-    description: "Meet with your accountant and get the support you need.",
-    icon: CheckCircle2,
+    title: "Open a profile",
+    description:
+      "The full record, with its review status stated plainly. Direct contact opens in a later phase",
   },
 ];
 
@@ -258,96 +222,90 @@ export const searchCountries: SearchCountry[] = [
 export interface MapMarker {
   code: string;
   name: string;
-  expertsLabel: string;
   mapX: number;
   mapY: number;
 }
 
 /**
+ * The eight countries open for public discovery, one marker each.
+ *
+ * Replaces seven markers labelled "2,500+ Experts", "3,000+ Experts" and so
+ * on — invented head counts, two of which ("Europe", "Other Countries")
+ * were not countries this site has a page for at all. The country names and
+ * their authorised tax jurisdictions are now listed beside the map, where
+ * they can be read, instead of floating over it in callouts.
+ *
  * mapX/mapY are plain equirectangular projection math against the 800x400
  * world-map.svg (public domain, see public/images/ATTRIBUTIONS.md):
  * x% = (lon + 180) / 360 * 100, y% = (90 - lat) / 180 * 100.
  */
 export const mapMarkers: MapMarker[] = [
-  { code: "US", name: "USA", expertsLabel: "2,500+ Experts", mapX: 22.6, mapY: 27.9 },
-  { code: "CA", name: "Canada", expertsLabel: "800+ Experts", mapX: 29.0, mapY: 24.8 },
-  { code: "GB", name: "UK", expertsLabel: "1,300+ Experts", mapX: 50.0, mapY: 21.4 },
-  { code: "EU", name: "Europe", expertsLabel: "3,000+ Experts", mapX: 56.0, mapY: 24.0 },
-  { code: "IN", name: "India", expertsLabel: "3,000+ Experts", mapX: 71.4, mapY: 34.1 },
-  { code: "AU", name: "Australia", expertsLabel: "700+ Experts", mapX: 91.4, mapY: 69.6 },
-  { code: "XX", name: "Other Countries", expertsLabel: "2,000+ Experts", mapX: 46.0, mapY: 62.0 },
+  { code: "US", name: "United States", mapX: 22.6, mapY: 27.9 },
+  { code: "CA", name: "Canada", mapX: 29.0, mapY: 24.8 },
+  { code: "GB", name: "United Kingdom", mapX: 50.0, mapY: 21.4 },
+  { code: "DE", name: "Germany", mapX: 53.7, mapY: 20.8 },
+  { code: "AE", name: "United Arab Emirates", mapX: 65.1, mapY: 36.4 },
+  { code: "IN", name: "India", mapX: 71.4, mapY: 34.1 },
+  { code: "SG", name: "Singapore", mapX: 78.8, mapY: 49.3 },
+  { code: "AU", name: "Australia", mapX: 91.4, mapY: 69.6 },
 ];
 
 export interface WhyChooseItem {
   title: string;
   description: string;
-  icon: LucideIcon;
 }
 
+/**
+ * "We manually verify credentials and experience" was false — no profile
+ * has been reviewed and `verificationStatus` is `not_reviewed` on every
+ * row — so it now says what the platform actually does with a credential.
+ * The rest are restated as the specific thing rather than the category:
+ * "Transparent Pricing" became what the site can really promise about
+ * price, which is that it does not hold any.
+ *
+ * Icons dropped. Five tinted icon tiles in a row said nothing that the
+ * five headings did not already say, and they were the fourth appearance
+ * of the same tile on one page.
+ */
 export const whyChooseUs: WhyChooseItem[] = [
   {
-    title: "Verified & Qualified Professionals",
-    description: "We manually verify credentials and experience.",
-    icon: GraduationCap,
+    title: "Jurisdiction, not just location",
+    description:
+      "Where someone is authorised to file is recorded separately from where they live, because the two are routinely different",
   },
   {
-    title: "Transparent Pricing",
-    description: "Compare rates and choose what fits your budget.",
-    icon: Eye,
+    title: "Credentials stated, not vouched for",
+    description:
+      "Designations appear as the professional declared them, with their review status next to them",
   },
   {
-    title: "Secure & Confidential",
-    description: "Your documents and data are encrypted and always protected.",
-    icon: Lock,
+    title: "No ranking you cannot see",
+    description:
+      "Results are ordered by the filters you set. Nothing on this site is a paid placement",
   },
   {
-    title: "Multiple Consultation Options",
-    description: "Video, chat or in-person meetings.",
-    icon: CalendarClock,
+    title: "Eight languages recorded",
+    description:
+      "Matched on the language a professional advises in, not the language of their country",
   },
   {
-    title: "Dedicated Support",
-    description: "Our team is here to help you anytime, anywhere.",
-    icon: Headphones,
+    title: "Built for cross-border cases",
+    description:
+      "Multiple authorisations per professional, so expatriate and dual-status work is a search and not a phone call",
   },
 ];
 
-export interface Testimonial {
-  id: string;
-  quote: string;
-  name: string;
-  role: string;
-  photo: string;
-  photoAlt: string;
-}
-
-export const testimonials: Testimonial[] = [
-  {
-    id: "testimonial-1",
-    quote:
-      "Found an excellent CPA through TaxAccountant. The process was easy and the service was outstanding.",
-    name: "Jennifer M.",
-    role: "Small Business Owner",
-    photo: "/images/testimonial-1.jpg",
-    photoAlt: "Portrait of Jennifer M., a demo testimonial avatar",
-  },
-  {
-    id: "testimonial-2",
-    quote: "Great platform with verified professionals. I saved time and got the right tax advice for my business.",
-    name: "Robert K.",
-    role: "E-commerce Business Owner",
-    photo: "/images/testimonial-2.jpg",
-    photoAlt: "Portrait of Robert K., a demo testimonial avatar",
-  },
-  {
-    id: "testimonial-3",
-    quote: "Very professional and secure. Highly recommend for anyone looking for tax help internationally.",
-    name: "Maria S.",
-    role: "Freelancer",
-    photo: "/images/testimonial-3.jpg",
-    photoAlt: "Portrait of Maria S., a demo testimonial avatar",
-  },
-];
+/*
+ * `Testimonial`/`testimonials` removed, and `TestimonialsSection` with it.
+ *
+ * Three quotes, three names, three job titles and fifteen filled stars, for
+ * a platform that has never had a client, a review or a rating. Unlike the
+ * stats band there is no honest version of this section to write — a
+ * testimonial is either something a real person said or it is nothing — so
+ * it is gone rather than rewritten. `src/components/home/
+ * testimonials-section.tsx` is deleted; restore it from git history when
+ * `reviews` exists in Convex and has rows.
+ */
 
 export interface DemoArticle {
   id: string;

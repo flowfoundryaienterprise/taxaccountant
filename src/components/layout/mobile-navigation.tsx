@@ -163,7 +163,7 @@ export function MobileNavigation({ primaryLinks, sections }: MobileNavigationPro
 
           {sections.map((section) => (
             <div key={section.label} className="flex flex-col gap-1">
-              <p className="px-3 text-caption font-semibold uppercase tracking-wide text-slate">
+              <p className="px-3 text-caption text-slate">
                 {section.label}
               </p>
               {section.items.map((item) =>

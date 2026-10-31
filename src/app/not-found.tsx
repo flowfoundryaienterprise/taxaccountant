@@ -37,7 +37,7 @@ export default function NotFound() {
         </span>
 
         <div className="flex flex-col gap-3">
-          <p className="text-caption font-semibold uppercase tracking-wide text-action">
+          <p className="text-caption text-slate">
             404
           </p>
           <h1 className="text-heading-lg font-semibold text-navy">
@@ -59,7 +59,7 @@ export default function NotFound() {
           <li key={destination.href}>
             <Link
               href={destination.href}
-              className="flex h-full flex-col gap-1.5 rounded-card border border-border bg-white p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-action"
+              className="flex h-full flex-col gap-1.5 rounded-card border border-border bg-white p-5 transition-colors duration-200 hover:border-action"
             >
               <span className="text-compact font-semibold text-navy">{destination.label}</span>
               <span className="text-caption text-slate">{destination.description}</span>

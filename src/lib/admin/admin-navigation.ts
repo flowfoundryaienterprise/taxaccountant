@@ -58,7 +58,7 @@ export const adminNavigation: AdminNavItem[] = [
   },
   {
     href: "/admin/jurisdictions",
-    label: "Tax Jurisdictions",
+    label: "Tax jurisdictions",
     icon: Scale,
     description: "Tax authorities, grouped by country.",
   },
@@ -70,25 +70,25 @@ export const adminNavigation: AdminNavItem[] = [
   },
   {
     href: "/admin/articles",
-    label: "Articles & Resources",
+    label: "Articles and resources",
     icon: Newspaper,
     description: "Editorial content with author and reviewer attribution.",
   },
   {
     href: "/admin/media",
-    label: "Media Library",
+    label: "Media library",
     icon: ImageIcon,
     description: "Approved public website assets.",
   },
   {
     href: "/admin/seo",
-    label: "SEO Management",
+    label: "SEO management",
     icon: Search,
     description: "Titles, descriptions and indexing eligibility per route.",
   },
   {
     href: "/admin/settings",
-    label: "Site Settings",
+    label: "Site settings",
     icon: Settings,
     description: "Site identity, navigation and display configuration.",
   },
@@ -119,12 +119,12 @@ const SEGMENT_LABELS: Record<string, string> = {
   pages: "Pages",
   services: "Services",
   countries: "Countries",
-  jurisdictions: "Tax Jurisdictions",
+  jurisdictions: "Tax jurisdictions",
   professionals: "Professionals",
-  articles: "Articles & Resources",
-  media: "Media Library",
-  seo: "SEO Management",
-  settings: "Site Settings",
+  articles: "Articles and resources",
+  media: "Media library",
+  seo: "SEO management",
+  settings: "Site settings",
 };
 
 /**

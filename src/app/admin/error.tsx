@@ -24,7 +24,7 @@ export default function AdminError({
 
   return (
     <div className="flex flex-col items-start gap-5">
-      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-tint text-danger">
+      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-subtle text-danger">
         <AlertTriangle className="h-6 w-6" aria-hidden />
       </span>
 
@@ -53,7 +53,7 @@ export default function AdminError({
         </button>
         <Link
           href="/admin"
-          className="inline-flex min-h-11 items-center justify-center rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+          className="inline-flex min-h-11 items-center justify-center rounded-input border border-border bg-white px-4 text-compact font-medium text-navy hover:bg-subtle"
         >
           CMS overview
         </Link>

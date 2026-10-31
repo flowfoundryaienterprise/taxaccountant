@@ -54,7 +54,7 @@ export function SeoFields({
 
   return (
     <fieldset className="flex flex-col gap-5 rounded-card border border-border bg-white p-5">
-      <legend className="px-1 text-compact font-semibold text-navy">Search engine metadata</legend>
+      <legend className="px-1 text-compact font-medium text-navy">Search engine metadata</legend>
 
       <AdminTextField
         id="seo-title"
@@ -91,8 +91,8 @@ export function SeoFields({
         hint="Site-relative path. One canonical address per piece of content — duplicates split ranking and confuse crawlers."
       />
 
-      <div className="flex flex-col gap-2 rounded-card border border-border bg-tint/40 p-4">
-        <p className="flex items-center gap-1.5 text-caption font-semibold text-navy">
+      <div className="flex flex-col gap-2 rounded-card border border-border bg-subtle p-4">
+        <p className="flex items-center gap-1.5 text-caption font-medium text-navy">
           <Globe2 className="h-3.5 w-3.5 text-action" aria-hidden />
           Search appearance preview
         </p>

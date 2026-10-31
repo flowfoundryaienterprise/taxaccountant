@@ -40,7 +40,7 @@ export function MediaPicker({ value, onChange, label, hint, disabled }: MediaPic
 
       {selected ? (
         <div className="flex items-center gap-3 rounded-card border border-border bg-white p-3">
-          <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-input bg-tint">
+          <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-input bg-subtle">
             {failed === selected.path ? (
               <span className="flex h-full w-full items-center justify-center text-slate">
                 <ImageOff className="h-4 w-4" aria-hidden />
@@ -69,7 +69,7 @@ export function MediaPicker({ value, onChange, label, hint, disabled }: MediaPic
             disabled={disabled}
             onClick={() => onChange(undefined)}
             aria-label="Remove selected image"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-input border border-control text-slate hover:bg-tint disabled:opacity-40"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-input border border-control text-slate hover:bg-subtle disabled:opacity-40"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
@@ -93,7 +93,7 @@ export function MediaPicker({ value, onChange, label, hint, disabled }: MediaPic
               disabled={disabled}
               onClick={() => onChange(isSelected ? undefined : asset.path)}
               className={cn(
-                "group relative aspect-[4/3] overflow-hidden rounded-input border-2 bg-tint transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50",
+                "group relative aspect-[4/3] overflow-hidden rounded-input border-2 bg-subtle transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50",
                 isSelected ? "border-action" : "border-transparent hover:border-border",
               )}
             >

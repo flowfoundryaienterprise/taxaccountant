@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
  */
 
 export function AdminSkeletonBar({ className }: { className?: string }) {
-  return <div aria-hidden className={cn("animate-pulse rounded-input bg-tint", className)} />;
+  return <div aria-hidden className={cn("animate-pulse rounded-input bg-subtle", className)} />;
 }
 
 export function AdminTableSkeleton({ rows = 6 }: { rows?: number }) {

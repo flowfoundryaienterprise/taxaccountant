@@ -50,11 +50,11 @@ export function CountryJurisdictions({ country, jurisdictions }: CountryJurisdic
               <li key={jurisdiction.value} className="flex">
                 <Link
                   href={directoryHref({ jurisdiction: jurisdiction.value })}
-                  className="group flex h-full w-full flex-col gap-2 rounded-card border border-border bg-white p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-action hover:shadow-[0_18px_32px_-26px_rgba(16,44,87,0.35)]"
+                  className="group flex h-full w-full flex-col gap-2 rounded-card border border-border bg-white p-5 transition-colors duration-200 hover:border-action hover:shadow-[0_18px_32px_-26px_rgba(16,44,87,0.35)]"
                 >
                   <span className="flex items-center gap-2">
                     <Scale className="h-4 w-4 shrink-0 text-action" aria-hidden />
-                    <span className="text-caption font-mono uppercase tracking-wide text-slate">
+                    <span className="font-mono text-caption text-slate">
                       {jurisdiction.value}
                     </span>
                   </span>

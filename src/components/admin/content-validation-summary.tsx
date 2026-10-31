@@ -54,7 +54,7 @@ export function ContentValidationSummary({ issues, subject }: ContentValidationS
     <div role="status" className="flex flex-col gap-3 rounded-card border border-border bg-white p-4">
       {blockers.length ? (
         <div className="flex flex-col gap-2">
-          <h2 className="flex items-center gap-1.5 text-compact font-semibold text-danger">
+          <h2 className="flex items-center gap-1.5 text-compact font-medium text-danger">
             <AlertCircle className="h-4 w-4" aria-hidden />
             {blockers.length === 1
               ? `1 issue blocks publishing this ${subject}`
@@ -72,7 +72,7 @@ export function ContentValidationSummary({ issues, subject }: ContentValidationS
 
       {warnings.length ? (
         <div className="flex flex-col gap-2">
-          <h2 className="flex items-center gap-1.5 text-compact font-semibold text-warning">
+          <h2 className="flex items-center gap-1.5 text-compact font-medium text-warning">
             <Info className="h-4 w-4" aria-hidden />
             {warnings.length === 1 ? "1 thing worth fixing" : `${warnings.length} things worth fixing`}
           </h2>

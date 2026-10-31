@@ -3,7 +3,7 @@ import type { StatusTone } from "@/lib/admin/admin-types";
 import { cn } from "@/lib/utils";
 
 const TONE_CLASSES: Record<StatusTone, string> = {
-  neutral: "border-border bg-tint/70 text-slate",
+  neutral: "border-border bg-subtle text-slate",
   info: "border-action/30 bg-tint text-action",
   success: "border-success/30 bg-white text-success",
   warning: "border-warning/30 bg-white text-warning",

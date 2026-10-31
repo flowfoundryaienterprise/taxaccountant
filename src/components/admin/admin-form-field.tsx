@@ -101,7 +101,7 @@ function FieldFrame({
 }
 
 const controlClass =
-  "w-full rounded-input border bg-white px-3 py-2.5 text-compact text-navy placeholder:text-slate disabled:cursor-not-allowed disabled:bg-tint/50 disabled:text-slate";
+  "w-full rounded-input border bg-white px-3 py-2.5 text-compact text-navy placeholder:text-slate disabled:cursor-not-allowed disabled:bg-subtle disabled:text-slate";
 
 export function AdminTextField({
   placeholder,

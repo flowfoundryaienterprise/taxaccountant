@@ -1,12 +1,7 @@
 import Link from "next/link";
 import {
-  ClipboardCheck,
   FileText,
-  Folder,
-  Globe2,
-  Newspaper,
   Plus,
-  Users,
 } from "lucide-react";
 
 import { AdminDataTable, type AdminColumn } from "@/components/admin/admin-data-table";
@@ -103,14 +98,16 @@ export default function AdminOverviewPage() {
       key: "updated",
       header: "Last updated",
       hideOnMobile: true,
-      render: (row) => formatDate(row.updatedAt) ?? "—",
+      render: (row) => (
+        <span className="font-mono tabular-nums">{formatDate(row.updatedAt) ?? "—"}</span>
+      ),
     },
     {
       key: "actions",
       header: "Actions",
       align: "right",
       render: (row) => (
-        <Link href={row.href} className="text-caption font-semibold text-action hover:underline">
+        <Link href={row.href} className="text-caption font-medium text-action hover:underline">
           Edit
         </Link>
       ),
@@ -127,14 +124,14 @@ export default function AdminOverviewPage() {
   return (
     <div className="flex flex-col gap-8">
       <AdminPageHeader
-        title="Content Management Overview"
+        title="Overview"
         description="Manage the public content and discovery information for TaxAccountant.com."
       />
 
       <UnauthenticatedNotice />
 
       <section aria-labelledby="overview-counts" className="flex flex-col gap-4">
-        <h2 id="overview-counts" className="text-compact font-semibold text-navy">
+        <h2 id="overview-counts" className="text-compact font-medium text-navy">
           At a glance
         </h2>
 
@@ -142,42 +139,36 @@ export default function AdminOverviewPage() {
           <AdminStatCard
             label="Published pages"
             value={publishedPages}
-            icon={FileText}
             caption={`of ${pages.length} page records — demonstration fixtures`}
             href="/admin/pages"
           />
           <AdminStatCard
             label="Draft articles"
             value={draftArticles}
-            icon={Newspaper}
             caption={`of ${articles.length} article records — demonstration fixtures`}
             href="/admin/articles"
           />
           <AdminStatCard
             label="Service categories"
             value={publishedServices}
-            icon={Folder}
             caption="published and live on the public site"
             href="/admin/services"
           />
           <AdminStatCard
             label="Discoverable countries"
             value={discoverableCountries}
-            icon={Globe2}
             caption={`of ${countries.length} country records. None is activated for transactions.`}
             href="/admin/countries"
           />
           <AdminStatCard
             label="Published listings"
             value={publishedListings}
-            icon={Users}
             caption={`of ${professionals.length} professional records`}
             href="/admin/professionals"
           />
           <AdminStatCard
             label="Awaiting review"
             value={pendingReview}
-            icon={ClipboardCheck}
             caption="pages and articles in the review state"
             href="/admin/articles?status=review"
           />
@@ -192,7 +183,7 @@ export default function AdminOverviewPage() {
       </section>
 
       <section aria-labelledby="quick-actions" className="flex flex-col gap-3">
-        <h2 id="quick-actions" className="text-compact font-semibold text-navy">
+        <h2 id="quick-actions" className="text-compact font-medium text-navy">
           Quick actions
         </h2>
 
@@ -203,7 +194,7 @@ export default function AdminOverviewPage() {
               href={action.href}
               className={cn(
                 "inline-flex min-h-11 items-center gap-1.5 rounded-input border border-border bg-white px-4",
-                "text-compact font-medium text-navy transition-colors duration-150 hover:bg-tint",
+                "text-compact font-medium text-navy transition-colors duration-150 hover:bg-subtle",
               )}
             >
               <Plus className="h-4 w-4 text-action" aria-hidden />
@@ -221,7 +212,7 @@ export default function AdminOverviewPage() {
       <ReadOnlyNotice />
 
       <section aria-labelledby="recent-content" className="flex flex-col gap-3">
-        <h2 id="recent-content" className="text-compact font-semibold text-navy">
+        <h2 id="recent-content" className="text-compact font-medium text-navy">
           Recently updated content
         </h2>
 

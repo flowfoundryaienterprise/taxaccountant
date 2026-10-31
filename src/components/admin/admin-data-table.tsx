@@ -68,14 +68,19 @@ export function AdminDataTable<Row>({
         <caption className="sr-only">{caption}</caption>
 
         <thead>
-          <tr className="border-b border-border bg-tint/50">
+          <tr className="border-b border-border bg-subtle">
             {columns.map((column) => (
               <th
                 key={column.key}
                 scope="col"
                 style={column.width ? { width: column.width } : undefined}
                 className={cn(
-                  "px-4 py-3 text-caption font-semibold tracking-wide text-navy uppercase",
+                  /*
+                   * Sentence case. These were 12px semibold uppercase with
+                   * wide tracking — the hardest text in the CMS to read,
+                   * on the row that tells you what every column means.
+                   */
+                  "px-4 py-3 text-caption font-medium text-slate",
                   column.align === "right" && "text-right",
                   column.hideOnMobile && "hidden sm:table-cell",
                 )}
@@ -90,7 +95,7 @@ export function AdminDataTable<Row>({
           {rows.map((row) => (
             <tr
               key={rowKey(row)}
-              className="border-b border-border last:border-b-0 hover:bg-tint/30"
+              className="border-b border-border last:border-b-0 transition-colors duration-150 hover:bg-subtle"
             >
               {columns.map((column) => (
                 <td

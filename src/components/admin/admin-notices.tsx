@@ -67,7 +67,7 @@ export function ReadOnlyNotice({ className }: { className?: string }) {
   return (
     <p
       className={cn(
-        "flex max-w-[92ch] gap-2 rounded-card border border-border bg-tint/60 px-4 py-3 text-caption text-slate",
+        "flex max-w-[92ch] gap-2 rounded-card border border-border bg-subtle px-4 py-3 text-caption text-slate",
         className,
       )}
     >
@@ -96,17 +96,17 @@ export function UnauthenticatedNotice() {
     <div className="flex gap-3 rounded-card border border-warning/40 bg-white px-4 py-4">
       <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden />
       <div className="flex min-w-0 flex-col gap-1.5">
-        <h2 className="text-compact font-semibold text-navy">
+        <h2 className="text-compact font-medium text-navy">
           This CMS has no authentication and is not deployed
         </h2>
         <p className="max-w-[92ch] text-caption text-slate">
           No sign-in, session or role check exists anywhere in this project yet. These screens are
           excluded from production builds at compile time by the{" "}
-          <code className="rounded bg-tint px-1 py-0.5 font-mono text-navy">
+          <code className="rounded bg-subtle px-1 py-0.5 font-mono text-navy">
             cms-production-exclusion
           </code>{" "}
           plugin, so no CMS code or data reaches a deployed environment and{" "}
-          <code className="rounded bg-tint px-1 py-0.5 font-mono text-navy">/admin</code> returns
+          <code className="rounded bg-subtle px-1 py-0.5 font-mono text-navy">/admin</code> returns
           404 there. That is a build gate, not authorization: before this interface may be enabled
           anywhere, it needs server-side authentication, staff role checks, and authorized Convex
           queries that enforce the public/private boundary on the server.

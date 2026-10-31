@@ -72,7 +72,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
     <form onSubmit={onSubmit} className="flex flex-col gap-6">
       {invalid ? (
         <div role="alert" className="flex flex-col gap-2 rounded-card border border-danger/40 bg-white p-4">
-          <h2 className="text-compact font-semibold text-danger">
+          <h2 className="text-compact font-medium text-danger">
             {result.errors.length === 1
               ? "There is 1 problem with this form"
               : `There are ${result.errors.length} problems with this form`}
@@ -97,7 +97,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
         <div className="flex min-w-0 flex-col gap-6">
           <fieldset className="flex flex-col gap-5 rounded-card border border-border bg-white p-5">
-            <legend className="px-1 text-compact font-semibold text-navy">Service details</legend>
+            <legend className="px-1 text-compact font-medium text-navy">Service details</legend>
 
             <AdminTextField
               id="title"
@@ -125,7 +125,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
             ) : (
               <div className="flex flex-col gap-1.5">
                 <span className="text-compact font-medium text-navy">URL slug</span>
-                <div className="flex items-center gap-2 rounded-input border border-border bg-tint/50 px-3 py-2.5">
+                <div className="flex items-center gap-2 rounded-input border border-border bg-subtle px-3 py-2.5">
                   <Lock className="h-3.5 w-3.5 shrink-0 text-slate" aria-hidden />
                   <code className="min-w-0 truncate font-mono text-compact text-slate">
                     /services/{slug}
@@ -163,7 +163,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
           </fieldset>
 
           <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
-            <legend className="px-1 text-compact font-semibold text-navy">Featured image</legend>
+            <legend className="px-1 text-compact font-medium text-navy">Featured image</legend>
             <MediaPicker
               label="Service detail hero image"
               hint="Choose from assets already approved and shipped with the site. Uploading new media requires the R2 integration."
@@ -185,7 +185,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-28">
           <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
-            <legend className="px-1 text-compact font-semibold text-navy">Publication</legend>
+            <legend className="px-1 text-compact font-medium text-navy">Publication</legend>
 
             <AdminTextField
               id="sortOrder"
@@ -208,7 +208,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
             <div className="flex flex-col gap-2">
               <button
                 type="submit"
-                className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+                className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-subtle"
               >
                 Validate form
               </button>
@@ -226,7 +226,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
 
               <Link
                 href="/admin/services"
-                className="inline-flex min-h-11 items-center justify-center rounded-input px-4 text-compact font-medium text-slate hover:bg-tint"
+                className="inline-flex min-h-11 items-center justify-center rounded-input px-4 text-compact font-medium text-slate hover:bg-subtle"
               >
                 Cancel
               </Link>
@@ -235,7 +235,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
 
           {record ? (
             <div className="flex flex-col gap-2 rounded-card border border-border bg-white p-5">
-              <h2 className="text-compact font-semibold text-navy">Danger zone</h2>
+              <h2 className="text-compact font-medium text-navy">Danger zone</h2>
               <p className="text-caption text-slate">
                 Professionals are mapped to this category, and removing it would orphan those
                 mappings as well as break the public route.

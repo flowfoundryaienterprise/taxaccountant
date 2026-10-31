@@ -14,29 +14,37 @@ function formatDate(value: string): string {
 
 export function ArticleCard({ article }: { article: DemoArticle }) {
   return (
-    <article className="group flex flex-col overflow-hidden rounded-card border border-border bg-white transition-all duration-200 hover:-translate-y-1.5 hover:shadow-[0_24px_44px_-28px_rgba(16,44,87,0.3)]">
+    <article className="group flex flex-col overflow-hidden rounded-card border border-border bg-white transition-colors duration-150 hover:border-action">
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-tint">
         <Image
           src={article.photo}
           alt={article.photoAlt}
           fill
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-          className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+          className="object-cover"
         />
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-5">
-        <time dateTime={article.date} className="text-caption text-slate">
+        <time dateTime={article.date} className="font-mono text-caption tabular-nums text-slate">
           {formatDate(article.date)}
         </time>
-        <h3 className="text-compact font-semibold text-navy">{article.title}</h3>
+        <h3 className="text-compact font-medium text-navy">{article.title}</h3>
 
+        {/*
+          Was `/find-accountant`: a "Read More" on an article card that
+          opened the professional directory. Guides live under
+          `/resources`, which currently renders an honest empty state.
+        */}
         <Link
-          href="/find-accountant"
-          className="group/link mt-auto inline-flex items-center gap-1.5 pt-2 text-compact font-semibold text-action"
+          href="/resources"
+          className="group/link mt-auto inline-flex items-center gap-1.5 pt-2 text-compact font-medium text-action transition-colors duration-150 hover:text-navy"
         >
-          Read More
-          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-150 group-hover/link:translate-x-1" aria-hidden />
+          Read guide
+          <ArrowRight
+            className="h-3.5 w-3.5 transition-transform duration-150 group-hover/link:translate-x-0.5"
+            aria-hidden
+          />
         </Link>
       </div>
     </article>

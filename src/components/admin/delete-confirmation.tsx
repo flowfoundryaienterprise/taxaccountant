@@ -53,7 +53,7 @@ export function DeleteConfirmation({
         type="button"
         onClick={open}
         className={cn(
-          "inline-flex min-h-9 items-center gap-1.5 rounded-input border border-control bg-white px-3 text-caption font-medium text-danger transition-colors duration-150 hover:bg-tint",
+          "inline-flex min-h-9 items-center gap-1.5 rounded-input border border-control bg-white px-3 text-caption font-medium text-danger transition-colors duration-150 hover:bg-subtle",
           className,
         )}
       >
@@ -69,11 +69,11 @@ export function DeleteConfirmation({
         <div className="flex flex-col gap-4 p-6">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tint text-danger">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-subtle text-danger">
                 <AlertTriangle className="h-5 w-5" aria-hidden />
               </span>
               <div className="flex flex-col gap-1">
-                <h2 id="delete-dialog-title" className="text-compact font-semibold text-navy">
+                <h2 id="delete-dialog-title" className="text-compact font-medium text-navy">
                   Delete this {recordType}?
                 </h2>
                 <p className="text-caption text-slate">
@@ -87,7 +87,7 @@ export function DeleteConfirmation({
               type="button"
               onClick={close}
               aria-label="Close dialog"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-input text-slate hover:bg-tint"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-input text-slate hover:bg-subtle"
             >
               <X className="h-4 w-4" aria-hidden />
             </button>
@@ -107,7 +107,7 @@ export function DeleteConfirmation({
             />
           </div>
 
-          <p className="rounded-card border border-border bg-tint/60 px-3 py-2 text-caption text-slate">
+          <p className="rounded-card border border-border bg-subtle px-3 py-2 text-caption text-slate">
             <strong className="font-semibold text-navy">Deletion is not available.</strong> No
             authorized delete mutation exists, and there is no authentication to authorize one or
             to write the audit event a destructive action requires. This dialog is the approved
@@ -118,7 +118,7 @@ export function DeleteConfirmation({
             <button
               type="button"
               onClick={close}
-              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-tint"
+              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-subtle"
             >
               Cancel
             </button>

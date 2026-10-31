@@ -49,8 +49,8 @@ const WHITE = "#ffffff";
 /** Hover shades live as arbitrary values in `buttonVariants`, not as tokens. */
 const ACTION_HOVER = "#0668c7";
 
-test("body and secondary text clear AA on both surfaces", () => {
-  for (const surface of [WHITE, token("tint")]) {
+test("body and secondary text clear AA on every surface", () => {
+  for (const surface of [WHITE, token("tint"), token("canvas"), token("subtle")]) {
     assert.ok(contrast(token("navy"), surface) >= AA_NORMAL);
     assert.ok(contrast(token("slate"), surface) >= AA_NORMAL);
   }
@@ -68,6 +68,18 @@ test("action colour clears AA as text and as a button background", () => {
     contrast(action, token("tint")) >= AA_NORMAL,
     `action on tint is ${contrast(action, token("tint")).toFixed(2)}:1`,
   );
+
+  /*
+   * The CMS surfaces. The row-hover case is the one that fails first: a
+   * table row's "Edit" link is action-coloured, and hovering the row swaps
+   * white for `--color-subtle` underneath it.
+   */
+  for (const surface of [token("canvas"), token("subtle")]) {
+    assert.ok(
+      contrast(action, surface) >= AA_NORMAL,
+      `action on ${surface} is ${contrast(action, surface).toFixed(2)}:1`,
+    );
+  }
 
   // Every primary button label, at 14px — normal-size text under WCAG.
   assert.ok(

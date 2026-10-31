@@ -105,7 +105,7 @@ export function NavDropdown({ label, items, activePrefix }: NavDropdownProps) {
                 role="menuitem"
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "animate-fade-up block rounded-input px-3 py-2 text-compact text-navy transition-all duration-150 hover:translate-x-0.5 hover:bg-tint",
+                  "animate-fade-up block rounded-input px-3 py-2 text-compact text-navy transition-colors duration-150 hover:bg-tint",
                   item.featured && "mb-1 border-b border-border pb-2.5 font-semibold text-action",
                 )}
                 style={{ animationDelay: `${index * 30}ms` }}
