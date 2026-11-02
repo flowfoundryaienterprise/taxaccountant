@@ -71,6 +71,19 @@ export const PHASE_GATED: IndexingDecision = {
 };
 
 /**
+ * Legal pages (Privacy, Terms) whose real policy text is not approved yet
+ * — PRD.md section 13, approval item A-05: "Brand/logo, exact page copy,
+ * trust claims, legal text... before launch". The page exists and says so
+ * honestly rather than 404ing, but indexing a placeholder as if it were
+ * the real policy would be worse than not having the page at all.
+ */
+export const LEGAL_PENDING_APPROVAL: IndexingDecision = {
+  index: false,
+  follow: true,
+  reason: "noindex — placeholder pending legal review and approval (PRD.md A-05), not real policy text yet.",
+};
+
+/**
  * Staff-only surfaces. `follow: false` as well, because there is nothing
  * behind a CMS link a crawler should pursue.
  *

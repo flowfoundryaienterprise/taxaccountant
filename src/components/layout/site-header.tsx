@@ -67,7 +67,7 @@ const resourceItems: NavDropdownItem[] = [
 const primaryLinks = [
   { label: "Home", href: "/" },
   { label: "Find an Accountant", href: "/find-accountant" },
-  { label: "How It Works", href: "/#how-it-works" },
+  { label: "How It Works", href: "/how-it-works" },
   { label: "For Professionals", href: "/for-professionals" },
 ];
 
@@ -103,7 +103,7 @@ export function SiteHeader() {
           <NavLink label="Find an Accountant" href="/find-accountant" />
           <NavDropdown label="Services" items={serviceItems} activePrefix="/services" />
           <NavDropdown label="Countries" items={countryItems} activePrefix="/countries" />
-          <NavLink label="How It Works" href="/#how-it-works" />
+          <NavLink label="How It Works" href="/how-it-works" />
           <NavDropdown label="Resources" items={resourceItems} activePrefix="/resources" />
         </nav>
 

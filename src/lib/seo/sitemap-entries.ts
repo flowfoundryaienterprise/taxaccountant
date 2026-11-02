@@ -34,7 +34,8 @@ import { absoluteUrl } from "@/lib/seo/site";
  * | `/professionals/[slug]` | `noindex` — listing them would publish invented people |
  * | `/for-professionals` | `noindex` — explains an unlaunched capability |
  * | `/admin/*` | staff interface, absent from production builds |
- * | `/sign-in`, `/api/*` | nothing for a searcher |
+ * | `/sign-in`, `/staff-login`, `/api/*` | nothing for a searcher |
+ * | `/privacy`, `/terms` | `noindex` — placeholder pending legal review, not real policy yet |
  * | Filtered `/find-accountant?...` | faceted-navigation trap |
  *
  * Each mirrors a decision in `@/lib/seo/indexing`. A sitemap that
@@ -59,6 +60,13 @@ export async function buildSitemapEntries(): Promise<SitemapEntry[]> {
     { url: absoluteUrl("/"), changeFrequency: "weekly", priority: 1 },
     { url: absoluteUrl("/services"), changeFrequency: "monthly", priority: 0.8 },
     { url: absoluteUrl("/resources"), changeFrequency: "weekly", priority: 0.7 },
+    // Real, honest, indexable content pages (Day 11) — each one's own
+    // `robots` export already agrees (INDEXABLE from `@/lib/seo/indexing`).
+    { url: absoluteUrl("/about"), changeFrequency: "yearly", priority: 0.5 },
+    { url: absoluteUrl("/how-it-works"), changeFrequency: "yearly", priority: 0.6 },
+    { url: absoluteUrl("/faq"), changeFrequency: "monthly", priority: 0.5 },
+    { url: absoluteUrl("/help"), changeFrequency: "yearly", priority: 0.4 },
+    { url: absoluteUrl("/contact"), changeFrequency: "yearly", priority: 0.4 },
   ];
 
   // The eight approved service categories: live, indexable, and describing
