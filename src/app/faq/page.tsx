@@ -92,6 +92,11 @@ export default function FaqPage() {
       </section>
 
       <Container className="max-w-[72ch] py-16 sm:py-20">
+        {/* sr-only: the footer's own `<h3>` column titles follow this
+            section, and native <details>/<summary> correctly carries no
+            heading of its own — without this, a screen-reader user jumps
+            straight from the page's h1 to the footer's h3. */}
+        <h2 className="sr-only">Questions</h2>
         <FaqAccordion items={items} structuredData />
       </Container>
     </>

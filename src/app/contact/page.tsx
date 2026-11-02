@@ -38,6 +38,10 @@ export default function ContactPage() {
       </section>
 
       <Container className="max-w-[72ch] py-16 sm:py-20">
+        {/* sr-only: EnquiryForm's own field labels start at the form level
+            with no heading of their own, so without this a screen-reader
+            user jumps straight from the page's h1 to the footer's h3. */}
+        <h2 className="sr-only">Contact form</h2>
         <EnquiryForm
           kind="contact"
           successTitle="Message sent"
