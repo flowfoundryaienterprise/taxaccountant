@@ -4,6 +4,7 @@ import { ArrowLeft, BadgeCheck, FileCheck2, UserCog } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { Reveal } from "@/components/shared/reveal";
+import { EnquiryForm } from "@/components/shared/enquiry-form";
 import { PHASE_GATED, robotsFor } from "@/lib/seo/indexing";
 
 export const metadata: Metadata = {
@@ -107,6 +108,26 @@ export default function ForProfessionalsPage() {
           />
           Back to the homepage
         </Link>
+      </Container>
+
+      <Container className="flex flex-col gap-6 border-t border-border py-16 sm:py-20">
+        <Reveal className="flex max-w-[62ch] flex-col gap-3">
+          <h2 className="text-3xl font-semibold tracking-tight text-navy sm:text-4xl">
+            Register your interest
+          </h2>
+          <p className="text-body text-slate">
+            Phase 2 registration isn&apos;t open yet — this sends a message to our staff so we can
+            reach out when it is. It does not create an account or a listing.
+          </p>
+        </Reveal>
+
+        <div className="max-w-[72ch]">
+          <EnquiryForm
+            kind="professional_interest"
+            successTitle="Thanks for your interest"
+            successBody="Our staff has your message and will reach out once professional registration opens in Phase 2."
+          />
+        </div>
       </Container>
     </>
   );

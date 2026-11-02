@@ -20,10 +20,11 @@ const quickLinks: FooterLink[] = [
   { label: "Find an Accountant", href: "/find-accountant" },
   { label: "Services", href: "/services" },
   { label: "Countries", href: "/countries" },
-  { label: "How it Works", href: "/#how-it-works" },
+  { label: "How it Works", href: "/how-it-works" },
   { label: "Blog", href: "/#articles" },
+  // "Pricing" stays plain text — no approved pricing exists yet (PRD.md A-07).
   { label: "Pricing" },
-  { label: "Contact" },
+  { label: "Contact", href: "/contact" },
 ];
 
 /**
@@ -40,18 +41,22 @@ const servicesLinks: FooterLink[] = [
 
 const forProfessionalsLinks: FooterLink[] = [
   { label: "Join as a Professional", href: "/for-professionals" },
-  { label: "Professional Login" },
+  // Public professional accounts are Phase 2 — same honest explainer /sign-in
+  // already gives customers (DESIGN.md section 6).
+  { label: "Professional Login", href: "/sign-in" },
+  // No approved pricing exists yet (PRD.md A-07) — stays plain text.
   { label: "Pricing Plans" },
   { label: "Resources", href: "/resources" },
-  { label: "Help Center" },
+  { label: "Help Center", href: "/help" },
 ];
 
 const supportLinks: FooterLink[] = [
-  { label: "FAQ" },
-  { label: "Contact Us" },
+  { label: "FAQ", href: "/faq" },
+  { label: "Contact Us", href: "/contact" },
+  // No live chat exists — stays plain text rather than a dead destination.
   { label: "Live Chat" },
-  { label: "Security & Privacy" },
-  { label: "Terms of Service" },
+  { label: "Security & Privacy", href: "/privacy" },
+  { label: "Terms of Service", href: "/terms" },
 ];
 
 const socialIcons = [
