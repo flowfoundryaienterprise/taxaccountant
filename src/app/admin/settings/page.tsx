@@ -119,9 +119,10 @@ export default function AdminSettingsScreen() {
           Site settings change what every visitor sees, so they are exactly the kind of
           configuration that needs an authenticated, authorized actor and an audit record —
           <code className="mx-1 font-mono">settings:getPublic</code> is a public read in API.md,
-          but there is no corresponding write, and no identity to attribute a change to. Making
-          these editable before that exists would mean an unauthenticated interface could alter
-          the public site.
+          but there is no corresponding write yet. Staff sign-in now identifies who is in this
+          screen, but making these fields editable before a `cms:*` write mutation exists (and
+          records who changed what) would mean a change to the public site with no audit trail
+          behind it.
         </p>
       </section>
 

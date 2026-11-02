@@ -157,7 +157,7 @@ export interface TransitionAvailability {
  * there is exactly one place to change when the backend lands.
  */
 export const NO_BACKEND_REASON =
-  "No authorized mutation exists yet, and there is no authentication to authorize one. This control is inert rather than pretending to save.";
+  "No authorized Convex mutation exists yet for staff sign-in to authorize. This control is inert rather than pretending to save.";
 
 export interface AvailabilityContext {
   status: EditorialStatus;

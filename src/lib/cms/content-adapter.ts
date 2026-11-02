@@ -15,8 +15,10 @@ import type { AdminArticleRow, AdminPageRow } from "@/lib/admin/admin-types";
  *
  * ## Staff only
  * This module backs `ContentRepository` with the CMS demonstration
- * fixtures. No `cms:*` Convex query exists, and no authentication exists to
- * authorize one.
+ * fixtures. No `cms:*` Convex query exists yet — staff authentication and
+ * role checking do exist (`src/app/admin/layout.tsx`, `convex/staff.ts`),
+ * but there is nothing for them to authorize here, since every read below
+ * is a static fixture rather than a Convex call.
  *
  * **It must only ever be imported by CMS code.** The public counterpart
  * lives in `./public-content-adapter` and deliberately imports no fixture
@@ -26,14 +28,14 @@ import type { AdminArticleRow, AdminPageRow } from "@/lib/admin/admin-types";
  *
  * ## Swapping in Convex
  * Replace each method body with the corresponding staff query and update
- * `staffRepositoryStatus`. Every one of those queries needs an
- * authenticated staff identity and a server-side role check.
+ * `staffRepositoryStatus`. Every one of those queries needs
+ * `requireStaff` (`convex/staff.ts`) at the top of its handler, the same
+ * way a future `cms:*` mutation would.
  */
 
 export const staffRepositoryStatus: RepositoryStatus = {
   backing: "fixtures",
-  detail:
-    "Reading local demonstration fixtures. No cms:* Convex query exists, and no authentication exists to authorize one.",
+  detail: "Reading local demonstration fixtures. No cms:* Convex query exists yet.",
 };
 
 // ---------------------------------------------------------------------------

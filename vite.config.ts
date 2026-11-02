@@ -4,69 +4,42 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 import { imagesOptimizer } from "@vinext/cloudflare/images/images-optimizer";
 
 /**
- * Day 6 addition: build-time exclusion of the Phase 1 CMS.
+ * The Day 6 `cms-production-exclusion` build-time stub (replacing every
+ * module under `src/app/admin/` with a `notFound()` stub unless
+ * `CMS_PREVIEW=enabled`) is removed as of the staff-auth pass. It existed
+ * because, verified Day 6, there was no authentication anywhere in the
+ * project — "Do not deploy an unprotected admin dashboard" (DAY6_ADMIN_CMS.md
+ * section 1) had to be satisfied by keeping the CMS out of the production
+ * bundle entirely, since there was nothing else to protect it with.
  *
- * ## Why this exists
- * No authentication or authorization exists in this project yet — there is
- * no Better Auth integration, no `convex/auth.config.ts`, and no
- * `ctx.auth` call anywhere (verified Day 6). The Day 6 brief is explicit:
- * "Do not deploy an unprotected admin dashboard" and "Keep all unfinished
- * CMS routes out of public production."
+ * That prerequisite is now met: `/admin` is gated by real server-side
+ * authentication and a role check, both evaluated before any admin markup
+ * is sent.
+ *   - `src/app/admin/layout.tsx` calls `isAuthenticated()` and
+ *     `fetchAuthQuery(api.staff.currentStaff, {})` (`@/lib/auth/server`,
+ *     reading the session cookie via vinext's `next/headers` shim) and
+ *     redirects to `/staff-login` on either an unauthenticated request or
+ *     an authenticated one with no active `staffMemberships` row — a
+ *     Server Component check, not a client-side one a bundle inspection
+ *     could bypass.
+ *   - Identity and credentials live in the Better Auth component
+ *     (`convex/auth.ts`, `convex/convex.config.ts`); role is looked up
+ *     separately in `staffMemberships`, keyed by `identity.tokenIdentifier`
+ *     (`convex/staff.ts`), so a Better Auth account alone grants nothing.
  *
- * A runtime `process.env` check inside a route is **not** sufficient: it was
- * measured, and vinext keeps such a check as a runtime lookup, so the entire
- * CMS component tree and its fixture data still ship inside the production
- * Worker bundle and merely refuse to render. Code that is present can be
- * reached by a bug, a misconfiguration or a stray env var.
- *
- * ## What this does
- * `vite.config.ts` runs in Node, so it can read the real shell environment
- * (application modules cannot — vinext only inlines `NEXT_PUBLIC_*`).
- * Unless `CMS_PREVIEW=enabled` is set for the build or dev command, every
- * module under `src/app/admin/` is replaced, before any other plugin sees
- * it, with a stub that calls `notFound()`. The CMS markup, its fixtures and
- * its components are then unreferenced and drop out of the bundle entirely.
- *
- * Verified: with the flag unset, no CMS string appears anywhere in
- * `.cloudflare/output/` and `/admin` returns HTTP 404 from the Workers
- * preview. With `CMS_PREVIEW=enabled`, the screens build and render.
- *
- * ## What this is NOT
- * This is a **development gate, not authorization**. It keeps unfinished
- * screens out of production; it does not make them safe to expose. Before
- * `/admin` may ever be enabled in a deployed environment it needs real
- * server-side authentication and role checks, and every read must be an
- * authorized Convex query. See docs/DAY6_ADMIN_CMS.md.
+ * What this does NOT yet satisfy, from the same DAY6_ADMIN_CMS.md
+ * checklist: "Authorized Convex queries that enforce the public/private
+ * boundary in the query" and "An audit event on every write". Every admin
+ * screen today still reads from the same static fixtures/catalog
+ * projections it always has (`src/lib/admin/**`) rather than real `cms:*`
+ * Convex queries, and every save/publish/delete control is still disabled
+ * — so there is nothing to audit yet. The auth gate controls who can reach
+ * the screens; it does not retroactively make the screens read or write
+ * authorized data, because none of that exists yet. See `convex/staff.ts`'s
+ * `requireStaff` for the helper future `cms:*` functions should use.
  */
-const cmsPreviewEnabled = process.env.CMS_PREVIEW === "enabled";
-
-const CMS_ROUTE_PREFIX = "/src/app/admin/";
-
-const cmsProductionExclusion = {
-  name: "cms-production-exclusion",
-  // `pre` so the stub replaces the source before vinext's RSC transforms run.
-  enforce: "pre" as const,
-  transform(_code: string, id: string) {
-    if (cmsPreviewEnabled) return null;
-
-    // Normalize Windows separators so one plain substring test works on
-    // every platform, rather than a regex full of escaped separators.
-    const normalized = id.split("\\").join("/");
-    if (!normalized.includes(CMS_ROUTE_PREFIX)) return null;
-    if (!/\.tsx?$/.test(normalized)) return null;
-
-    // Valid for both `page.tsx` and `layout.tsx`: the default export is a
-    // component, and calling `notFound()` during render ends the route.
-    return {
-      code: `import { notFound } from "next/navigation";\nexport default function CmsExcludedFromProduction() { notFound(); }\n`,
-      map: null,
-    };
-  },
-};
-
 export default defineConfig({
   plugins: [
-    cmsProductionExclusion,
     vinext({
       images: { optimizer: imagesOptimizer() },
     }),
@@ -77,4 +50,17 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    /*
+     * Vite blocks requests carrying an unrecognized `Host` header by
+     * default (DNS-rebinding protection) — necessary when tunneling the dev
+     * server (e.g. `cloudflared tunnel --url http://localhost:5173` for a
+     * client demo link) through a hostname Vite has never seen. Each quick
+     * tunnel gets a fresh random `*.trycloudflare.com` subdomain, so the
+     * wildcard is allowed rather than one specific hostname that would stop
+     * working the moment the tunnel restarts. Dev-server-only setting; has
+     * no effect on the production Worker build.
+     */
+    allowedHosts: [".trycloudflare.com"],
+  },
 });
