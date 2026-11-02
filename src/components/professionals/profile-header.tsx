@@ -12,6 +12,7 @@ import {
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { Container } from "@/components/layout/container";
 import { PortraitImage } from "@/components/shared/portrait-image";
+import { Reveal } from "@/components/shared/reveal";
 import { buttonVariants } from "@/components/ui/button";
 import {
   consultationLabel,
@@ -89,7 +90,7 @@ export function ProfileHeader({ profile, backHref, backLabel }: ProfileHeaderPro
 
   return (
     <section className="border-b border-border bg-tint/50">
-      <Container className="flex flex-col gap-8 py-8 sm:py-12">
+      <Container className="flex flex-col gap-8 py-10 sm:py-14">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
@@ -99,7 +100,7 @@ export function ProfileHeader({ profile, backHref, backLabel }: ProfileHeaderPro
         />
 
         <div className="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start lg:gap-12">
-          <div className="group relative mx-auto w-full max-w-[320px] overflow-hidden rounded-panel border border-border bg-white shadow-[0_28px_60px_-44px_rgba(16,44,87,0.5)] lg:mx-0">
+          <Reveal className="group relative mx-auto w-full max-w-[320px] overflow-hidden rounded-panel border border-border bg-white shadow-float lg:mx-0">
             {profile.photo ? (
               <PortraitImage
                 src={profile.photo}
@@ -125,9 +126,9 @@ export function ProfileHeader({ profile, backHref, backLabel }: ProfileHeaderPro
                 </span>
               </div>
             )}
-          </div>
+          </Reveal>
 
-          <div className="flex min-w-0 flex-col gap-6">
+          <Reveal delayMs={100} className="flex min-w-0 flex-col gap-6">
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-border bg-white px-3 py-1 text-caption font-semibold text-navy">
@@ -155,7 +156,9 @@ export function ProfileHeader({ profile, backHref, backLabel }: ProfileHeaderPro
                 </span>
               </div>
 
-              <h1 className="max-w-[20ch] text-hero font-semibold text-navy">{name}</h1>
+              <h1 className="max-w-[18ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
+                {name}
+              </h1>
 
               {designation ? (
                 <p className="text-lead text-slate">
@@ -228,7 +231,7 @@ export function ProfileHeader({ profile, backHref, backLabel }: ProfileHeaderPro
                 {backLabel}
               </Link>
             </div>
-          </div>
+          </Reveal>
         </div>
       </Container>
     </section>

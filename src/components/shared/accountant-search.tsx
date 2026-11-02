@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { MagneticCta } from "@/components/shared/magnetic-cta";
 import { buildDirectoryHref, EMPTY_FILTERS } from "@/lib/directory/query-params";
 import { countryCodes, serviceSlugs } from "@/lib/directory/taxonomy";
 import { searchCountries, services } from "@/lib/home-content";
@@ -89,14 +90,16 @@ export function AccountantSearch() {
           </select>
         </div>
 
-        <Button
-          type="submit"
-          size="lg"
-          className="transition-colors duration-150 active:scale-[0.98] sm:w-auto"
-        >
-          <Search className="h-4 w-4" aria-hidden />
-          Find an Accountant
-        </Button>
+        <MagneticCta strength={0.25} className="w-full sm:w-auto">
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full transition-colors duration-150 active:scale-[0.98] sm:w-auto"
+          >
+            <Search className="h-4 w-4" aria-hidden />
+            Find an Accountant
+          </Button>
+        </MagneticCta>
       </form>
 
       {error ? (

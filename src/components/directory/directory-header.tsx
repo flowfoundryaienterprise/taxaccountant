@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ChevronRight, FlaskConical } from "lucide-react";
 
+import { Reveal } from "@/components/shared/reveal";
+
 /**
  * Directory page heading, breadcrumbs and the honesty notice about the data
  * behind the results.
@@ -11,8 +13,15 @@ import { ChevronRight, FlaskConical } from "lucide-react";
  */
 export function DirectoryHeader({ resultCount }: { resultCount: number }) {
   return (
-    <div className="border-b border-border bg-tint/50">
-      <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-5 px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+    <div className="relative overflow-hidden border-b border-border bg-tint/50">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -top-14 right-[4%] select-none text-[11rem] font-semibold leading-none tracking-tighter text-navy/[0.04] sm:text-[15rem]"
+      >
+        {resultCount}
+      </span>
+
+      <div className="relative mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-4 py-12 sm:px-6 sm:py-16 lg:max-w-[72ch] lg:px-8">
         <nav aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-1.5 text-caption text-slate">
             <li>
@@ -32,29 +41,31 @@ export function DirectoryHeader({ resultCount }: { resultCount: number }) {
           </ol>
         </nav>
 
-        <div className="flex flex-col gap-3">
-          <h1 className="max-w-[26ch] text-hero font-semibold text-navy">
-            Find the Right Tax Accountant for Your Needs
+        <Reveal className="flex flex-col gap-3">
+          <h1 className="max-w-[20ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
+            Find the right <span className="text-action">tax accountant</span> for your needs
           </h1>
           <p className="max-w-[70ch] text-lead text-slate">
             Explore tax and accounting professionals by country, tax jurisdiction, specialty and
             language.
           </p>
-        </div>
+        </Reveal>
 
-        <p className="flex max-w-[80ch] gap-2 rounded-card border border-border bg-white px-4 py-3 text-caption text-slate">
-          <FlaskConical className="mt-0.5 h-3.5 w-3.5 shrink-0 text-action" aria-hidden />
-          <span>
-            <strong className="font-semibold text-navy">
-              Development preview — {resultCount} example profiles.
-            </strong>{" "}
-            These are development-only examples used to build and test the directory, not live
-            listings. Designations shown are self-declared and have not been verified. No ratings,
-            reviews, prices or availability are shown, because none of that data exists yet.
-            The profile pages these cards open are excluded from search indexing for the same
-            reason.
-          </span>
-        </p>
+        <Reveal delayMs={100}>
+          <p className="flex max-w-[80ch] gap-2 rounded-card border border-border bg-white px-4 py-3 text-caption text-slate">
+            <FlaskConical className="mt-0.5 h-3.5 w-3.5 shrink-0 text-action" aria-hidden />
+            <span>
+              <strong className="font-semibold text-navy">
+                Development preview — {resultCount} example profiles.
+              </strong>{" "}
+              These are development-only examples used to build and test the directory, not live
+              listings. Designations shown are self-declared and have not been verified. No ratings,
+              reviews, prices or availability are shown, because none of that data exists yet.
+              The profile pages these cards open are excluded from search indexing for the same
+              reason.
+            </span>
+          </p>
+        </Reveal>
       </div>
     </div>
   );

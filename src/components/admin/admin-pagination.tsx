@@ -43,12 +43,12 @@ export function AdminPagination({
   const last = Math.min(page * pageSize, total);
 
   const linkClass =
-    "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-input border border-control bg-white px-3 text-compact font-medium text-navy transition-colors duration-150 hover:bg-subtle";
+    "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-input border border-control bg-white px-3 text-compact font-medium text-navy transition-[background-color,transform] duration-150 hover:bg-subtle active:scale-[0.97]";
 
   return (
     <nav
       aria-label="Pagination"
-      className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border bg-white px-4 py-3"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-[1.25rem] border border-border bg-white px-5 py-4"
     >
       <p className="text-caption text-slate">
         Showing <span className="font-semibold text-navy">{first}</span>–

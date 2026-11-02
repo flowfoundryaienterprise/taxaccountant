@@ -29,11 +29,11 @@ export function AdminEmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center gap-3 rounded-card border border-dashed border-border bg-white px-6 py-12 text-center",
+        "flex flex-col items-center gap-3 rounded-[1.25rem] border border-dashed border-border bg-white px-6 py-14 text-center",
         className,
       )}
     >
-      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-tint text-action">
+      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-tint text-action">
         <Icon className="h-5 w-5" aria-hidden />
       </span>
       <div className="flex max-w-[56ch] flex-col gap-1.5">

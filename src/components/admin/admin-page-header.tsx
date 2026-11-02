@@ -26,7 +26,7 @@ export function AdminPageHeader({
   return (
     <div className={cn("flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between", className)}>
       <div className="flex min-w-0 flex-col gap-2">
-        <h1 className="text-heading-lg font-semibold text-navy">{title}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-navy">{title}</h1>
         {description ? (
           <p className="max-w-[78ch] text-compact text-slate">{description}</p>
         ) : null}

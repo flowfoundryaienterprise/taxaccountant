@@ -103,14 +103,14 @@ export function UnsavedChangesDialog({
             <button
               type="button"
               onClick={() => dialogRef.current?.close()}
-              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-subtle"
+              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy transition-transform duration-150 hover:bg-subtle active:scale-[0.97]"
             >
               Keep editing
             </button>
             <button
               type="button"
               onClick={leave}
-              className="inline-flex min-h-11 items-center justify-center rounded-input bg-action px-4 text-compact font-medium text-white hover:bg-[#0668c7]"
+              className="inline-flex min-h-11 items-center justify-center rounded-input bg-action px-4 text-compact font-medium text-white transition-transform duration-150 hover:bg-[#0668c7] active:scale-[0.97]"
             >
               Discard and leave
             </button>

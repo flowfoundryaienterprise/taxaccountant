@@ -7,6 +7,7 @@ import { MobileNavigation } from "@/components/layout/mobile-navigation";
 import { NavDropdown, type NavDropdownItem } from "@/components/layout/nav-dropdown";
 import { NavLink } from "@/components/layout/nav-link";
 import { ScrollHeader } from "@/components/layout/scroll-header";
+import { MagneticCta } from "@/components/shared/magnetic-cta";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { countryHref, serviceHref } from "@/lib/marketplace/query-params";
@@ -91,7 +92,7 @@ export function SiteHeader() {
         <Link
           href="/"
           aria-label="TaxAccountant home"
-          className="flex items-center gap-2.5 text-heading-sm font-semibold text-navy transition-transform duration-200"
+          className="flex items-center gap-2.5 text-heading-sm font-semibold text-navy transition-transform duration-200 hover:scale-[1.03]"
         >
           <BrandLogo size={32} className="shrink-0" />
           TaxAccountant
@@ -111,15 +112,17 @@ export function SiteHeader() {
           <Link href="/sign-in" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
             Sign In
           </Link>
-          <Link
-            href="/sign-in?intent=signup"
-            className={cn(
-              buttonVariants({ variant: "primary", size: "sm" }),
-              "transition-transform duration-150 active:scale-[0.98]",
-            )}
-          >
-            Sign Up
-          </Link>
+          <MagneticCta strength={0.3}>
+            <Link
+              href="/sign-in?intent=signup"
+              className={cn(
+                buttonVariants({ variant: "primary", size: "sm" }),
+                "transition-transform duration-150 active:scale-[0.98]",
+              )}
+            >
+              Sign Up
+            </Link>
+          </MagneticCta>
         </div>
 
         <MobileNavigation

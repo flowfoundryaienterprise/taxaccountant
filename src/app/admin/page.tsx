@@ -8,7 +8,7 @@ import { AdminDataTable, type AdminColumn } from "@/components/admin/admin-data-
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
-import { ReadOnlyNotice, UnauthenticatedNotice } from "@/components/admin/admin-notices";
+import { CmsStatusNotice, ReadOnlyNotice } from "@/components/admin/admin-notices";
 import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 import { adminCountries, adminProfessionals, adminServices } from "@/lib/admin/admin-data";
 import { demoArticles, demoPages } from "@/lib/admin/admin-fixtures";
@@ -128,7 +128,7 @@ export default function AdminOverviewPage() {
         description="Manage the public content and discovery information for TaxAccountant.com."
       />
 
-      <UnauthenticatedNotice />
+      <CmsStatusNotice />
 
       <section aria-labelledby="overview-counts" className="flex flex-col gap-4">
         <h2 id="overview-counts" className="text-compact font-medium text-navy">
@@ -136,42 +136,57 @@ export default function AdminOverviewPage() {
         </h2>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <AdminStatCard
-            label="Published pages"
-            value={publishedPages}
-            caption={`of ${pages.length} page records — demonstration fixtures`}
-            href="/admin/pages"
-          />
-          <AdminStatCard
-            label="Draft articles"
-            value={draftArticles}
-            caption={`of ${articles.length} article records — demonstration fixtures`}
-            href="/admin/articles"
-          />
-          <AdminStatCard
-            label="Service categories"
-            value={publishedServices}
-            caption="published and live on the public site"
-            href="/admin/services"
-          />
-          <AdminStatCard
-            label="Discoverable countries"
-            value={discoverableCountries}
-            caption={`of ${countries.length} country records. None is activated for transactions.`}
-            href="/admin/countries"
-          />
-          <AdminStatCard
-            label="Published listings"
-            value={publishedListings}
-            caption={`of ${professionals.length} professional records`}
-            href="/admin/professionals"
-          />
-          <AdminStatCard
-            label="Awaiting review"
-            value={pendingReview}
-            caption="pages and articles in the review state"
-            href="/admin/articles?status=review"
-          />
+          {[
+            {
+              label: "Published pages",
+              value: publishedPages,
+              caption: `of ${pages.length} page records — demonstration fixtures`,
+              href: "/admin/pages",
+            },
+            {
+              label: "Draft articles",
+              value: draftArticles,
+              caption: `of ${articles.length} article records — demonstration fixtures`,
+              href: "/admin/articles",
+            },
+            {
+              label: "Service categories",
+              value: publishedServices,
+              caption: "published and live on the public site",
+              href: "/admin/services",
+            },
+            {
+              label: "Discoverable countries",
+              value: discoverableCountries,
+              caption: `of ${countries.length} country records. None is activated for transactions.`,
+              href: "/admin/countries",
+            },
+            {
+              label: "Published listings",
+              value: publishedListings,
+              caption: `of ${professionals.length} professional records`,
+              href: "/admin/professionals",
+            },
+            {
+              label: "Awaiting review",
+              value: pendingReview,
+              caption: "pages and articles in the review state",
+              href: "/admin/articles?status=review",
+            },
+          ].map((stat, index) => (
+            <div
+              key={stat.label}
+              className="animate-fade-up"
+              style={{ animationDelay: `${index * 60}ms` }}
+            >
+              <AdminStatCard
+                label={stat.label}
+                value={stat.value}
+                caption={stat.caption}
+                href={stat.href}
+              />
+            </div>
+          ))}
         </div>
 
         <p className="max-w-[92ch] text-caption text-slate">

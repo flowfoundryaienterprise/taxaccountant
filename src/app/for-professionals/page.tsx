@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgeCheck, FileCheck2, UserCog } from "lucide-react";
+import { ArrowLeft, BadgeCheck, FileCheck2, UserCog } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
+import { Reveal } from "@/components/shared/reveal";
 import { PHASE_GATED, robotsFor } from "@/lib/seo/indexing";
 
 export const metadata: Metadata = {
@@ -50,39 +51,63 @@ const steps = [
  */
 export default function ForProfessionalsPage() {
   return (
-    <Container className="flex flex-col gap-10 py-16">
-      <div className="flex flex-col gap-3">
-        <span className="inline-flex w-fit items-center gap-2 rounded-full bg-tint px-3 py-1 text-caption font-semibold text-action">
-          Phase 2 feature
+    <>
+      <section className="relative overflow-hidden border-b border-border bg-tint/50">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-16 right-[4%] select-none text-[11rem] font-semibold leading-none tracking-tighter text-navy/[0.04] sm:text-[15rem]"
+        >
+          2
         </span>
-        <h1 className="text-heading-lg font-semibold text-navy">
-          Professional registration opens in Phase 2
-        </h1>
-        <p className="max-w-[60ch] text-lead text-slate">
-          Today, TaxAccountant.com is a Phase 1 public directory. Here's what's planned once
-          professional accounts and credential review ship in Phase 2.
-        </p>
-      </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-        {steps.map((step, index) => {
-          const Icon = step.icon;
-          return (
-            <div key={step.title} className="flex flex-col gap-3 rounded-card border border-border bg-white p-6">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-compact font-semibold text-white">
-                {index + 1}
-              </span>
-              <Icon className="h-5 w-5 text-action" aria-hidden />
-              <h2 className="text-compact font-semibold text-navy">{step.title}</h2>
-              <p className="text-compact text-slate">{step.description}</p>
-            </div>
-          );
-        })}
-      </div>
+        <Container className="relative flex flex-col gap-6 py-16 sm:py-20">
+          <Reveal className="flex flex-col gap-4">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full bg-tint px-3 py-1 text-caption font-semibold text-action">
+              Phase 2 feature
+            </span>
+            <h1 className="max-w-[18ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
+              Professional registration opens in Phase 2
+            </h1>
+            <p className="max-w-[60ch] text-lead text-slate">
+              Today, TaxAccountant.com is a Phase 1 public directory. Here&apos;s what&apos;s
+              planned once professional accounts and credential review ship in Phase 2.
+            </p>
+          </Reveal>
+        </Container>
+      </section>
 
-      <Link href="/" className="text-compact font-semibold text-action">
-        &larr; Back to the homepage
-      </Link>
-    </Container>
+      <Container className="flex flex-col gap-10 py-16 sm:py-20">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr_1.15fr]">
+          {steps.map((step, index) => {
+            const Icon = step.icon;
+            return (
+              <Reveal key={step.title} delayMs={index * 90}>
+                <div className="flex h-full flex-col gap-4 rounded-panel border border-border bg-white p-7">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-caption font-medium tabular-nums text-slate">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <Icon className="h-5 w-5 text-action" aria-hidden />
+                  </div>
+                  <h2 className="text-compact font-semibold text-navy">{step.title}</h2>
+                  <p className="text-compact text-slate">{step.description}</p>
+                </div>
+              </Reveal>
+            );
+          })}
+        </div>
+
+        <Link
+          href="/"
+          className="group inline-flex w-fit items-center gap-1.5 text-compact font-semibold text-action"
+        >
+          <ArrowLeft
+            className="h-3.5 w-3.5 transition-transform duration-150 group-hover:-translate-x-0.5"
+            aria-hidden
+          />
+          Back to the homepage
+        </Link>
+      </Container>
+    </>
   );
 }

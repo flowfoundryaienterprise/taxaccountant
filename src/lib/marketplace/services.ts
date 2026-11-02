@@ -355,8 +355,8 @@ const details: ServiceDetail[] = [
       "Forward-looking advice on structure, timing and tax position, given by a professional authorized in the relevant jurisdiction.",
     audience: "both",
     image: {
-      src: "/images/hero-accountant.jpg",
-      alt: "A tax advisor working through planning scenarios on a laptop in an office",
+      src: "/images/hero-accountant.png",
+      alt: "Two tax and accounting professionals reviewing figures together on a tablet in a modern office",
     },
     about: [
       "Advisory work looks ahead rather than back. It deals with decisions that have not been made yet — how to structure an entity, when to realise a transaction, how a change in residence or ownership would be treated.",

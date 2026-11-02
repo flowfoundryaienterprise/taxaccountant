@@ -6,7 +6,11 @@ import { cn } from "@/lib/utils";
  */
 
 export function AdminSkeletonBar({ className }: { className?: string }) {
-  return <div aria-hidden className={cn("animate-pulse rounded-input bg-subtle", className)} />;
+  return (
+    <div aria-hidden className={cn("relative overflow-hidden rounded-input bg-subtle", className)}>
+      <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/60 to-transparent animate-shimmer" />
+    </div>
+  );
 }
 
 export function AdminTableSkeleton({ rows = 6 }: { rows?: number }) {
@@ -17,7 +21,7 @@ export function AdminTableSkeleton({ rows = 6 }: { rows?: number }) {
         <AdminSkeletonBar className="h-4 w-full max-w-xl" />
       </div>
 
-      <AdminSkeletonBar className="h-28 w-full rounded-card" />
+      <AdminSkeletonBar className="h-28 w-full rounded-[1.5rem]" />
 
       <div className="overflow-hidden rounded-card border border-border bg-white">
         <AdminSkeletonBar className="h-11 w-full rounded-none" />

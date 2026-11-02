@@ -5,6 +5,7 @@ import { ArrowRight, Coins, Globe2, Languages } from "lucide-react";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { Container } from "@/components/layout/container";
 import { CountryBadge } from "@/components/countries/country-badge";
+import { Reveal } from "@/components/shared/reveal";
 import { buttonVariants } from "@/components/ui/button";
 import type { CountryEntry } from "@/lib/marketplace/countries";
 import { directoryHref } from "@/lib/marketplace/query-params";
@@ -23,7 +24,7 @@ import { cn } from "@/lib/utils";
 export function CountryOverview({ country }: { country: CountryEntry }) {
   return (
     <section className="border-b border-border bg-tint/50">
-      <Container className="flex flex-col gap-8 py-10 sm:py-14">
+      <Container className="flex flex-col gap-8 py-12 sm:py-16">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
@@ -32,8 +33,8 @@ export function CountryOverview({ country }: { country: CountryEntry }) {
           ]}
         />
 
-        <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div className="flex flex-col gap-6">
+        <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+          <Reveal className="flex flex-col gap-6">
             <div className="flex flex-wrap items-center gap-4">
               <CountryBadge code={country.code} countryName={country.name} size="lg" />
               <span className="rounded-full border border-border bg-white px-3 py-1 text-caption font-semibold text-navy">
@@ -42,8 +43,8 @@ export function CountryOverview({ country }: { country: CountryEntry }) {
             </div>
 
             <div className="flex flex-col gap-3">
-              <h1 className="max-w-[22ch] text-hero font-semibold text-navy">
-                Tax &amp; Accounting Professionals in {country.name}
+              <h1 className="max-w-[20ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
+                Tax &amp; accounting professionals in {country.name}
               </h1>
               <p className="max-w-[64ch] text-lead text-slate">{country.context}</p>
             </div>
@@ -89,16 +90,19 @@ export function CountryOverview({ country }: { country: CountryEntry }) {
                 All countries
               </Link>
             </div>
-          </div>
+          </Reveal>
 
-          <div className="relative aspect-[2/1] w-full rounded-panel bg-white p-2 shadow-[0_28px_60px_-44px_rgba(16,44,87,0.5)]">
+          <Reveal
+            delayMs={120}
+            className="relative aspect-[2/1] w-full rounded-panel bg-white p-2 shadow-float"
+          >
             <div className="relative h-full w-full">
               <Image
                 src="/images/world-map.svg"
                 alt={`World map with ${country.name} marked`}
                 fill
                 priority
-                sizes="(min-width: 1024px) 46vw, 100vw"
+                sizes="(min-width: 1024px) 34vw, 100vw"
                 className="object-contain"
               />
               <span
@@ -107,7 +111,7 @@ export function CountryOverview({ country }: { country: CountryEntry }) {
                 aria-hidden
               />
             </div>
-          </div>
+          </Reveal>
         </div>
       </Container>
     </section>

@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { Container } from "@/components/layout/container";
+import { Reveal } from "@/components/shared/reveal";
 import { buttonVariants } from "@/components/ui/button";
 import { audienceLabel, type ServiceCatalogEntry } from "@/lib/marketplace/services";
 import { directoryHref } from "@/lib/marketplace/query-params";
@@ -15,7 +16,7 @@ export function ServiceDetailHero({ service }: { service: ServiceCatalogEntry })
 
   return (
     <section className="border-b border-border bg-tint/50">
-      <Container className="flex flex-col gap-8 py-10 sm:py-14">
+      <Container className="flex flex-col gap-8 py-12 sm:py-16">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
@@ -25,11 +26,14 @@ export function ServiceDetailHero({ service }: { service: ServiceCatalogEntry })
           structuredData
         />
 
-        <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div className="flex flex-col gap-6">
+        {/* Visual order flipped on `lg` (image left) while reading/DOM order
+            keeps the heading first — asymmetric variety against the
+            services index hero without disturbing heading-first a11y. */}
+        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+          <Reveal className="flex flex-col gap-6 lg:order-2">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-input bg-white text-action shadow-[0_12px_24px_-18px_rgba(16,44,87,0.5)]">
-                <Icon className="h-5 w-5" aria-hidden />
+              <span className="flex h-14 w-14 items-center justify-center rounded-panel bg-navy text-white shadow-raised">
+                <Icon className="h-6 w-6" aria-hidden />
               </span>
               <span className="rounded-full border border-border bg-white px-3 py-1 text-caption font-semibold text-navy">
                 {audienceLabel(service.audience)}
@@ -37,7 +41,9 @@ export function ServiceDetailHero({ service }: { service: ServiceCatalogEntry })
             </div>
 
             <div className="flex flex-col gap-3">
-              <h1 className="max-w-[20ch] text-hero font-semibold text-navy">{service.title}</h1>
+              <h1 className="max-w-[18ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
+                {service.title}
+              </h1>
               <p className="max-w-[62ch] text-lead text-slate">{service.overview}</p>
             </div>
 
@@ -62,18 +68,21 @@ export function ServiceDetailHero({ service }: { service: ServiceCatalogEntry })
                 All services
               </Link>
             </div>
-          </div>
+          </Reveal>
 
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-panel border border-border bg-white shadow-[0_28px_60px_-40px_rgba(16,44,87,0.45)] lg:aspect-[5/4]">
+          <Reveal
+            delayMs={120}
+            className="relative aspect-[4/3] w-full overflow-hidden rounded-panel border border-border bg-white shadow-float lg:order-1 lg:aspect-[4/5]"
+          >
             <Image
               src={service.image.src}
               alt={service.image.alt}
               fill
               priority
-              sizes="(min-width: 1024px) 46vw, 100vw"
+              sizes="(min-width: 1024px) 36vw, 100vw"
               className="object-cover"
             />
-          </div>
+          </Reveal>
         </div>
       </Container>
     </section>

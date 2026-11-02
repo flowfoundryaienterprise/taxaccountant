@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
+import { MagneticCta } from "@/components/shared/magnetic-cta";
 import { Reveal } from "@/components/shared/reveal";
 import { professionalCtaImage } from "@/lib/home-content";
 
@@ -18,16 +19,18 @@ export function ProfessionalCTA() {
               Register the jurisdictions you are authorised in, the services you cover and the
               languages you advise in. Listings open before public accounts do.
             </p>
-            <Link
-              href="/for-professionals"
-              className="group inline-flex h-12 shrink-0 items-center gap-2 rounded-input bg-action px-6 text-body font-medium text-white transition-colors duration-150 hover:bg-[#0668c7] active:scale-[0.98]"
-            >
-              Register a practice
-              <ArrowRight
-                className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5"
-                aria-hidden
-              />
-            </Link>
+            <MagneticCta>
+              <Link
+                href="/for-professionals"
+                className="group inline-flex h-12 shrink-0 items-center gap-2 rounded-input bg-action px-6 text-body font-medium text-white transition-colors duration-150 hover:bg-[#0668c7] active:scale-[0.98]"
+              >
+                Register a practice
+                <ArrowRight
+                  className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </Link>
+            </MagneticCta>
           </div>
 
           <div className="relative hidden aspect-[4/3] h-full min-h-64 w-full lg:block">

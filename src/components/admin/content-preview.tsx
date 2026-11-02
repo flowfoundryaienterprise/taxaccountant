@@ -76,7 +76,7 @@ export function ContentPreview({
   return (
     <section
       aria-labelledby="content-preview-heading"
-      className="flex flex-col gap-4 rounded-card border border-border bg-white p-5"
+      className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 id="content-preview-heading" className="text-compact font-medium text-navy">

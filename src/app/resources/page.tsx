@@ -5,6 +5,7 @@ import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { Container } from "@/components/layout/container";
 import { EmptyState } from "@/components/shared/empty-state";
 import { MarketplaceCta } from "@/components/shared/marketplace-cta";
+import { Reveal } from "@/components/shared/reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { ResourceCard } from "@/components/resources/resource-card";
 import { TAX_CONTENT_DISCLAIMER } from "@/lib/cms/content-formatters";
@@ -54,22 +55,22 @@ export default async function ResourcesPage() {
   return (
     <>
       <section className="border-b border-border bg-tint/50">
-        <Container className="flex flex-col gap-6 py-10 sm:py-14">
+        <Container className="flex flex-col gap-6 py-12 sm:py-16">
           <Breadcrumbs
             items={[{ label: "Home", href: "/" }, { label: "Guides & Resources" }]}
             structuredData
           />
 
-          <div className="flex flex-col gap-3">
-            <h1 className="max-w-[24ch] text-hero font-semibold text-navy">
-              Guides &amp; Resources
+          <Reveal className="flex flex-col gap-3">
+            <h1 className="max-w-[20ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
+              Guides &amp; resources
             </h1>
             <p className="max-w-[70ch] text-lead text-slate">
               General explanations of how tax and accounting work across jurisdictions. Every
               resource published here carries the date it was last reviewed, and the tax
               jurisdiction it describes where that matters.
             </p>
-          </div>
+          </Reveal>
         </Container>
       </section>
 

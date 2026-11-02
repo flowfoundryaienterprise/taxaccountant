@@ -8,7 +8,6 @@ anyway as good practice. Downloaded at build time via direct CDN URLs
 
 | File | Pexels photo | Photographer |
 |---|---|---|
-| `hero-accountant.jpg` | [photo/3855619](https://www.pexels.com/photo/smiling-businesswoman-with-laptop-in-office-3855619/) | Andrea Piacquadio |
 | `professional-1.jpg` | [photo/3756679](https://www.pexels.com/photo/laughing-businesswoman-working-in-office-with-laptop-3756679/) | Andrea Piacquadio |
 | `professional-2.jpg` | [photo/32064778](https://www.pexels.com/photo/professional-headshot-of-businessman-in-suit-32064778/) | Alpha Pixels |
 | `professional-3.jpg` | [photo/7642127](https://www.pexels.com/photo/a-portrait-of-a-woman-in-business-attire-and-eyeglasses-7642127/) | cottonbro studio |
@@ -21,6 +20,11 @@ anyway as good practice. Downloaded at build time via direct CDN URLs
 | `testimonial-1.jpg` | [photo/18809829](https://www.pexels.com/photo/portrait-of-a-woman-smiling-18809829/) | — |
 | `testimonial-2.jpg` | [photo/30767572](https://www.pexels.com/photo/professional-portrait-of-a-smiling-man-30767572/) | — |
 | `testimonial-3.jpg` | [photo/34381970](https://www.pexels.com/photo/professional-portrait-of-smiling-businesswoman-34381970/) | — |
+
+`hero-accountant.png` is not from Pexels — it was supplied directly by the
+project owner (generated via ChatGPT) to replace the original Pexels hero
+photo. No Pexels license applies to it; origin/usage rights for this
+specific file rest with whoever generated and provided it.
 
 `world-map.svg` is from Wikimedia Commons —
 [World_location_map.svg](https://commons.wikimedia.org/wiki/File:World_location_map.svg),

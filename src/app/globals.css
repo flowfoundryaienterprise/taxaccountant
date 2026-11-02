@@ -250,3 +250,36 @@
 .animate-fade-up {
   animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+/*
+ * Redesign addition: two perpetual, GPU-cheap loops (transform/opacity only,
+ * per ARCHITECTURE.md performance guidance), used sparingly — a live status
+ * dot and a skeleton shimmer, both already covered by the
+ * prefers-reduced-motion override above.
+ */
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes shimmer-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer-sweep 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

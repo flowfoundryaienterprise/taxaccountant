@@ -36,7 +36,7 @@ export function ContentValidationSummary({ issues, subject }: ContentValidationS
     return (
       <div
         role="status"
-        className="flex gap-2 rounded-card border border-success/40 bg-white px-4 py-3"
+        className="flex gap-2 rounded-[1rem] border border-success/40 bg-white px-4 py-3"
       >
         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
         <p className="text-caption text-slate">
@@ -51,7 +51,7 @@ export function ContentValidationSummary({ issues, subject }: ContentValidationS
   }
 
   return (
-    <div role="status" className="flex flex-col gap-3 rounded-card border border-border bg-white p-4">
+    <div role="status" className="flex flex-col gap-3 rounded-[1rem] border border-border bg-white p-4">
       {blockers.length ? (
         <div className="flex flex-col gap-2">
           <h2 className="flex items-center gap-1.5 text-compact font-medium text-danger">

@@ -34,18 +34,33 @@ export function AdminStatCard({ label, value, caption, href, className }: AdminS
   const content = (
     <>
       <p className="text-caption text-slate">{label}</p>
-      <p className="font-mono text-heading-lg font-medium tabular-nums text-navy">{value}</p>
+      <p className="font-mono text-4xl font-semibold tracking-tight tabular-nums text-navy">
+        {value}
+      </p>
       <p className="text-caption text-slate">{caption}</p>
     </>
   );
 
-  const shared = "flex flex-col gap-1.5 rounded-card border border-border bg-white p-4";
+  /*
+   * "Bento 2.0" surface per the redesign brief: bigger rounded corner,
+   * a soft wide diffusion shadow instead of a hard edge, generous padding.
+   * The content model is unchanged — label, figure, caption, nothing else —
+   * no trend arrow or icon badge was added; see the file-level note above.
+   */
+  const shared = cn(
+    "flex flex-col gap-2 rounded-[1.5rem] border border-border bg-white p-6",
+    "shadow-[0_20px_40px_-28px_rgba(16,44,87,0.18)]",
+  );
 
   if (href) {
     return (
       <Link
         href={href}
-        className={cn(shared, "transition-colors duration-150 hover:border-action", className)}
+        className={cn(
+          shared,
+          "transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-action hover:shadow-[0_24px_48px_-24px_rgba(16,44,87,0.22)] active:translate-y-0 active:scale-[0.99]",
+          className,
+        )}
       >
         {content}
       </Link>

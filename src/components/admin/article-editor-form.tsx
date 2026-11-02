@@ -163,7 +163,7 @@ export function ArticleEditorForm({
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
         <div className="flex min-w-0 flex-col gap-6">
-          <fieldset className="flex flex-col gap-5 rounded-card border border-border bg-white p-5">
+          <fieldset className="flex flex-col gap-5 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Article details</legend>
 
             <AdminTextField
@@ -211,12 +211,12 @@ export function ArticleEditorForm({
             />
           </fieldset>
 
-          <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
+          <fieldset className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Article content</legend>
             <ContentEditor blocks={blocks} onChange={setBlocks} />
           </fieldset>
 
-          <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
+          <fieldset className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Featured image</legend>
             <MediaPicker
               label="Featured image"
@@ -272,7 +272,7 @@ export function ArticleEditorForm({
         </div>
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-28">
-          <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
+          <fieldset className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Classification</legend>
 
             <AdminSelectField
@@ -309,7 +309,7 @@ export function ArticleEditorForm({
             />
           </fieldset>
 
-          <fieldset className="flex flex-col gap-3 rounded-card border border-border bg-white p-5">
+          <fieldset className="flex flex-col gap-3 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Editorial review</legend>
 
             {reviewed ? (
@@ -329,7 +329,7 @@ export function ArticleEditorForm({
             )}
           </fieldset>
 
-          <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
+          <fieldset className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Publication</legend>
 
             <AdminSelectField
@@ -362,7 +362,7 @@ export function ArticleEditorForm({
           </EditorialActionBar>
 
           {record ? (
-            <div className="flex flex-col gap-2 rounded-card border border-border bg-white p-5">
+            <div className="flex flex-col gap-2 rounded-[1.25rem] border border-border bg-white p-5">
               <h2 className="text-compact font-medium text-navy">Danger zone</h2>
               <DeleteConfirmation
                 recordName={record.title}

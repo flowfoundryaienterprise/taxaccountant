@@ -60,7 +60,7 @@ export function AdminFilterBar({
   const hasActive = Boolean(query) || activeFilter !== "all";
 
   return (
-    <div className="flex flex-col gap-4 rounded-card border border-border bg-white p-4">
+    <div className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5">
       <form action={action} className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <label htmlFor={`${filterName}-search`} className="sr-only">
           {searchLabel}
@@ -90,7 +90,7 @@ export function AdminFilterBar({
 
         <button
           type="submit"
-          className="inline-flex h-11 shrink-0 items-center justify-center rounded-input bg-action px-4 text-compact font-medium text-white transition-colors duration-150 hover:bg-[#0668c7]"
+          className="inline-flex h-11 shrink-0 items-center justify-center rounded-input bg-action px-4 text-compact font-medium text-white transition-[background-color,transform] duration-150 hover:bg-[#0668c7] active:scale-[0.97]"
         >
           Search
         </button>
