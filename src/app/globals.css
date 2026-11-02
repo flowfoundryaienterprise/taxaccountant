@@ -188,9 +188,39 @@
     color: inherit;
   }
 
-  /* Visible, accessible focus state (WCAG 2.2 AA, DESIGN.md section 10) */
+  /*
+   * Visible, accessible focus state (WCAG 2.2 AA, DESIGN.md section 10).
+   *
+   * Day 9 BUG-11, still open: the rendered outline is width 2px / style
+   * solid / colour navy (`currentColor`) instead of `--color-focus`
+   * (`#1459b5`), on this rule and on every `focus-visible:outline-focus`
+   * utility checked. Re-investigated in this pass, still not isolated:
+   *  - `getComputedStyle(documentElement).getPropertyValue('--color-focus')`
+   *    resolves correctly to `#1459b5`.
+   *  - Enumerating every stylesheet rule that matches a focused link via
+   *    `element.matches(rule.selectorText)` finds exactly one rule setting
+   *    `outline-color` — this one, with the correct value — and no other
+   *    matching rule touches `outline-color` or the `outline` shorthand at
+   *    all, ruling out a competing declaration.
+   *  - Setting the identical `var(--color-focus)` as an inline style
+   *    resolves correctly, so the token and the property both work; only
+   *    this stylesheet rule's effect on the live computed style does not,
+   *    and that reads as a cascade/recompute quirk specific to the browser
+   *    automation environment this project is tested in, not a CSS error.
+   *  - Splitting the original `outline: 2px solid var(--color-focus)`
+   *    shorthand into longhands (tried in this pass) made no observable
+   *    difference and is not kept for that reason — it stays only because
+   *    it is the clearer form, matching how the `outline-focus` utility is
+   *    already written elsewhere.
+   * Still low severity, deliberately not forced further: navy on white is
+   * 13.82:1, higher contrast than the intended `#1459b5` (6.72:1), so WCAG
+   * 2.4.7 and 1.4.11 are satisfied either way — what's wrong is the hue, not
+   * the visibility. Needs a real (non-automated) browser to isolate.
+   */
   :focus-visible {
-    outline: 2px solid var(--color-focus);
+    outline-width: 2px;
+    outline-style: solid;
+    outline-color: var(--color-focus);
     outline-offset: 2px;
   }
 }
