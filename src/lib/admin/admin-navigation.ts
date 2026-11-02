@@ -4,6 +4,7 @@ import {
   Folder,
   Globe2,
   Image as ImageIcon,
+  Inbox,
   LayoutDashboard,
   Newspaper,
   Scale,
@@ -75,6 +76,12 @@ export const adminNavigation: AdminNavItem[] = [
     description: "Editorial content with author and reviewer attribution.",
   },
   {
+    href: "/admin/messages",
+    label: "Messages",
+    icon: Inbox,
+    description: "Contact and professional-interest submissions.",
+  },
+  {
     href: "/admin/media",
     label: "Media library",
     icon: ImageIcon,
@@ -122,6 +129,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   jurisdictions: "Tax jurisdictions",
   professionals: "Professionals",
   articles: "Articles and resources",
+  messages: "Messages",
   media: "Media library",
   seo: "SEO management",
   settings: "Site settings",

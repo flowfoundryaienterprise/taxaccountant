@@ -327,7 +327,16 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_kind_status_created", ["kind", "status", "createdAt"])
-    .index("by_created", ["createdAt"]),
+    .index("by_created", ["createdAt"])
+    /*
+     * Added alongside the admin Messages inbox (`convex/contact.ts`
+     * `listMessages`): the inbox filters by status alone (across both
+     * `kind`s), which `by_kind_status_created` cannot serve — Convex
+     * requires querying indexed fields in their declared order, and `kind`
+     * comes first in that one. Small additive index, not a backfill risk
+     * (`publicMessages` has at most a handful of rows today).
+     */
+    .index("by_status_created", ["status", "createdAt"]),
 
   auditEvents: defineTable({
     actorSubject: v.optional(v.string()),
