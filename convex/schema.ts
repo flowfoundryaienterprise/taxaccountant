@@ -259,6 +259,27 @@ export default defineSchema({
     reviewedAt: v.optional(v.number()),
     publishedAt: v.optional(v.number()),
     updatedAt: v.number(),
+    /*
+     * Added alongside the first real `cms:*`/`content:*` mutations
+     * (convex/cms.ts, convex/content.ts). `AdminArticleRow.category` and
+     * `.featuredImage` (src/lib/admin/admin-types.ts) needed somewhere to
+     * live once articles could actually be saved.
+     *
+     * `category` is a plain string, not a `contentCategories` join row —
+     * the editor form is a single-select (one category per article), so a
+     * many-to-many join would add write/read complexity (insert/delete join
+     * rows, resolve on every read) for a relationship the UI never
+     * exercises as many-to-many. `contentCategories`/`contentPageCategories`
+     * stay defined and unused, reserved for if admin-managed, multi-category
+     * taxonomy is ever actually needed.
+     *
+     * `featuredImage` is an embedded `{path, alt}` rather than a
+     * `mediaAssets` reference, matching what `MediaPicker` actually produces
+     * today — a `public/` path string, because the R2 upload integration
+     * that would make a real `mediaAssets` row meaningful doesn't exist yet.
+     */
+    category: v.optional(v.string()),
+    featuredImage: v.optional(v.object({ path: v.string(), alt: v.string() })),
   })
     .index("by_slug_locale", ["slug", "locale"])
     .index("by_kind_status", ["kind", "status"])

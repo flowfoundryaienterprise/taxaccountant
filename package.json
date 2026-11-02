@@ -45,7 +45,7 @@
 		"preview": "npm run build && npm run start --",
 		"cf-typegen": "cf workers types",
 		"lint": "eslint .",
-		"test": "node --import ./scripts/test-resolver.mjs --test \"src/**/*.test.ts\"",
+		"test": "node --env-file-if-exists=.env.local --import ./scripts/test-resolver.mjs --test \"src/**/*.test.ts\"",
 		"typecheck": "tsc --noEmit",
 		"convex:dev": "convex dev"
 	}

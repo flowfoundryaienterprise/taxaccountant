@@ -1,6 +1,7 @@
 "use client";
 
-import { Info, Lock } from "lucide-react";
+import * as React from "react";
+import { Info, Loader2, Lock } from "lucide-react";
 
 import {
   statusLabel,
@@ -15,8 +16,14 @@ interface EditorialActionBarProps {
   status: EditorialStatus;
   /** Blocking problems keyed by action, from `content-validation`. */
   blockers?: Partial<Record<EditorialAction, string>>;
-  /** Flips to `true` only when an authorized, permission-checked backend exists. */
+  /**
+   * `false` only for an unsaved new record — there's nothing to transition
+   * yet. `true` once a record exists, since every `content:*` mutation this
+   * bar calls is real (`convex/content.ts`).
+   */
   backendReady?: boolean;
+  /** Performs the transition. Throwing surfaces the message as the error. */
+  onAction?: (action: EditorialAction) => Promise<void>;
   /** Rendered alongside the workflow actions — usually Cancel. */
   children?: React.ReactNode;
 }
@@ -24,32 +31,46 @@ interface EditorialActionBarProps {
 /**
  * The Draft → Review → Publish → Unpublish control set.
  *
- * ## Every control is disabled, and says which reason applies
+ * ## Every control says which reason blocks it
  * Two different reasons can block an action, and they are not
  * interchangeable:
  *
  *  - a **validation blocker** ("this article has no recorded review") is
  *    actionable by the editor, so it is shown in preference; and
- *  - the **missing backend** reason, which is not actionable by anyone
- *    using this screen.
+ *  - **no record saved yet** (`backendReady=false`), which isn't actionable
+ *    until the draft exists.
  *
- * `transitionAvailability` decides between them. Nothing here fakes a save:
- * there is no success path in this component at all, so there is nothing
- * that could accidentally report one.
+ * `transitionAvailability` decides between them.
  *
  * ## Only legal transitions appear
  * The bar renders `transitionsFrom(status)`, so a draft never offers
  * "Unpublish" and a published record never offers "Submit for review". The
- * server must still enforce the same rules — a disabled button is a UI
- * affordance, not a permission check.
+ * server enforces the same rules independently (`convex/content.ts`) — this
+ * is a UI affordance, not the permission check.
  */
 export function EditorialActionBar({
   status,
   blockers = {},
-  backendReady = false,
+  backendReady = true,
+  onAction,
   children,
 }: EditorialActionBarProps) {
   const actions = transitionAvailability({ status, backendReady, blockers });
+  const [pending, setPending] = React.useState<EditorialAction | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  async function handleClick(action: EditorialAction) {
+    if (!onAction) return;
+    setPending(action);
+    setError(null);
+    try {
+      await onAction(action);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setPending(null);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5">
@@ -61,47 +82,57 @@ export function EditorialActionBar({
         </p>
       </div>
 
+      {error ? (
+        <p role="alert" className="text-caption font-medium text-danger">
+          {error}
+        </p>
+      ) : null}
+
       <ul className="flex flex-col gap-3">
-        {actions.map((action) => (
-          <li key={action.action} className="flex flex-col gap-1.5">
-            <button
-              type="button"
-              disabled={!action.enabled}
-              aria-disabled={!action.enabled}
-              title={action.blockedReason}
-              aria-describedby={action.blockedReason ? `${action.action}-reason` : undefined}
-              className={cn(
-                "inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-input px-4 text-compact font-medium transition-[background-color,transform] duration-150 active:scale-[0.98]",
-                action.enabled
-                  ? action.destructive
-                    ? "bg-action text-white hover:bg-[#0668c7]"
-                    : "border border-control bg-white text-navy hover:bg-subtle"
-                  : "cursor-not-allowed border border-border bg-subtle text-slate",
-              )}
-            >
-              {!action.enabled ? <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden /> : null}
-              {action.label}
-            </button>
+        {actions.map((action) => {
+          const isPending = pending === action.action;
+          const disabled = !action.enabled || pending !== null;
 
-            <p className="text-caption text-slate">{action.description}</p>
-
-            {action.blockedReason ? (
-              <p
-                id={`${action.action}-reason`}
-                className="flex items-start gap-1.5 text-caption text-warning"
+          return (
+            <li key={action.action} className="flex flex-col gap-1.5">
+              <button
+                type="button"
+                disabled={disabled}
+                aria-disabled={disabled}
+                title={action.blockedReason}
+                aria-describedby={action.blockedReason ? `${action.action}-reason` : undefined}
+                onClick={() => handleClick(action.action)}
+                className={cn(
+                  "inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-input px-4 text-compact font-medium transition-[background-color,transform] duration-150 active:scale-[0.98]",
+                  action.enabled
+                    ? action.destructive
+                      ? "bg-action text-white hover:bg-[#0668c7] disabled:opacity-70"
+                      : "border border-control bg-white text-navy hover:bg-subtle disabled:opacity-70"
+                    : "cursor-not-allowed border border-border bg-subtle text-slate",
+                )}
               >
-                <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
-                <span>{action.blockedReason}</span>
-              </p>
-            ) : null}
+                {isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" aria-hidden />
+                ) : !action.enabled ? (
+                  <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                ) : null}
+                {action.label}
+              </button>
 
-            {/* Naming the mutation makes the pending contract concrete for
-                whoever writes the backend, rather than leaving it implied. */}
-            <p className="text-caption text-slate/70">
-              Will call <code className="font-mono">{action.mutation}</code>
-            </p>
-          </li>
-        ))}
+              <p className="text-caption text-slate">{action.description}</p>
+
+              {action.blockedReason ? (
+                <p
+                  id={`${action.action}-reason`}
+                  className="flex items-start gap-1.5 text-caption text-warning"
+                >
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+                  <span>{action.blockedReason}</span>
+                </p>
+              ) : null}
+            </li>
+          );
+        })}
       </ul>
 
       {children}

@@ -86,27 +86,31 @@ export function ReadOnlyNotice({ className }: { className?: string }) {
 /**
  * The status banner on the CMS overview.
  *
- * States the actual posture rather than implying more than is true.
- * Sign-in and the staff role check are real now — `/admin/layout.tsx`
+ * States the actual posture rather than implying more or less than is
+ * true. Sign-in and the staff role check are real — `/admin/layout.tsx`
  * verifies the session and an active `staffMemberships` row server-side on
- * every request (convex/staff.ts) before any admin screen renders — but
- * content is still read-only: no `cms:*` mutation exists yet to persist a
- * save, which is a separate, larger piece of work
- * (DAY6_ADMIN_CMS.md's "Required authorized functions").
+ * every request (`convex/staff.ts`) before any admin screen renders.
+ *
+ * Pages and Articles (`convex/content.ts`) are the first two collections
+ * with a real save/review/publish/delete workflow; Messages
+ * (`convex/contact.ts`) reads and updates real submissions. Everything
+ * else — Services, Countries, Jurisdictions, Professionals, Media,
+ * Settings, SEO — is still read-only: each screen's own `ReadOnlyNotice`
+ * says so.
  */
 export function CmsStatusNotice() {
   return (
     <div className="flex gap-3 rounded-[1.25rem] border border-border bg-white px-5 py-5">
       <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-action" aria-hidden />
       <div className="flex min-w-0 flex-col gap-1.5">
-        <h2 className="text-compact font-medium text-navy">Staff sign-in required, content read-only</h2>
+        <h2 className="text-compact font-medium text-navy">Staff sign-in required</h2>
         <p className="max-w-[92ch] text-caption text-slate">
           This screen is only reachable after a server-verified Better Auth session with an active
           staff role — anonymous and non-staff requests are redirected to{" "}
           <code className="rounded bg-subtle px-1 py-0.5 font-mono text-navy">/staff-login</code>{" "}
-          before any admin markup renders. Saving, publishing and deleting are still disabled: no
-          authorized Convex mutation exists yet to persist a change, so those controls stay inert
-          rather than pretending to.
+          before any admin markup renders. Pages, Articles and Messages save, publish and delete
+          for real now. The remaining screens (Services, Countries, Jurisdictions, Professionals,
+          Media, Settings, SEO) are still read-only previews — each says so on its own screen.
         </p>
       </div>
     </div>

@@ -11,8 +11,8 @@ import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
 import { CmsStatusNotice, ReadOnlyNotice } from "@/components/admin/admin-notices";
 import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 import { adminCountries, adminProfessionals, adminServices } from "@/lib/admin/admin-data";
-import { demoArticles, demoPages } from "@/lib/admin/admin-fixtures";
 import { formatDate, truncate } from "@/lib/admin/admin-formatters";
+import { contentRepository } from "@/lib/cms/content-adapter";
 import { cn } from "@/lib/utils";
 
 /**
@@ -32,18 +32,21 @@ interface RecentRow {
   status: string;
   updatedAt: string;
   href: string;
-  provenance: "approved" | "demonstration";
 }
 
-export default function AdminOverviewPage() {
-  const pages = demoPages;
-  const articles = demoArticles;
-  const services = adminServices();
-  const countries = adminCountries();
-  const professionals = adminProfessionals();
+export default async function AdminOverviewPage() {
+  const [pagesResult, articlesResult, services, countries, professionals] = await Promise.all([
+    contentRepository.listPages({ q: "" }),
+    contentRepository.listArticles({ q: "" }),
+    Promise.resolve(adminServices()),
+    Promise.resolve(adminCountries()),
+    Promise.resolve(adminProfessionals()),
+  ]);
+  const pages = pagesResult.items;
+  const articles = articlesResult.items;
 
-  const publishedPages = pages.filter((page) => page.status === "published").length;
-  const draftArticles = articles.filter((article) => article.status === "draft").length;
+  const publishedPages = pages.filter((page) => page.editorial.status === "published").length;
+  const draftArticles = articles.filter((article) => article.editorial.status === "draft").length;
   const publishedServices = services.filter((service) => service.status === "published").length;
   const discoverableCountries = countries.filter((country) => country.discoverable).length;
   const publishedListings = professionals.filter(
@@ -52,31 +55,28 @@ export default function AdminOverviewPage() {
 
   /*
    * "Pending review" is a real count of records sitting in the `review`
-   * state across both content types, not a decorative number — which is why
-   * the fixtures deliberately include some.
+   * state across both content types — real content now, not fixtures.
    */
   const pendingReview =
-    pages.filter((page) => page.status === "review").length +
-    articles.filter((article) => article.status === "review").length;
+    pages.filter((page) => page.editorial.status === "review").length +
+    articles.filter((article) => article.editorial.status === "review").length;
 
   const recent: RecentRow[] = [
     ...pages.map((page) => ({
       id: `page-${page.id}`,
       title: page.title,
       type: page.kind === "page" ? "Page" : page.kind === "guide" ? "Guide" : "Glossary",
-      status: page.status,
-      updatedAt: page.updatedAt,
+      status: page.editorial.status,
+      updatedAt: page.editorial.updatedAt,
       href: `/admin/pages/${page.id}/edit`,
-      provenance: page.provenance,
     })),
     ...articles.map((article) => ({
       id: `article-${article.id}`,
       title: article.title,
       type: "Article",
-      status: article.status,
-      updatedAt: article.updatedAt,
+      status: article.editorial.status,
+      updatedAt: article.editorial.updatedAt,
       href: `/admin/articles/${article.id}/edit`,
-      provenance: article.provenance,
     })),
   ]
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
@@ -140,13 +140,13 @@ export default function AdminOverviewPage() {
             {
               label: "Published pages",
               value: publishedPages,
-              caption: `of ${pages.length} page records — demonstration fixtures`,
+              caption: `of ${pages.length} page records`,
               href: "/admin/pages",
             },
             {
               label: "Draft articles",
               value: draftArticles,
-              caption: `of ${articles.length} article records — demonstration fixtures`,
+              caption: `of ${articles.length} article records`,
               href: "/admin/articles",
             },
             {
@@ -191,9 +191,11 @@ export default function AdminOverviewPage() {
 
         <p className="max-w-[92ch] text-caption text-slate">
           Service, country and professional counts are read from the modules the public site
-          renders, so they describe what is genuinely live. Page and article counts come from
-          demonstration fixtures, because no page or article has been authored yet. No figure here
-          is a traffic, engagement or revenue metric — none of that data exists.
+          renders, so they describe what is genuinely live. Page and article counts are real
+          <code className="mx-1 rounded bg-subtle px-1 py-0.5 font-mono text-navy">contentPages</code>
+          rows — Pages and Articles are the first two CMS collections with a working save and
+          publish workflow. No figure here is a traffic, engagement or revenue metric — none of
+          that data exists.
         </p>
       </section>
 

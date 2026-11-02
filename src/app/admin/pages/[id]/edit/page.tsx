@@ -3,10 +3,9 @@ import { notFound } from "next/navigation";
 
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
-import { ProvenanceNotice, ReadOnlyNotice } from "@/components/admin/admin-notices";
 import { PageEditorForm } from "@/components/admin/page-editor-form";
-import { demoPages } from "@/lib/admin/admin-fixtures";
 import { formatDate } from "@/lib/admin/admin-formatters";
+import { contentRepository, toAdminPageRow } from "@/lib/cms/content-adapter";
 
 interface EditPageProps {
   params: Promise<{ id: string }>;
@@ -14,17 +13,21 @@ interface EditPageProps {
 
 export async function generateMetadata({ params }: EditPageProps): Promise<Metadata> {
   const { id } = await params;
-  const record = demoPages.find((page) => page.id === id);
+  const record = await contentRepository.getPage(id);
   return { title: record ? `Edit ${record.title}` : "Page not found" };
 }
 
 export default async function EditPageScreen({ params }: EditPageProps) {
   const { id } = await params;
-  const record = demoPages.find((page) => page.id === id);
+  const [cmsPage, { items }] = await Promise.all([
+    contentRepository.getPage(id),
+    contentRepository.listPages({ q: "" }),
+  ]);
 
-  // An unknown id is a 404 here just as it would be once this reads a real
-  // query — the screen never invents an empty record to edit.
-  if (!record) notFound();
+  // An unknown id is a 404 here, same as it would be for any other missing
+  // record — the screen never invents an empty one to edit.
+  if (!cmsPage) notFound();
+  const record = toAdminPageRow(cmsPage);
 
   return (
     <div className="flex flex-col gap-6">
@@ -33,9 +36,10 @@ export default async function EditPageScreen({ params }: EditPageProps) {
         description={`Last updated ${formatDate(record.updatedAt) ?? "—"}. Locale ${record.locale}.`}
         actions={<AdminStatusBadge status={record.status} />}
       />
-      <ProvenanceNotice provenance={record.provenance} entity="pages" />
-      <ReadOnlyNotice />
-      <PageEditorForm record={record} existingSlugs={demoPages.map((page) => page.slug)} />
+      <PageEditorForm
+        record={record}
+        existingSlugs={items.map((page) => page.slug)}
+      />
     </div>
   );
 }

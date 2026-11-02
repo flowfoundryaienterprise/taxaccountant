@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { ShieldAlert, Wand2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
+import { CheckCircle2, Loader2, ShieldAlert, Wand2 } from "lucide-react";
 
 import {
   AdminSelectField,
@@ -19,9 +21,11 @@ import { UnsavedChangesDialog } from "@/components/admin/unsaved-changes-dialog"
 import { articleCategories } from "@/lib/admin/admin-fixtures";
 import { toSlug } from "@/lib/admin/admin-formatters";
 import { LIMITS, errorFor, validateArticleForm } from "@/lib/admin/admin-validation";
-import type { EditorialStatus } from "@/lib/cms/content-status";
+import type { EditorialAction, EditorialStatus } from "@/lib/cms/content-status";
 import { articlePublishIssues, toActionBlockers } from "@/lib/cms/content-validation";
 import type { AdminArticleRow, ContentBlock } from "@/lib/admin/admin-types";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 
 interface ArticleEditorFormProps {
   record?: AdminArticleRow;
@@ -30,12 +34,6 @@ interface ArticleEditorFormProps {
   jurisdictions: { value: string; label: string }[];
 }
 
-const STATUS_OPTIONS = [
-  { value: "draft", label: "Draft" },
-  { value: "review", label: "In review" },
-  { value: "published", label: "Published" },
-  { value: "archived", label: "Archived" },
-];
 
 /**
  * Create / edit form for an article or resource.
@@ -55,13 +53,21 @@ export function ArticleEditorForm({
   existingSlugs,
   jurisdictions,
 }: ArticleEditorFormProps) {
+  const router = useRouter();
+  const saveDraft = useMutation(api.content.saveDraft);
+  const requestReview = useMutation(api.content.requestReview);
+  const returnToDraft = useMutation(api.content.returnToDraft);
+  const recordReview = useMutation(api.content.recordReview);
+  const publishMutation = useMutation(api.content.publish);
+  const unpublish = useMutation(api.content.unpublish);
+  const archive = useMutation(api.content.archive);
+  const deleteContent = useMutation(api.content.deleteContent);
+
   const [title, setTitle] = React.useState(record?.title ?? "");
   const [slug, setSlug] = React.useState(record?.slug ?? "");
   const [excerpt, setExcerpt] = React.useState(record?.excerpt ?? "");
   const [category, setCategory] = React.useState(record?.category ?? "");
   const [jurisdiction, setJurisdiction] = React.useState(record?.jurisdictionCode ?? "");
-  const [status, setStatus] = React.useState(record?.status ?? "draft");
-  const [author, setAuthor] = React.useState(record?.author ?? "");
   const [blocks, setBlocks] = React.useState<ContentBlock[]>(record?.body ?? []);
   const [image, setImage] = React.useState<string | undefined>(record?.featuredImage?.path);
   const [imageAlt, setImageAlt] = React.useState(record?.featuredImage?.alt ?? "");
@@ -72,33 +78,113 @@ export function ArticleEditorForm({
   });
 
   const [result, setResult] = React.useState<ReturnType<typeof validateArticleForm>>();
+  const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
+  const [savedAt, setSavedAt] = React.useState<number | null>(null);
+  const [markingReviewed, setMarkingReviewed] = React.useState(false);
+  const [reviewError, setReviewError] = React.useState<string | null>(null);
 
   const otherSlugs = React.useMemo(
     () => existingSlugs.filter((entry) => entry !== record?.slug),
     [existingSlugs, record?.slug],
   );
 
-  const onSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    setResult(
-      validateArticleForm(
-        {
-          title,
-          slug,
-          summary: excerpt,
-          excerpt,
-          category,
-          imageAlt,
-          hasImage: Boolean(image),
-          ...seo,
-        },
-        otherSlugs,
-      ),
+  async function performSave() {
+    const validation = validateArticleForm(
+      {
+        title,
+        slug,
+        summary: excerpt,
+        excerpt,
+        category,
+        imageAlt,
+        hasImage: Boolean(image),
+        ...seo,
+      },
+      otherSlugs,
     );
-  };
+    setResult(validation);
+    if (!validation.ok) throw new Error("Fix the highlighted fields before saving.");
+
+    const { id } = await saveDraft({
+      id: record?.id as Id<"contentPages"> | undefined,
+      kind: "blog",
+      title,
+      slug,
+      summary: excerpt || undefined,
+      body: blocks,
+      seo: {
+        title: seo.seoTitle || undefined,
+        description: seo.seoDescription || undefined,
+        canonicalPath: seo.canonicalPath || undefined,
+      },
+      category: category || undefined,
+      featuredImage: image ? { path: image, alt: imageAlt } : undefined,
+    });
+    setSavedAt(Date.now());
+    if (!record) {
+      router.push(`/admin/articles/${id}/edit`);
+    } else {
+      router.refresh();
+    }
+  }
+
+  async function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await performSave();
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Something went wrong while saving.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onWorkflowAction(action: EditorialAction) {
+    if (!record) throw new Error("Save this article as a draft first.");
+    const id = record.id as Id<"contentPages">;
+    switch (action) {
+      case "saveDraft":
+        await performSave();
+        return;
+      case "submitForReview":
+        await requestReview({ id });
+        break;
+      case "returnToDraft":
+        await returnToDraft({ id });
+        break;
+      case "publish":
+        await publishMutation({ id });
+        break;
+      case "unpublish":
+        await unpublish({ id });
+        break;
+      case "archive":
+        await archive({ id });
+        break;
+    }
+    router.refresh();
+  }
+
+  async function onMarkReviewed() {
+    if (!record) return;
+    setMarkingReviewed(true);
+    setReviewError(null);
+    try {
+      await recordReview({ id: record.id as Id<"contentPages"> });
+      router.refresh();
+    } catch (err) {
+      setReviewError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setMarkingReviewed(false);
+    }
+  }
 
   const invalid = result && !result.ok;
   const reviewed = Boolean(record?.reviewer && record?.reviewedAt);
+  const canMarkReviewed = record?.status === "review" && !reviewed;
 
   /*
    * Publish-readiness is recomputed from the *live form state*, not from the
@@ -127,8 +213,6 @@ export function ArticleEditorForm({
     excerpt !== (record?.excerpt ?? "") ||
     category !== (record?.category ?? "") ||
     jurisdiction !== (record?.jurisdictionCode ?? "") ||
-    status !== (record?.status ?? "draft") ||
-    author !== (record?.author ?? "") ||
     image !== record?.featuredImage?.path ||
     imageAlt !== (record?.featuredImage?.alt ?? "") ||
     JSON.stringify(blocks) !== JSON.stringify(record?.body ?? []);
@@ -154,10 +238,15 @@ export function ArticleEditorForm({
         </div>
       ) : null}
 
-      {result?.ok ? (
+      {saveError ? (
+        <p role="alert" className="rounded-card border border-danger/40 bg-white px-4 py-3 text-caption font-medium text-danger">
+          {saveError}
+        </p>
+      ) : null}
+
+      {savedAt && result?.ok ? (
         <p role="status" className="rounded-card border border-success/40 bg-white px-4 py-3 text-caption text-slate">
-          <strong className="font-semibold text-navy">Validation passed.</strong> Nothing has been
-          saved — there is no mutation to save to.
+          <strong className="font-semibold text-navy">Saved.</strong> This draft is stored in Convex.
         </p>
       ) : null}
 
@@ -257,14 +346,14 @@ export function ArticleEditorForm({
               public resource pages use, inside the editor — there is no
               preview URL and no draft is reachable from outside. */}
           <ContentPreview
-            status={status as EditorialStatus}
+            status={(record?.status ?? "draft") as EditorialStatus}
             title={title}
             excerpt={excerpt}
             body={blocks}
             category={category}
             jurisdictionLabel={jurisdictionText}
             featuredImage={image ? { path: image, alt: imageAlt } : undefined}
-            author={author}
+            author={record?.author}
             reviewer={record?.reviewer}
             reviewedAt={record?.reviewedAt}
             publishedAt={record?.publishedAt}
@@ -300,13 +389,10 @@ export function ArticleEditorForm({
               hint="Set this whenever the article states anything specific to one tax authority, so it is never presented as a universal position."
             />
 
-            <AdminTextField
-              id="author"
-              label="Author"
-              value={author}
-              onChange={setAuthor}
-              hint="Attribution shown on the published article."
-            />
+            <p className="text-caption text-slate">
+              Author:{" "}
+              <span className="font-medium text-navy">{record?.author ?? "Set automatically when you save a new article"}</span>
+            </p>
           </fieldset>
 
           <fieldset className="flex flex-col gap-3 rounded-[1.25rem] border border-border bg-white p-5">
@@ -327,36 +413,54 @@ export function ArticleEditorForm({
                 </span>
               </p>
             )}
+
+            {canMarkReviewed ? (
+              <>
+                {reviewError ? (
+                  <p role="alert" className="text-caption font-medium text-danger">
+                    {reviewError}
+                  </p>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={onMarkReviewed}
+                  disabled={markingReviewed}
+                  className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-subtle disabled:opacity-60"
+                >
+                  {markingReviewed ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                  ) : (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-success" aria-hidden />
+                  )}
+                  Mark reviewed
+                </button>
+              </>
+            ) : null}
           </fieldset>
 
           <fieldset className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Publication</legend>
 
-            <AdminSelectField
-              id="status"
-              label="Publication status"
-              value={status}
-              onChange={(value) => setStatus(value as AdminArticleRow["status"])}
-              options={STATUS_OPTIONS}
-              hint="Shown so the workflow below can be exercised from each state. Changing it here does not move the record — only an authorized transition does that."
-            />
+            <p className="text-caption text-slate">
+              Status: <span className="font-medium text-navy">{record?.status ?? "Not saved yet"}</span>.
+              Changed only through the workflow actions below, not this form.
+            </p>
 
             <button
               type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-subtle"
+              disabled={saving}
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-subtle disabled:opacity-60"
             >
-              Check fields
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
+              {record ? "Save draft" : "Create article"}
             </button>
           </fieldset>
 
-          {/*
-            Workflow actions, all disabled. Validation blockers are passed
-            through so the bar explains the useful reason ("no recorded
-            review") in preference to the generic one ("no backend").
-          */}
           <EditorialActionBar
-            status={status as EditorialStatus}
+            status={record?.status ?? "draft"}
+            backendReady={Boolean(record)}
             blockers={toActionBlockers(publishIssues)}
+            onAction={onWorkflowAction}
           >
             <UnsavedChangesDialog dirty={dirty} cancelHref="/admin/articles" />
           </EditorialActionBar>
@@ -368,6 +472,10 @@ export function ArticleEditorForm({
                 recordName={record.title}
                 recordType="article"
                 consequence="Archiving is usually preferable to deletion — it keeps the record and its review history."
+                onConfirm={async () => {
+                  await deleteContent({ id: record.id as Id<"contentPages"> });
+                  router.push("/admin/articles");
+                }}
               />
             </div>
           ) : null}

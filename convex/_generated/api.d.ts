@@ -9,7 +9,9 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as cms from "../cms.js";
 import type * as contact from "../contact.js";
+import type * as content from "../content.js";
 import type * as devProvision from "../devProvision.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
@@ -23,7 +25,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  cms: typeof cms;
   contact: typeof contact;
+  content: typeof content;
   devProvision: typeof devProvision;
   healthCheck: typeof healthCheck;
   http: typeof http;

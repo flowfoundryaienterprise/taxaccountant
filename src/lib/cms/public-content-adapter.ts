@@ -5,6 +5,8 @@ import type {
   PublicPage,
   RepositoryStatus,
 } from "@/lib/cms/content-types";
+import { publicConvexClient } from "@/lib/convex/public-client";
+import { api } from "@/convex/_generated/api";
 
 /**
  * The public content repository — and **nothing else**.
@@ -18,45 +20,51 @@ import type {
  * design: tree-shaking is an optimisation, not a guarantee, and the same
  * mistake on Day 5 did ship unapproved records into executable code.
  *
- * So the public side imports **no fixture module at all**. There is no
- * import edge for a bundler to follow, which is a stronger property than a
- * filter applied to data that should not be in reach.
+ * So the public side imports **no fixture module at all**, still. It now
+ * imports `@/convex/_generated/api` and a plain, unauthenticated
+ * `ConvexHttpClient` (`@/lib/convex/public-client`) instead — not a fixture,
+ * and not `src/lib/cms/content-adapter.ts`'s staff-only module, which this
+ * file must never import for the same reason it never imported the fixtures.
  *
- * ## Why it returns nothing
- * No approved, reviewed, published resource exists. The CMS fixtures
- * include articles marked published, but they are fictional tax content,
- * and serving them would put invented guidance on indexable public pages
- * under a real brand.
+ * ## Why the boundary still holds
+ * `content:listPublishedResources` and `content:getPublishedBySlug`
+ * (`convex/content.ts`) filter to `status: "published"` **in the query
+ * itself**, not in this adapter. Anything the server sends is readable by
+ * the caller whether or not this file re-filters it, so the authorization
+ * boundary is the Convex query, and this file is a thin shape-mapper in
+ * front of it.
  *
- * So this reports the truth — the public set is empty — and `/resources`
- * renders its genuine empty state. The gate is not a filter over fictional
- * data; there is simply nothing public yet.
- *
- * ## Replacing this with Convex
- * Swap each body for the corresponding query and update
- * `publicRepositoryStatus`. The queries **must** filter by publication
- * status server-side: the mappers in `@/lib/marketplace/content-mappers`
- * are a second line of defence, not the boundary. Anything the server sends
- * is readable by the caller, whether or not the page renders it.
+ * Demonstration articles (`src/lib/admin/admin-fixtures.ts`) are
+ * deliberately never seeded into real `contentPages` rows as "published" —
+ * they are fictional, unreviewed tax content, and publishing them for real
+ * would put invented guidance on an indexable public page under a real
+ * brand. So this now genuinely reads Convex, and still returns nothing
+ * until a staff member writes and publishes real content through
+ * `/admin/articles` or `/admin/pages`.
  */
 
 export const publicRepositoryStatus: RepositoryStatus = {
-  backing: "empty",
-  detail:
-    "no approved, reviewed and published resource exists yet, so the public resource pages are genuinely empty rather than populated with development fixtures.",
+  backing: "convex",
+  detail: "content:listPublishedResources / content:getPublishedBySlug, filtered to published rows server-side.",
 };
 
 export const publicContentRepository: PublicContentRepository = {
-  async listArticles(): Promise<CmsPage_<PublicArticle>> {
-    return { items: [], hasMore: false };
+  async listArticles(options): Promise<CmsPage_<PublicArticle>> {
+    const result = await publicConvexClient.query(api.content.listPublishedResources, {
+      category: options?.category,
+      limit: options?.limit,
+    });
+    return { items: result.items, hasMore: result.hasMore };
   },
-  async getArticle(): Promise<PublicArticle | undefined> {
-    return undefined;
+  async getArticle(slug): Promise<PublicArticle | undefined> {
+    const result = await publicConvexClient.query(api.content.getPublishedBySlug, { slug });
+    return result?.kind === "article" ? result.article : undefined;
   },
-  async getPage(): Promise<PublicPage | undefined> {
-    return undefined;
+  async getPage(slug): Promise<PublicPage | undefined> {
+    const result = await publicConvexClient.query(api.content.getPublishedBySlug, { slug });
+    return result?.kind === "page" ? result.page : undefined;
   },
   async listCategories(): Promise<string[]> {
-    return [];
+    return publicConvexClient.query(api.content.listCategories, {});
   },
 };
