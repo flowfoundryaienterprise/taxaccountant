@@ -52,7 +52,7 @@ export function EditorialActionBar({
   const actions = transitionAvailability({ status, backendReady, blockers });
 
   return (
-    <div className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
+    <div className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5">
       <div className="flex flex-col gap-1">
         <h2 className="text-compact font-medium text-navy">Editorial workflow</h2>
         <p className="text-caption text-slate">
@@ -71,7 +71,7 @@ export function EditorialActionBar({
               title={action.blockedReason}
               aria-describedby={action.blockedReason ? `${action.action}-reason` : undefined}
               className={cn(
-                "inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-input px-4 text-compact font-medium transition-colors duration-150",
+                "inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-input px-4 text-compact font-medium transition-[background-color,transform] duration-150 active:scale-[0.98]",
                 action.enabled
                   ? action.destructive
                     ? "bg-action text-white hover:bg-[#0668c7]"

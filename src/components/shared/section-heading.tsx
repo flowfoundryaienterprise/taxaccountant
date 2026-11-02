@@ -32,7 +32,7 @@ export function SectionHeading({
         things that are actually actionable.
       */}
       {eyebrow ? <p className="text-caption text-slate">{eyebrow}</p> : null}
-      <h2 className="text-heading-lg font-semibold text-navy">{title}</h2>
+      <h2 className="text-3xl font-semibold tracking-tight text-navy sm:text-4xl">{title}</h2>
       {description ? <p className="text-lead text-slate">{description}</p> : null}
     </div>
   );

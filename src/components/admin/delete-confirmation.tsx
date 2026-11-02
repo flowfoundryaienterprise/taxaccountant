@@ -53,7 +53,7 @@ export function DeleteConfirmation({
         type="button"
         onClick={open}
         className={cn(
-          "inline-flex min-h-9 items-center gap-1.5 rounded-input border border-control bg-white px-3 text-caption font-medium text-danger transition-colors duration-150 hover:bg-subtle",
+          "inline-flex min-h-9 items-center gap-1.5 rounded-input border border-control bg-white px-3 text-caption font-medium text-danger transition-[background-color,transform] duration-150 hover:bg-subtle active:scale-[0.97]",
           className,
         )}
       >
@@ -109,9 +109,9 @@ export function DeleteConfirmation({
 
           <p className="rounded-card border border-border bg-subtle px-3 py-2 text-caption text-slate">
             <strong className="font-semibold text-navy">Deletion is not available.</strong> No
-            authorized delete mutation exists, and there is no authentication to authorize one or
-            to write the audit event a destructive action requires. This dialog is the approved
-            design, not a working control.
+            authorized delete mutation exists yet, and none exists to write the audit event a
+            destructive action requires. This dialog is the approved design, not a working
+            control.
           </p>
 
           <div className="flex flex-wrap items-center justify-end gap-2">

@@ -148,7 +148,7 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
         <div className="flex min-w-0 flex-col gap-6">
-          <fieldset className="flex flex-col gap-5 rounded-card border border-border bg-white p-5">
+          <fieldset className="flex flex-col gap-5 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Page details</legend>
 
             <AdminTextField
@@ -198,7 +198,7 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
             />
           </fieldset>
 
-          <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
+          <fieldset className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Page content</legend>
             <p className="text-caption text-slate">
               Structured blocks of plain text. No HTML is stored or rendered, so CMS content
@@ -233,7 +233,7 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
         </div>
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-28">
-          <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
+          <fieldset className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Publication</legend>
 
             <AdminSelectField
@@ -269,7 +269,7 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
           </EditorialActionBar>
 
           {record ? (
-            <div className="flex flex-col gap-2 rounded-card border border-border bg-white p-5">
+            <div className="flex flex-col gap-2 rounded-[1.25rem] border border-border bg-white p-5">
               <h2 className="text-compact font-medium text-navy">Danger zone</h2>
               <p className="text-caption text-slate">
                 Deleting a published page breaks any link pointing at it.

@@ -8,6 +8,7 @@ import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { Container } from "@/components/layout/container";
 import { ContentBlocks } from "@/components/shared/content-blocks";
 import { MarketplaceCta } from "@/components/shared/marketplace-cta";
+import { Reveal } from "@/components/shared/reveal";
 import { JsonLd } from "@/components/seo/json-ld";
 import { articleJsonLd } from "@/lib/seo/structured-data";
 import {
@@ -103,7 +104,7 @@ export default async function ResourceDetailPage({ params }: ResourceDetailProps
       />
 
       <section className="border-b border-border bg-tint/50">
-        <Container className="flex flex-col gap-6 py-10 sm:py-14">
+        <Container className="flex flex-col gap-6 py-12 sm:py-16">
           <Breadcrumbs
             items={[
               { label: "Home", href: "/" },
@@ -113,45 +114,49 @@ export default async function ResourceDetailPage({ params }: ResourceDetailProps
             structuredData
           />
 
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="rounded-full bg-white px-2.5 py-1 text-caption font-medium text-navy">
-              {article.category}
-            </span>
-            {article.jurisdictionLabel ? (
-              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-white px-2.5 py-1 text-caption font-medium text-slate">
-                <Scale className="h-3 w-3" aria-hidden />
-                {article.jurisdictionLabel}
+          <Reveal className="flex flex-col gap-6">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="rounded-full bg-white px-2.5 py-1 text-caption font-medium text-navy">
+                {article.category}
               </span>
-            ) : null}
-          </div>
-
-          <h1 className="max-w-[28ch] text-hero font-semibold text-navy">{article.title}</h1>
-
-          {article.excerpt ? (
-            <p className="max-w-[70ch] text-lead text-slate">{article.excerpt}</p>
-          ) : null}
-
-          {/* Publish date and review date are shown separately and labelled
-              distinctly — never merged, and never substituted for each
-              other. The gap between them is information the reader needs. */}
-          <dl className="flex flex-wrap gap-x-8 gap-y-2">
-            {dateline.published ? (
-              <div className="flex items-center gap-2">
-                <CalendarCheck className="h-4 w-4 text-action" aria-hidden />
-                <dt className="text-caption text-slate">Published</dt>
-                <dd className="text-caption font-medium text-navy">{dateline.published}</dd>
-              </div>
-            ) : null}
-
-            <div className="flex items-center gap-2">
-              <UserCheck className="h-4 w-4 text-action" aria-hidden />
-              <dt className="text-caption text-slate">Last reviewed</dt>
-              <dd className="text-caption font-medium text-navy">
-                {dateline.reviewed ?? "Not reviewed"}
-                {article.reviewer && dateline.reviewed ? ` by ${article.reviewer}` : ""}
-              </dd>
+              {article.jurisdictionLabel ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-border bg-white px-2.5 py-1 text-caption font-medium text-slate">
+                  <Scale className="h-3 w-3" aria-hidden />
+                  {article.jurisdictionLabel}
+                </span>
+              ) : null}
             </div>
-          </dl>
+
+            <h1 className="max-w-[22ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
+              {article.title}
+            </h1>
+
+            {article.excerpt ? (
+              <p className="max-w-[70ch] text-lead text-slate">{article.excerpt}</p>
+            ) : null}
+
+            {/* Publish date and review date are shown separately and labelled
+                distinctly — never merged, and never substituted for each
+                other. The gap between them is information the reader needs. */}
+            <dl className="flex flex-wrap gap-x-8 gap-y-2">
+              {dateline.published ? (
+                <div className="flex items-center gap-2">
+                  <CalendarCheck className="h-4 w-4 text-action" aria-hidden />
+                  <dt className="text-caption text-slate">Published</dt>
+                  <dd className="text-caption font-medium text-navy">{dateline.published}</dd>
+                </div>
+              ) : null}
+
+              <div className="flex items-center gap-2">
+                <UserCheck className="h-4 w-4 text-action" aria-hidden />
+                <dt className="text-caption text-slate">Last reviewed</dt>
+                <dd className="text-caption font-medium text-navy">
+                  {dateline.reviewed ?? "Not reviewed"}
+                  {article.reviewer && dateline.reviewed ? ` by ${article.reviewer}` : ""}
+                </dd>
+              </div>
+            </dl>
+          </Reveal>
         </Container>
       </section>
 

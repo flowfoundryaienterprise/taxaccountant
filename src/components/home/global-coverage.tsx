@@ -4,6 +4,8 @@ import { ArrowRight } from "lucide-react";
 
 import { CountryBadge } from "@/components/countries/country-badge";
 import { Container } from "@/components/layout/container";
+import { MagneticCta } from "@/components/shared/magnetic-cta";
+import { Reveal } from "@/components/shared/reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { mapMarkers } from "@/lib/home-content";
 import { jurisdictionOptions } from "@/lib/directory/taxonomy";
@@ -51,34 +53,35 @@ export function GlobalCoverage() {
         <div className="grid gap-12 lg:grid-cols-[1fr_1.05fr] lg:items-center">
           <div className="flex flex-col gap-6">
             <ul className="flex flex-col">
-              {jurisdictionsByCountry.map((country) => (
-                <li
-                  key={country.code}
-                  className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border py-3 first:pt-0"
-                >
-                  <span className="flex items-center gap-2.5 text-compact text-navy">
-                    <CountryBadge code={country.code} countryName={country.name} size="sm" />
-                    {country.name}
-                  </span>
-                  <span className="font-mono text-caption text-slate">
-                    {country.codes.join(" · ")}
-                  </span>
-                </li>
+              {jurisdictionsByCountry.map((country, index) => (
+                <Reveal key={country.code} delayMs={index * 40}>
+                  <li className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border py-3 first:pt-0">
+                    <span className="flex items-center gap-2.5 text-compact text-navy">
+                      <CountryBadge code={country.code} countryName={country.name} size="sm" />
+                      {country.name}
+                    </span>
+                    <span className="font-mono text-caption text-slate">
+                      {country.codes.join(" · ")}
+                    </span>
+                  </li>
+                </Reveal>
               ))}
             </ul>
 
             {/* Day 4 brief section 8: "Explore by Country" opens the country
                 directory, not a generic professional search. */}
-            <Link
-              href="/countries"
-              className="group inline-flex h-11 w-fit items-center gap-2 rounded-input bg-action px-5 text-compact font-medium text-white transition-colors duration-150 hover:bg-[#0668c7]"
-            >
-              Explore by country
-              <ArrowRight
-                className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5"
-                aria-hidden
-              />
-            </Link>
+            <MagneticCta strength={0.3} className="w-fit">
+              <Link
+                href="/countries"
+                className="group inline-flex h-11 w-fit items-center gap-2 rounded-input bg-action px-5 text-compact font-medium text-white transition-colors duration-150 hover:bg-[#0668c7]"
+              >
+                Explore by country
+                <ArrowRight
+                  className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </Link>
+            </MagneticCta>
           </div>
 
           <div className="relative aspect-[2/1] w-full rounded-panel bg-tint">
@@ -94,7 +97,9 @@ export function GlobalCoverage() {
               Decorative: every country and code on this map is listed in
               full beside it, so the markers carry no information of their
               own and are hidden from assistive technology rather than
-              announced eight times.
+              announced eight times. Static, not pulsing — a loop here would
+              claim these points are live or changing, which they are not;
+              see the note above on the marker pulse this map used to carry.
             */}
             {mapMarkers.map((marker) => (
               <span

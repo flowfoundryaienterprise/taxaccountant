@@ -34,7 +34,7 @@ export function ProvenanceNotice({
   return (
     <p
       className={cn(
-        "flex max-w-[92ch] gap-2 rounded-card border px-4 py-3 text-caption",
+        "flex max-w-[92ch] gap-2 rounded-[1rem] border px-4 py-3 text-caption",
         approved ? "border-border bg-white text-slate" : "border-warning/30 bg-white text-slate",
       )}
     >
@@ -67,49 +67,46 @@ export function ReadOnlyNotice({ className }: { className?: string }) {
   return (
     <p
       className={cn(
-        "flex max-w-[92ch] gap-2 rounded-card border border-border bg-subtle px-4 py-3 text-caption text-slate",
+        "flex max-w-[92ch] gap-2 rounded-[1rem] border border-border bg-subtle px-4 py-3 text-caption text-slate",
         className,
       )}
     >
       <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-action" aria-hidden />
       <span>
         <strong className="font-semibold text-navy">Read-only interface.</strong> Save, publish and
-        delete are disabled throughout this CMS. No authorized Convex mutation exists yet, and no
-        authentication is in place to authorize one — so these controls are inert rather than
-        pretending to persist. The forms still validate, so the rules can be reviewed before the
-        backend is written.
+        delete are disabled throughout this CMS. Staff sign-in is enforced server-side, but no
+        `cms:*` Convex mutation exists yet for it to authorize — so these controls are inert rather
+        than pretending to persist. The forms still validate, so the rules can be reviewed before
+        the backend is written.
       </span>
     </p>
   );
 }
 
 /**
- * The security banner on the CMS overview.
+ * The status banner on the CMS overview.
  *
- * States the actual posture rather than implying the interface is
- * protected: there is no authentication at all, and the only thing keeping
- * these screens off the public internet is that they are stripped from
- * production builds.
+ * States the actual posture rather than implying more than is true.
+ * Sign-in and the staff role check are real now — `/admin/layout.tsx`
+ * verifies the session and an active `staffMemberships` row server-side on
+ * every request (convex/staff.ts) before any admin screen renders — but
+ * content is still read-only: no `cms:*` mutation exists yet to persist a
+ * save, which is a separate, larger piece of work
+ * (DAY6_ADMIN_CMS.md's "Required authorized functions").
  */
-export function UnauthenticatedNotice() {
+export function CmsStatusNotice() {
   return (
-    <div className="flex gap-3 rounded-card border border-warning/40 bg-white px-4 py-4">
-      <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden />
+    <div className="flex gap-3 rounded-[1.25rem] border border-border bg-white px-5 py-5">
+      <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-action" aria-hidden />
       <div className="flex min-w-0 flex-col gap-1.5">
-        <h2 className="text-compact font-medium text-navy">
-          This CMS has no authentication and is not deployed
-        </h2>
+        <h2 className="text-compact font-medium text-navy">Staff sign-in required, content read-only</h2>
         <p className="max-w-[92ch] text-caption text-slate">
-          No sign-in, session or role check exists anywhere in this project yet. These screens are
-          excluded from production builds at compile time by the{" "}
-          <code className="rounded bg-subtle px-1 py-0.5 font-mono text-navy">
-            cms-production-exclusion
-          </code>{" "}
-          plugin, so no CMS code or data reaches a deployed environment and{" "}
-          <code className="rounded bg-subtle px-1 py-0.5 font-mono text-navy">/admin</code> returns
-          404 there. That is a build gate, not authorization: before this interface may be enabled
-          anywhere, it needs server-side authentication, staff role checks, and authorized Convex
-          queries that enforce the public/private boundary on the server.
+          This screen is only reachable after a server-verified Better Auth session with an active
+          staff role — anonymous and non-staff requests are redirected to{" "}
+          <code className="rounded bg-subtle px-1 py-0.5 font-mono text-navy">/staff-login</code>{" "}
+          before any admin markup renders. Saving, publishing and deleting are still disabled: no
+          authorized Convex mutation exists yet to persist a change, so those controls stay inert
+          rather than pretending to.
         </p>
       </div>
     </div>

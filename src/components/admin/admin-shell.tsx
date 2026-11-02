@@ -19,7 +19,13 @@ import { SkipLink } from "@/components/layout/skip-link";
  *    closed by Escape, by the backdrop, or by following any link.
  *  - `>=lg` it is a sticky full-height rail and the toggle disappears.
  */
-export function AdminShell({ children }: { children: React.ReactNode }) {
+interface AdminShellProps {
+  children: React.ReactNode;
+  /** The signed-in staff member's role, resolved server-side in `admin/layout.tsx`. */
+  staffRole: "cms_admin" | "cms_editor";
+}
+
+export function AdminShell({ children, staffRole }: AdminShellProps) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
@@ -42,8 +48,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <AdminSidebar pathname={pathname} open={sidebarOpen} onClose={close} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <AdminHeader pathname={pathname} onOpenSidebar={() => setSidebarOpen(true)} />
-        <main id="main-content" className="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8">
+        <AdminHeader pathname={pathname} staffRole={staffRole} onOpenSidebar={() => setSidebarOpen(true)} />
+        <main id="main-content" className="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-10">
           {children}
         </main>
       </div>

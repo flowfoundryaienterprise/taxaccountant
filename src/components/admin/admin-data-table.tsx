@@ -59,7 +59,7 @@ export function AdminDataTable<Row>({
       aria-label={caption}
       tabIndex={0}
       className={cn(
-        "w-full overflow-x-auto rounded-card border border-border bg-white",
+        "w-full overflow-x-auto rounded-card border border-border bg-white shadow-[0_1px_2px_rgba(16,44,87,0.04)]",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-focus)]",
         className,
       )}
@@ -68,7 +68,7 @@ export function AdminDataTable<Row>({
         <caption className="sr-only">{caption}</caption>
 
         <thead>
-          <tr className="border-b border-border bg-subtle">
+          <tr className="border-b border-border bg-canvas">
             {columns.map((column) => (
               <th
                 key={column.key}
@@ -95,7 +95,7 @@ export function AdminDataTable<Row>({
           {rows.map((row) => (
             <tr
               key={rowKey(row)}
-              className="border-b border-border last:border-b-0 transition-colors duration-150 hover:bg-subtle"
+              className="border-b border-border border-l-2 border-l-transparent last:border-b-0 transition-[background-color,border-color] duration-150 hover:border-l-action hover:bg-subtle"
             >
               {columns.map((column) => (
                 <td

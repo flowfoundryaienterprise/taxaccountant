@@ -94,8 +94,8 @@ export default async function AdminMediaScreen({
             the browser to request an upload intent, the server to verify the actor, purpose,
             bucket and size limits, a short-lived purpose-scoped URL to be issued, the bytes to go
             directly to R2, and the server to verify the stored object before the record is marked
-            complete. None of that exists, and there is no authentication to identify the actor in
-            the first place.
+            complete. Staff sign-in now identifies the actor, but none of that upload protocol
+            exists yet.
           </p>
           <ul className="flex list-disc flex-col gap-1 pl-5 text-caption text-slate">
             <li>No R2 credential or bucket name appears in this interface or its bundle.</li>

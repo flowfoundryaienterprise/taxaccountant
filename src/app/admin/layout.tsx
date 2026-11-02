@@ -1,23 +1,32 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/admin-shell";
+import { fetchAuthQuery, isAuthenticated } from "@/lib/auth/server";
+import { api } from "@/convex/_generated/api";
 
 /**
  * CMS layout.
  *
  * ## Access
- * This route subtree has **no authentication**. It is kept out of deployed
- * environments by the `cms-production-exclusion` plugin in
- * `vite.config.ts`, which replaces every module under `src/app/admin/` with
- * a `notFound()` stub unless the build or dev command is run with
- * `CMS_PREVIEW=enabled`. With the flag unset no CMS code, markup or fixture
- * data is present in the bundle at all and `/admin` returns 404.
+ * DAY6_ADMIN_CMS.md section 1 required three things before `/admin` could
+ * ever be enabled in a deployed environment: (1) server-side authentication,
+ * (2) a staff role check derived server-side from the session, (3)
+ * authorized Convex queries enforcing the public/private boundary in the
+ * query itself. This layout is (1) and (2) — the one place every `/admin`
+ * request passes through before any child route renders.
  *
- * That is a build-time gate, not authorization. Before this interface may be
- * enabled in any deployed environment it needs server-side authentication,
- * staff role checks, and authorized Convex queries that enforce the
- * public/private boundary on the server rather than in the browser. The
- * required contracts are listed in docs/DAY6_ADMIN_CMS.md.
+ * `isAuthenticated()` and `fetchAuthQuery()` (`@/lib/auth/server`) read the
+ * session cookie via vinext's `next/headers` shim and call Convex directly
+ * from this Server Component, so an unauthenticated or non-staff request
+ * never receives the RSC payload for any admin screen — not a client-side
+ * check that hides already-sent markup. `staff:currentStaff`
+ * (`convex/staff.ts`) returns `null` for anyone without an **active**
+ * `staffMemberships` row, so a stray Better Auth account grants nothing by
+ * itself (ARCHITECTURE.md section 6).
+ *
+ * `/staff-login` lives outside this route tree specifically so it is never
+ * itself subject to this redirect.
  *
  * ## Why there is no `<main>` here
  * `AdminShell` renders its own `<main>`, and the root layout steps aside for
@@ -30,14 +39,22 @@ export const metadata: Metadata = {
     template: "%s | TaxAccountant.com CMS",
   },
   /*
-   * Hard `noindex, nofollow` on every CMS route. These pages never reach
-   * production, but if one is ever served by a preview deployment it must
-   * not be crawled, and no CMS URL should leak into an index through a
-   * followed link.
+   * Hard `noindex, nofollow` on every CMS route — a login-gated interface
+   * has nothing for a crawler to index, and no CMS URL should leak into a
+   * search index through a followed link.
    */
   robots: { index: false, follow: false },
 };
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <AdminShell>{children}</AdminShell>;
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  if (!(await isAuthenticated())) {
+    redirect("/staff-login");
+  }
+
+  const staff = await fetchAuthQuery(api.staff.currentStaff, {});
+  if (!staff) {
+    redirect("/staff-login?reason=not-staff");
+  }
+
+  return <AdminShell staffRole={staff.role}>{children}</AdminShell>;
 }

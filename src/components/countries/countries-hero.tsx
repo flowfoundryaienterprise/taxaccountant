@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { Container } from "@/components/layout/container";
+import { Reveal } from "@/components/shared/reveal";
 import { buttonVariants } from "@/components/ui/button";
 import { directoryHref } from "@/lib/marketplace/query-params";
 import { cn } from "@/lib/utils";
@@ -26,15 +27,22 @@ export interface CountryMarker {
  */
 export function CountriesHero({ markers }: { markers: CountryMarker[] }) {
   return (
-    <section className="border-b border-border bg-tint/50">
-      <Container className="flex flex-col gap-8 py-10 sm:py-14">
+    <section className="relative overflow-hidden border-b border-border bg-tint/50">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -top-14 left-[3%] select-none text-[11rem] font-semibold leading-none tracking-tighter text-navy/[0.04] sm:text-[15rem]"
+      >
+        {markers.length}
+      </span>
+
+      <Container className="relative flex flex-col gap-8 py-12 sm:py-16">
         <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Countries" }]} />
 
-        <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-          <div className="flex flex-col gap-6">
+        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+          <Reveal className="flex flex-col gap-6">
             <div className="flex flex-col gap-3">
-              <h1 className="max-w-[18ch] text-hero font-semibold text-navy">
-                Find Tax Accountants Around the World
+              <h1 className="max-w-[14ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
+                {markers.length} countries, searchable today
               </h1>
               <p className="max-w-[62ch] text-lead text-slate">
                 Explore tax and accounting professionals by country and find expertise for the
@@ -69,23 +77,26 @@ export function CountriesHero({ markers }: { markers: CountryMarker[] }) {
               the jurisdictions and service categories configured for that country — it is not a
               statement that any particular professional is authorized there.
             </p>
-          </div>
+          </Reveal>
 
-          <div className="relative aspect-[2/1] w-full rounded-panel bg-white p-2 shadow-[0_28px_60px_-44px_rgba(16,44,87,0.5)]">
+          <Reveal
+            delayMs={120}
+            className="relative aspect-[2/1] w-full rounded-panel bg-white p-2 shadow-float"
+          >
             <div className="relative h-full w-full">
               <Image
                 src="/images/world-map.svg"
                 alt={`World map marking the ${markers.length} countries currently open for discovery on TaxAccountant.com`}
                 fill
-                sizes="(min-width: 1024px) 52vw, 100vw"
+                sizes="(min-width: 1024px) 58vw, 100vw"
                 className="object-contain"
               />
 
               {markers.map((marker) => (
-                /* The pulse ring that used to sit under each marker is
-                   gone: nothing on this map is live, and a ring beating
-                   forever under eight dots reads as activity the site does
-                   not have. The marker is the marker. */
+                /* Still exactly one static marker per open country, no
+                   pulse — a ring beating forever under eight dots would
+                   read as activity the site does not have. The marker is
+                   the marker. */
                 <span
                   key={marker.code}
                   className="absolute block h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-action ring-2 ring-white"
@@ -94,7 +105,7 @@ export function CountriesHero({ markers }: { markers: CountryMarker[] }) {
                 />
               ))}
             </div>
-          </div>
+          </Reveal>
         </div>
       </Container>
     </section>

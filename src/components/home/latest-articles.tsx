@@ -31,7 +31,11 @@ export function LatestArticles() {
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {demoArticles.map((article, index) => (
-            <Reveal key={article.id} delayMs={index * 70}>
+            <Reveal
+              key={article.id}
+              delayMs={index * 70}
+              className={index === 0 ? "sm:col-span-2 lg:col-span-2" : undefined}
+            >
               <ArticleCard article={article} />
             </Reveal>
           ))}

@@ -31,16 +31,19 @@ const scope = [
 
 export function MarketplaceTrust() {
   return (
-    <section className="border-y border-border bg-white">
-      <Container className="py-10">
-        <h2 className="text-caption text-slate">What this directory indexes today</h2>
-        <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4">
+    <section className="border-y border-border bg-navy">
+      <Container className="flex flex-col gap-6 py-12 sm:flex-row sm:items-end sm:justify-between">
+        <h2 className="flex items-center gap-2 text-caption text-white/60">
+          <span aria-hidden className="h-1.5 w-1.5 shrink-0 animate-pulse-soft rounded-full bg-action" />
+          What this directory indexes today
+        </h2>
+        <dl className="grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-4">
           {scope.map((item) => (
             <div key={item.label} className="flex flex-col gap-1">
-              <dd className="font-mono text-heading-lg font-medium tabular-nums text-navy">
+              <dd className="font-mono text-4xl font-semibold tabular-nums text-white sm:text-5xl">
                 {item.value}
               </dd>
-              <dt className="text-caption text-slate">{item.label}</dt>
+              <dt className="text-caption text-white/60">{item.label}</dt>
             </div>
           ))}
         </dl>

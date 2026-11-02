@@ -4,10 +4,13 @@
 	"private": true,
 	"packageManager": "npm",
 	"dependencies": {
+		"@convex-dev/better-auth": "^0.12.6",
 		"@vinext/cloudflare": "latest",
+		"better-auth": "~1.6.15",
 		"class-variance-authority": "latest",
 		"clsx": "latest",
 		"convex": "latest",
+		"framer-motion": "latest",
 		"lucide-react": "latest",
 		"react": "latest",
 		"react-dom": "latest",

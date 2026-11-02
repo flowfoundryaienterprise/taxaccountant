@@ -390,11 +390,11 @@ export const articleCategories: string[] = [
 export const demoMedia: AdminMediaAsset[] = [
   {
     id: "media-hero-accountant",
-    objectKey: "public/images/hero-accountant.jpg",
-    path: "/images/hero-accountant.jpg",
-    contentType: "image/jpeg",
-    sizeBytes: 146_000,
-    altText: "A smiling professional working at a laptop in an office",
+    objectKey: "public/images/hero-accountant.png",
+    path: "/images/hero-accountant.png",
+    contentType: "image/png",
+    sizeBytes: 2_072_422,
+    altText: "Two tax and accounting professionals reviewing figures together on a tablet in a modern office",
     approvalStatus: "approved",
     visibility: "public",
     provenance: "demonstration",

@@ -70,7 +70,7 @@ export function SiteFooter() {
           <Link
             href="/"
             aria-label="TaxAccountant home"
-            className="flex items-center gap-2.5 text-heading-sm font-semibold text-navy"
+            className="flex items-center gap-2.5 text-xl font-semibold tracking-tight text-navy"
           >
             <BrandLogo size={32} className="shrink-0" />
             TaxAccountant
@@ -85,7 +85,7 @@ export function SiteFooter() {
                 key={label}
                 aria-label={label}
                 title={`${label} (not yet connected)`}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-slate transition-colors duration-150 hover:border-action hover:text-action"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-slate transition-[color,border-color,transform] duration-150 hover:-translate-y-0.5 hover:border-action hover:text-action"
               >
                 <Icon className="h-3.5 w-3.5" aria-hidden />
               </span>

@@ -95,7 +95,7 @@ export function NavDropdown({ label, items, activePrefix }: NavDropdownProps) {
       {open ? (
         <div
           role="menu"
-          className="animate-menu-pop absolute left-0 top-full z-10 mt-2 w-64 origin-top rounded-card border border-border bg-white p-2 shadow-[0_20px_40px_-24px_rgba(16,44,87,0.3)]"
+          className="animate-menu-pop absolute left-0 top-full z-10 mt-2 w-64 origin-top rounded-panel border border-border bg-white p-2 shadow-float"
         >
           {items.map((item, index) =>
             item.available ? (

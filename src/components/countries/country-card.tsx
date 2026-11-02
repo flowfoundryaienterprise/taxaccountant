@@ -35,7 +35,7 @@ export function CountryCard({ country }: { country: CountryCardData }) {
   return (
     <Link
       href={countryHref(country.code)}
-      className="group flex h-full flex-col gap-4 rounded-card border border-border bg-white p-6 transition-colors duration-200 hover:border-action hover:shadow-[0_20px_36px_-26px_rgba(16,44,87,0.3)] focus-visible:border-action"
+      className="group flex h-full flex-col gap-4 rounded-card border border-border bg-white p-6 transition-[color,border-color,box-shadow,transform] duration-200 hover:border-action hover:shadow-raised focus-visible:border-action active:scale-[0.99]"
     >
       <div className="flex items-center gap-3">
         <CountryBadge code={country.code} countryName={country.name} />

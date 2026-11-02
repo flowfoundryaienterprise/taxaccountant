@@ -96,7 +96,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
         <div className="flex min-w-0 flex-col gap-6">
-          <fieldset className="flex flex-col gap-5 rounded-card border border-border bg-white p-5">
+          <fieldset className="flex flex-col gap-5 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Service details</legend>
 
             <AdminTextField
@@ -162,7 +162,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
             />
           </fieldset>
 
-          <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
+          <fieldset className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Featured image</legend>
             <MediaPicker
               label="Service detail hero image"
@@ -184,7 +184,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
         </div>
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-28">
-          <fieldset className="flex flex-col gap-4 rounded-card border border-border bg-white p-5">
+          <fieldset className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5">
             <legend className="px-1 text-compact font-medium text-navy">Publication</legend>
 
             <AdminTextField
@@ -208,7 +208,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
             <div className="flex flex-col gap-2">
               <button
                 type="submit"
-                className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-subtle"
+                className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy transition-transform duration-150 hover:bg-subtle active:scale-[0.97]"
               >
                 Validate form
               </button>
@@ -234,7 +234,7 @@ export function ServiceEditorForm({ record, existingSlugs }: ServiceEditorFormPr
           </fieldset>
 
           {record ? (
-            <div className="flex flex-col gap-2 rounded-card border border-border bg-white p-5">
+            <div className="flex flex-col gap-2 rounded-[1.25rem] border border-border bg-white p-5">
               <h2 className="text-compact font-medium text-navy">Danger zone</h2>
               <p className="text-caption text-slate">
                 Professionals are mapped to this category, and removing it would orphan those

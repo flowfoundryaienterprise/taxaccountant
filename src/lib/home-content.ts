@@ -319,8 +319,8 @@ export interface DemoArticle {
 }
 
 export const heroImage = {
-  src: "/images/hero-accountant.jpg",
-  alt: "Tax professional reviewing figures on a laptop in a bright office",
+  src: "/images/hero-accountant.png",
+  alt: "Two tax and accounting professionals reviewing figures together on a tablet in a modern office",
 };
 
 export const professionalCtaImage = {

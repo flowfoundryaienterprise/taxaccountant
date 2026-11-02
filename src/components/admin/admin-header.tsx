@@ -2,34 +2,51 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ExternalLink, Menu, Search, ShieldAlert } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ExternalLink, LogOut, Menu, Search } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
+import { authClient } from "@/lib/auth/client";
 import { adminBreadcrumbs } from "@/lib/admin/admin-navigation";
 import { cn } from "@/lib/utils";
 
 interface AdminHeaderProps {
   pathname: string;
+  staffRole: "cms_admin" | "cms_editor";
   onOpenSidebar: () => void;
   /** Replaces the final breadcrumb with a record title instead of its id. */
   lastCrumbLabel?: string;
 }
 
+const ROLE_LABEL: Record<AdminHeaderProps["staffRole"], string> = {
+  cms_admin: "Admin",
+  cms_editor: "Editor",
+};
+
 /**
- * CMS top bar: sidebar toggle, breadcrumbs, content search, environment
- * indicator.
+ * CMS top bar: sidebar toggle, breadcrumbs, content search, account area.
  *
- * ## No account area
- * The brief allows a user/account area "only if actual authentication data
- * is available". There is none — no Better Auth integration, no session, no
- * identity of any kind exists in this project — so rather than render an
- * avatar and a plausible-looking name, the header states the environment
- * it is actually running in. An invented "Signed in as Admin" chip would be
- * the exact kind of fiction the brief rules out.
+ * ## The account area
+ * Previously a "Local preview — unauthenticated" warning, because no
+ * authentication existed anywhere in the project. Now that `/admin/layout.tsx`
+ * resolves a real, server-verified `staffRole` before this component ever
+ * renders (`convex/staff.ts`'s `currentStaff`, checked against the Better
+ * Auth session), showing it is reporting a real fact rather than the
+ * fiction the brief originally ruled out ("Signed in as Admin" with nothing
+ * behind it) — see docs/DAY6_ADMIN_CMS.md section 1.
  */
-export function AdminHeader({ pathname, onOpenSidebar, lastCrumbLabel }: AdminHeaderProps) {
+export function AdminHeader({ pathname, staffRole, onOpenSidebar, lastCrumbLabel }: AdminHeaderProps) {
   const [query, setQuery] = React.useState("");
+  const [signingOut, setSigningOut] = React.useState(false);
+  const router = useRouter();
   const crumbs = adminBreadcrumbs(pathname, lastCrumbLabel);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    await authClient.signOut();
+    router.push("/staff-login");
+    router.refresh();
+  }
 
   /*
    * Search navigates to the screens that genuinely hold searchable content
@@ -60,21 +77,38 @@ export function AdminHeader({ pathname, onOpenSidebar, lastCrumbLabel }: AdminHe
 
         <span
           className={cn(
-            "hidden shrink-0 items-center gap-1.5 rounded-full border border-warning/30 bg-white px-3 py-1",
-            "text-caption font-medium text-warning sm:inline-flex",
+            "hidden shrink-0 items-center gap-2 rounded-full border border-border bg-subtle px-3 py-1",
+            "text-caption font-medium text-navy sm:inline-flex",
           )}
-          title="This interface has no authentication. It is excluded from production builds."
         >
-          <ShieldAlert className="h-3.5 w-3.5" aria-hidden />
-          Local preview — unauthenticated
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" aria-hidden />
+          {ROLE_LABEL[staffRole]}
         </span>
 
+        <button
+          type="button"
+          onClick={handleSignOut}
+          disabled={signingOut}
+          className="hidden shrink-0 items-center gap-1.5 rounded-input px-3 py-2 text-caption font-medium text-slate transition-colors duration-150 hover:bg-subtle disabled:opacity-50 sm:inline-flex"
+        >
+          <LogOut className="h-3.5 w-3.5" aria-hidden />
+          {signingOut ? "Signing out…" : "Sign out"}
+        </button>
+
+        {/*
+          Always visible, every screen size — previously `hidden sm:inline-flex`,
+          so a signed-in staff member on a phone had no way back to the
+          public site short of editing the URL. Icon-only below `sm:` to fit
+          the header row next to the hamburger toggle and search; full label
+          once there's room.
+        */}
         <Link
           href="/"
-          className="hidden shrink-0 items-center gap-1.5 rounded-input px-3 py-2 text-caption font-medium text-action transition-colors duration-150 hover:bg-subtle sm:inline-flex"
+          aria-label="View public site"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-input border border-border px-2.5 py-2 text-caption font-medium text-action transition-colors duration-150 hover:bg-subtle sm:px-3"
         >
-          View public site
-          <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+          <span className="hidden sm:inline">View public site</span>
+          <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
         </Link>
       </div>
 

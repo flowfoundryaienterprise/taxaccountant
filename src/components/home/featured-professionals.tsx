@@ -13,22 +13,10 @@ import { professionalHref } from "@/lib/marketplace/query-params";
 /**
  * Four example records, rendered through the directory's own projection.
  *
- * ## What the disclaimer used to be doing here
- * These four cards previously showed a rating, a review count, an hourly
- * rate and an availability line for four named individuals, none of it
- * backed by anything. Day 9 added a six-line boxed paragraph above the grid
- * explaining that the numbers below it were not real.
- *
- * That paragraph is gone, because the claim it was disclaiming is gone:
- * `featuredProfessionals` now maps the fixture rows through `toCardModel`,
- * the same projection the directory uses, and `DirectoryProfessional` has
- * no rating, price or availability field to render. The cards show what is
- * actually recorded — declared designation, city, authorised tax
- * jurisdictions, languages, consultation mode.
- *
- * One quiet line remains, because these are still development fixtures
- * rather than listings, and that fact is worth one sentence rather than a
- * boxed warning.
+ * Redesign note: the flat 4-up grid became a horizontal scroll-snap rail —
+ * an asymmetric alternative to the generic equal-card row design-taste-
+ * frontend-v1 flags, and it reads naturally on mobile without a breakpoint
+ * collapsing a grid. `ProfessionalCard` itself is untouched.
  */
 const featured = featuredSlugs.map((slug) => {
   const row = directoryFixtures.find((fixture) => fixture.slug === slug);
@@ -62,13 +50,18 @@ export function FeaturedProfessionals() {
           yet, and each record states its own review status.
         </p>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0 lg:pb-0">
           {featured.map(({ slug, card }, index) => (
-            <Reveal key={slug} delayMs={index * 60}>
+            <Reveal
+              key={slug}
+              delayMs={index * 60}
+              className="w-[78vw] max-w-80 shrink-0 snap-start lg:w-auto lg:max-w-none"
+            >
               <ProfessionalCard
                 professional={card}
                 profileHref={professionalHref(slug)}
-                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                className="h-full"
+                sizes="(min-width: 1024px) 25vw, 78vw"
               />
             </Reveal>
           ))}

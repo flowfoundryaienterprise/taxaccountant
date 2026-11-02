@@ -53,7 +53,7 @@ export function SeoFields({
   const descriptionOver = previewDescription.length > SEO_DESCRIPTION_PIXEL_GUIDE;
 
   return (
-    <fieldset className="flex flex-col gap-5 rounded-card border border-border bg-white p-5">
+    <fieldset className="flex flex-col gap-5 rounded-[1.25rem] border border-border bg-white p-5">
       <legend className="px-1 text-compact font-medium text-navy">Search engine metadata</legend>
 
       <AdminTextField

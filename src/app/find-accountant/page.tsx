@@ -84,7 +84,7 @@ export default async function FindAccountantPage({ searchParams }: FindAccountan
     <>
       <DirectoryHeader resultCount={directoryFixtures.length} />
 
-      <Container className="flex flex-col gap-8 py-8 sm:py-10">
+      <Container className="flex flex-col gap-8 py-10 sm:py-12">
         <AccountantSearchBar key={searchBarKey(filters)} filters={filters} />
 
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
