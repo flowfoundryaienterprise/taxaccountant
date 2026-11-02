@@ -1,6 +1,8 @@
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
+import { requireStaff } from "./staff";
 
 /**
  * Public contact / professional-interest intake (PRD.md P1-F08).
@@ -96,6 +98,72 @@ export const submitPublicMessage = mutation({
       status: "new",
       createdAt: now,
       updatedAt: now,
+    });
+
+    return { ok: true as const };
+  },
+});
+
+/**
+ * Staff-only read of submitted messages (DAY6_ADMIN_CMS.md's "Required
+ * authorized functions" pattern, applied to the one collection that now
+ * genuinely has rows). `requireStaff` throws for anyone without an active
+ * `staffMemberships` row, so this is authorized in the query itself, not
+ * just hidden behind the `/admin` route gate (AGENTS.md section 5: "No
+ * client privilege from submitted role").
+ */
+export const listMessages = query({
+  args: {
+    status: v.optional(
+      v.union(v.literal("new"), v.literal("reviewing"), v.literal("closed"), v.literal("spam")),
+    ),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    await requireStaff(ctx);
+
+    if (args.status) {
+      return ctx.db
+        .query("publicMessages")
+        .withIndex("by_status_created", (q) => q.eq("status", args.status!))
+        .order("desc")
+        .paginate(args.paginationOpts);
+    }
+    return ctx.db.query("publicMessages").withIndex("by_created").order("desc").paginate(args.paginationOpts);
+  },
+});
+
+/**
+ * Staff-only status transition, with an audit event — AGENTS.md section 5:
+ * "Audit privileged content/verification/country/financial changes."
+ * `publicMessages` holds a submitter's name, email and message text, so
+ * reading or changing one is exactly the kind of access worth a record of
+ * who did it and when, even though the message content itself is never
+ * logged (AGENTS.md: "Do not log message text or private tax data").
+ */
+export const updateMessageStatus = mutation({
+  args: {
+    messageId: v.id("publicMessages"),
+    status: v.union(v.literal("new"), v.literal("reviewing"), v.literal("closed"), v.literal("spam")),
+  },
+  handler: async (ctx, args) => {
+    const staff = await requireStaff(ctx);
+
+    const existing = await ctx.db.get(args.messageId);
+    if (!existing) {
+      throw new Error("Message not found.");
+    }
+
+    await ctx.db.patch(args.messageId, { status: args.status, updatedAt: Date.now() });
+
+    await ctx.db.insert("auditEvents", {
+      actorSubject: staff.authSubject,
+      actorRole: staff.role,
+      action: "publicMessage.statusChanged",
+      resourceType: "publicMessages",
+      resourceId: args.messageId,
+      metadata: { from: existing.status, to: args.status },
+      createdAt: Date.now(),
     });
 
     return { ok: true as const };

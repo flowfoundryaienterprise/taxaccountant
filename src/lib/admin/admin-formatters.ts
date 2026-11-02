@@ -24,6 +24,11 @@ const STATUS_LABELS: Record<string, string> = {
   verified: "Verified",
   rejected: "Rejected",
   expired: "Expired",
+  // publicMessages statuses (src/app/admin/messages).
+  new: "New",
+  reviewing: "Reviewing",
+  closed: "Closed",
+  spam: "Spam",
 };
 
 const STATUS_TONES: Record<string, StatusTone> = {
@@ -37,6 +42,10 @@ const STATUS_TONES: Record<string, StatusTone> = {
   verified: "success",
   rejected: "danger",
   expired: "warning",
+  new: "info",
+  reviewing: "warning",
+  closed: "neutral",
+  spam: "danger",
 };
 
 export function statusLabel(
