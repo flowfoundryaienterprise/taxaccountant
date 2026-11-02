@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, ShieldAlert } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { Reveal } from "@/components/shared/reveal";
+import { AccountAuthForm } from "@/components/shared/account-auth-form";
 
 export const metadata: Metadata = {
   title: "Sign In",
-  description: "Public customer and professional accounts launch in Phase 2.",
+  description: "Sign in to your TaxAccountant.com account, or create one.",
   alternates: { canonical: "/sign-in" },
+  /*
+   * noindex: an auth form is not a result anyone should land on from search,
+   * and it carries no content of its own worth ranking.
+   */
   robots: { index: false, follow: true },
 };
 
@@ -17,10 +22,13 @@ interface SignInPageProps {
 }
 
 /**
- * ARCHITECTURE.md section 6: "No customer/professional public registration
- * until Phase 2." Phase 1 only provisions restricted staff CMS identities,
- * so Sign In and Create an Account share this honest explainer rather than
- * a form that can't actually authenticate anyone yet.
+ * Public customer/professional sign-in and sign-up (Phase 2, P2-W1).
+ *
+ * Replaces the earlier "opens in Phase 2" explainer now that it has —
+ * `AccountAuthForm` calls the same Better Auth instance the staff login
+ * form uses, and provisions an ordinary `appUsers` row
+ * (`convex/users.ts`), never a CMS role. Staff sign-in stays on its own
+ * `/staff-login` route, outside this one, same as before.
  */
 export default async function SignInPage({ searchParams }: SignInPageProps) {
   const { intent } = await searchParams;
@@ -35,20 +43,15 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         2
       </span>
 
-      <Container className="relative flex flex-col gap-6 py-20 sm:py-28">
+      <Container className="relative flex flex-col gap-10 py-20 sm:py-28">
         <Reveal className="flex max-w-[62ch] flex-col gap-5">
-          <span className="inline-flex w-fit items-center gap-2 rounded-full bg-tint px-3 py-1 text-caption font-semibold text-action">
-            <ShieldAlert className="h-3.5 w-3.5" aria-hidden />
-            Phase 2 feature
-          </span>
-          <h1 className="max-w-[18ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
-            {isSignup ? "Account creation opens in Phase 2" : "Public sign-in opens in Phase 2"}
+          <h1 className="max-w-[20ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
+            {isSignup ? "Create your account" : "Sign in"}
           </h1>
           <p className="text-lead text-slate">
-            Phase 1 of TaxAccountant.com is a public directory you can browse without an account.
-            Customer, business and professional accounts — with multi-factor authentication and
-            organization roles — are scoped for Phase 2 of the build. Staff CMS access in Phase 1
-            is provisioned directly, not through public sign-up.
+            {isSignup
+              ? "A customer account lets you save favorites and searches once those features launch. Browsing and contacting the directory never requires one."
+              : "Sign in to your TaxAccountant.com account."}
           </p>
           <Link
             href="/"
@@ -61,6 +64,28 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
             Back to the homepage
           </Link>
         </Reveal>
+
+        <div className="w-full max-w-md rounded-[1.5rem] border border-border bg-white p-6 sm:p-8">
+          <AccountAuthForm mode={isSignup ? "signup" : "signin"} />
+
+          <p className="mt-6 text-center text-caption text-slate">
+            {isSignup ? (
+              <>
+                Already have an account?{" "}
+                <Link href="/sign-in" className="font-medium text-action hover:underline">
+                  Sign in
+                </Link>
+              </>
+            ) : (
+              <>
+                New here?{" "}
+                <Link href="/sign-in?intent=signup" className="font-medium text-action hover:underline">
+                  Create an account
+                </Link>
+              </>
+            )}
+          </p>
+        </div>
       </Container>
     </section>
   );
