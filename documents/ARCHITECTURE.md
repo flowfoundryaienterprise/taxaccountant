@@ -75,6 +75,8 @@
 
 **Phase 2:** account signup/login/reset, MFA, customer/business/professional organization roles, invitation and recovery; account/organization access checked on every server function. Privileged staff MFA should be required when supported by validated Better Auth plugin setup.
 
+*P2-W1 status:* signup/login and session handling are real (`convex/users.ts`, `src/components/shared/account-auth-form.tsx`, `/sign-in`) — a public account is an ordinary `appUsers` row, created on first sign-in, carrying no CMS privilege. Password reset and MFA are not yet built: reset needs an approved transactional-email provider (none is configured anywhere in this repo — `grep`-verified, no Resend/SendGrid/nodemailer dependency exists), and MFA needs its own enrollment/recovery UI, not just enabling `better-auth`'s `twoFactor` plugin server-side. Both are the next concrete P2-W1 tasks once an email provider is chosen.
+
 - Deny by default on no session, unapproved account, missing role, inactive org, unapproved verification or country-disabled action.
 - Authorization source is server-side Convex + auth session, **not** UI flags.
 - Scope multi-user firm/org data by verified membership and fine-grained permissions; no cross-org leakage.

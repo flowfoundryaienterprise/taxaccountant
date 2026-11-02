@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Wand2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
+import { Loader2, Wand2 } from "lucide-react";
 
 import {
   AdminSelectField,
@@ -17,9 +19,11 @@ import { SeoFields } from "@/components/admin/seo-fields";
 import { UnsavedChangesDialog } from "@/components/admin/unsaved-changes-dialog";
 import { toSlug } from "@/lib/admin/admin-formatters";
 import { LIMITS, errorFor, validatePageForm } from "@/lib/admin/admin-validation";
-import type { EditorialStatus } from "@/lib/cms/content-status";
+import type { EditorialAction, EditorialStatus } from "@/lib/cms/content-status";
 import { pagePublishIssues, toActionBlockers } from "@/lib/cms/content-validation";
 import type { AdminPageRow, ContentBlock } from "@/lib/admin/admin-types";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 
 interface PageEditorFormProps {
   /** Omitted when creating. */
@@ -34,33 +38,29 @@ const KIND_OPTIONS = [
   { value: "glossary", label: "Glossary entry" },
 ];
 
-const STATUS_OPTIONS = [
-  { value: "draft", label: "Draft" },
-  { value: "review", label: "In review" },
-  { value: "published", label: "Published" },
-  { value: "archived", label: "Archived" },
-];
-
 /**
  * Create / edit form for a content page.
  *
- * ## Validation runs; saving does not
- * The form validates on submit and renders inline, accessible errors, so the
- * rules can be reviewed and agreed before the backend exists. The submit
- * button is permanently disabled: there is no authorized mutation and no
- * authentication to authorize one, and a button that appears to save but
- * discards the input would be worse than no button
- * (brief section 18: "Do not implement fake successful saves").
- *
- * The unsaved-change indicator is real — it compares current values against
- * the loaded record — because it is the thing that will matter most once
- * saving works, and it costs nothing to get right now.
+ * Validates client-side for immediate, accessible feedback, then calls the
+ * real `content:saveDraft` mutation (`convex/content.ts`) — which re-runs
+ * the same checks server-side, because a client-side check is a convenience
+ * for the editor, not the boundary (API.md section 1). A brand-new page
+ * redirects to its own edit screen once saved, so the editorial-workflow
+ * actions below (which need an id) become available.
  */
 export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
+  const router = useRouter();
+  const saveDraft = useMutation(api.content.saveDraft);
+  const requestReview = useMutation(api.content.requestReview);
+  const returnToDraft = useMutation(api.content.returnToDraft);
+  const publishMutation = useMutation(api.content.publish);
+  const unpublish = useMutation(api.content.unpublish);
+  const archive = useMutation(api.content.archive);
+  const deleteContent = useMutation(api.content.deleteContent);
+
   const [title, setTitle] = React.useState(record?.title ?? "");
   const [slug, setSlug] = React.useState(record?.slug ?? "");
   const [kind, setKind] = React.useState(record?.kind ?? "page");
-  const [status, setStatus] = React.useState(record?.status ?? "draft");
   const [summary, setSummary] = React.useState(record?.summary ?? "");
   const [blocks, setBlocks] = React.useState<ContentBlock[]>(record?.body ?? []);
   const [seo, setSeo] = React.useState({
@@ -70,6 +70,9 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
   });
 
   const [result, setResult] = React.useState<ReturnType<typeof validatePageForm>>();
+  const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
+  const [savedAt, setSavedAt] = React.useState<number | null>(null);
 
   // The slug a record already owns must not count against itself.
   const otherSlugs = React.useMemo(
@@ -81,17 +84,77 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
     title !== (record?.title ?? "") ||
     slug !== (record?.slug ?? "") ||
     kind !== (record?.kind ?? "page") ||
-    status !== (record?.status ?? "draft") ||
     summary !== (record?.summary ?? "") ||
     JSON.stringify(blocks) !== JSON.stringify(record?.body ?? []) ||
     seo.seoTitle !== (record?.seo.title ?? "") ||
     seo.seoDescription !== (record?.seo.description ?? "") ||
     seo.canonicalPath !== (record?.seo.canonicalPath ?? "");
 
-  const onSubmit = (event: React.FormEvent) => {
+  async function performSave() {
+    const validation = validatePageForm({ title, slug, summary, ...seo }, otherSlugs);
+    setResult(validation);
+    if (!validation.ok) throw new Error("Fix the highlighted fields before saving.");
+
+    const { id } = await saveDraft({
+      id: record?.id as Id<"contentPages"> | undefined,
+      kind,
+      title,
+      slug,
+      summary: summary || undefined,
+      body: blocks,
+      seo: {
+        title: seo.seoTitle || undefined,
+        description: seo.seoDescription || undefined,
+        canonicalPath: seo.canonicalPath || undefined,
+      },
+      locale: record?.locale,
+    });
+    setSavedAt(Date.now());
+    if (!record) {
+      router.push(`/admin/pages/${id}/edit`);
+    } else {
+      router.refresh();
+    }
+  }
+
+  async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
-    setResult(validatePageForm({ title, slug, summary, ...seo }, otherSlugs));
-  };
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await performSave();
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Something went wrong while saving.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onWorkflowAction(action: EditorialAction) {
+    if (!record) throw new Error("Save this page as a draft first.");
+    const id = record.id as Id<"contentPages">;
+    switch (action) {
+      case "saveDraft":
+        await performSave();
+        return;
+      case "submitForReview":
+        await requestReview({ id });
+        break;
+      case "returnToDraft":
+        await returnToDraft({ id });
+        break;
+      case "publish":
+        await publishMutation({ id });
+        break;
+      case "unpublish":
+        await unpublish({ id });
+        break;
+      case "archive":
+        await archive({ id });
+        break;
+    }
+    router.refresh();
+  }
 
   const publishIssues = React.useMemo(
     () =>
@@ -135,14 +198,18 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
         </div>
       ) : null}
 
-      {result?.ok ? (
+      {saveError ? (
+        <p role="alert" className="rounded-card border border-danger/40 bg-white px-4 py-3 text-caption font-medium text-danger">
+          {saveError}
+        </p>
+      ) : null}
+
+      {savedAt && result?.ok ? (
         <p
           role="status"
           className="rounded-card border border-success/40 bg-white px-4 py-3 text-caption text-slate"
         >
-          <strong className="font-semibold text-navy">Validation passed.</strong> These values
-          would be accepted by the rules defined so far. Nothing has been saved — there is no
-          mutation to save to.
+          <strong className="font-semibold text-navy">Saved.</strong> This draft is stored in Convex.
         </p>
       ) : null}
 
@@ -222,7 +289,7 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
           {/* Editor-local preview of the live form state. No preview URL
               exists, so no draft is reachable from outside this screen. */}
           <ContentPreview
-            status={status as EditorialStatus}
+            status={(record?.status ?? "draft") as EditorialStatus}
             title={title}
             excerpt={summary}
             body={blocks}
@@ -244,26 +311,26 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
               options={KIND_OPTIONS}
             />
 
-            <AdminSelectField
-              id="status"
-              label="Publication status"
-              value={status}
-              onChange={(value) => setStatus(value as AdminPageRow["status"])}
-              options={STATUS_OPTIONS}
-              hint="Only published content is eligible to appear publicly, and the public query must enforce that on the server."
-            />
+            <p className="text-caption text-slate">
+              Status: <span className="font-medium text-navy">{record?.status ?? "Not saved yet"}</span>.
+              Changed only through the workflow actions below, not this form.
+            </p>
 
             <button
               type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-subtle"
+              disabled={saving}
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-input border border-control bg-white px-4 text-compact font-medium text-navy hover:bg-subtle disabled:opacity-60"
             >
-              Check fields
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
+              {record ? "Save draft" : "Create page"}
             </button>
           </fieldset>
 
           <EditorialActionBar
-            status={status as EditorialStatus}
+            status={record?.status ?? "draft"}
+            backendReady={Boolean(record)}
             blockers={toActionBlockers(publishIssues)}
+            onAction={onWorkflowAction}
           >
             <UnsavedChangesDialog dirty={dirty} cancelHref="/admin/pages" />
           </EditorialActionBar>
@@ -278,6 +345,10 @@ export function PageEditorForm({ record, existingSlugs }: PageEditorFormProps) {
                 recordName={record.title}
                 recordType="page"
                 consequence="Any inbound link to this path would start returning a not-found page."
+                onConfirm={async () => {
+                  await deleteContent({ id: record.id as Id<"contentPages"> });
+                  router.push("/admin/pages");
+                }}
               />
             </div>
           ) : null}

@@ -17,7 +17,7 @@ import {
   resultSummary,
   type AdminSearchParams,
 } from "@/lib/admin/admin-list";
-import { demoArticles, demoPages } from "@/lib/admin/admin-fixtures";
+import { contentRepository } from "@/lib/cms/content-adapter";
 import type { AdminSeoRow } from "@/lib/admin/admin-types";
 
 export const metadata: Metadata = { title: "SEO management" };
@@ -38,7 +38,7 @@ export const metadata: Metadata = { title: "SEO management" };
  * of content claiming one canonical URL is the SEO fault most worth
  * catching early.
  */
-function buildSeoRows(): AdminSeoRow[] {
+async function buildSeoRows(): Promise<AdminSeoRow[]> {
   const rows: AdminSeoRow[] = [];
 
   rows.push({
@@ -139,7 +139,12 @@ function buildSeoRows(): AdminSeoRow[] {
     });
   }
 
-  for (const page of demoPages) {
+  const [pagesResult, articlesResult] = await Promise.all([
+    contentRepository.listPages({ q: "" }),
+    contentRepository.listArticles({ q: "" }),
+  ]);
+
+  for (const page of pagesResult.items) {
     rows.push({
       id: `page-${page.id}`,
       contentTitle: page.title,
@@ -147,17 +152,27 @@ function buildSeoRows(): AdminSeoRow[] {
       contentType: "Page",
       seoTitle: page.seo.title,
       metaDescription: page.seo.description,
-      status: page.status,
-      indexable: page.status === "published",
+      status: page.editorial.status,
+      /*
+       * `contentPages` kind "page"/"guide"/"glossary" has a real save/publish
+       * workflow (`convex/content.ts`) but no public route reads it yet —
+       * `/about`, `/privacy` and the rest are static files written directly
+       * (Day 11), not CMS-rendered. A published page record here is real
+       * data with nowhere public to appear, which is different from, and
+       * more honest than, "not published yet".
+       */
+      indexable: false,
       indexableReason:
-        page.status === "published"
-          ? "Would be indexable once the route exists."
+        page.editorial.status === "published"
+          ? "Published, but no public route reads contentPages of this kind yet."
           : "Not published, so not eligible for indexing.",
-      provenance: "demonstration",
+      provenance: "approved",
     });
   }
 
-  for (const article of demoArticles) {
+  for (const article of articlesResult.items) {
+    const reallyIndexable =
+      article.editorial.status === "published" && Boolean(article.editorial.reviewedAt);
     rows.push({
       id: `article-${article.id}`,
       contentTitle: article.title,
@@ -165,21 +180,18 @@ function buildSeoRows(): AdminSeoRow[] {
       contentType: "Article",
       seoTitle: article.seo.title,
       metaDescription: article.seo.description,
-      status: article.status,
-      /*
-       * The route exists as of Day 7, but the public repository serves
-       * nothing, so no article is reachable or indexable today. The column
-       * reports eligibility, which is a different question from whether the
-       * record is currently served.
-       */
-      indexable: false,
+      status: article.editorial.status,
+      // `content:listPublishedResources` (convex/content.ts) now genuinely
+      // serves published, reviewed articles to `/resources` — this reflects
+      // the real condition the public query enforces, not an aspiration.
+      indexable: reallyIndexable,
       indexableReason:
-        article.status !== "published"
+        article.editorial.status !== "published"
           ? "Not published, so not eligible for indexing."
-          : !article.reviewedAt
+          : !article.editorial.reviewedAt
             ? "Published without a recorded review — must never be indexed."
-            : "Eligible, but not served: the public repository returns no resources yet.",
-      provenance: "demonstration",
+            : "Indexable: served by the public repository at this path.",
+      provenance: "approved",
     });
   }
 
@@ -194,7 +206,7 @@ export default async function AdminSeoScreen({
   const params = await searchParams;
   const query = readParam(params, "q");
   const indexing = readParam(params, "indexing") || "all";
-  const rows = buildSeoRows();
+  const rows = await buildSeoRows();
 
   // Duplicate canonical paths split ranking signals and are almost always a
   // mistake, so they are surfaced rather than left to be discovered later.

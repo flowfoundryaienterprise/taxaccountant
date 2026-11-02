@@ -8,8 +8,6 @@ import { AdminFilterBar } from "@/components/admin/admin-filter-bar";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
-import { ProvenanceNotice, ReadOnlyNotice } from "@/components/admin/admin-notices";
-import { demoArticles } from "@/lib/admin/admin-fixtures";
 import { formatDate, truncate } from "@/lib/admin/admin-formatters";
 import {
   CONTENT_STATUSES,
@@ -20,8 +18,7 @@ import {
   statusFilterOptions,
   type AdminSearchParams,
 } from "@/lib/admin/admin-list";
-import { cmsArticles } from "@/lib/cms/content-adapter";
-import { publicRepositoryStatus } from "@/lib/cms/public-content-adapter";
+import { contentRepository, toAdminArticleRow } from "@/lib/cms/content-adapter";
 import { toPublishableArticles } from "@/lib/marketplace/content-mappers";
 import type { AdminArticleRow } from "@/lib/admin/admin-types";
 
@@ -45,16 +42,19 @@ export default async function AdminArticlesScreen({
   const query = readParam(params, "q");
   const status = readParam(params, "status") || "all";
 
+  const { items } = await contentRepository.listArticles({ q: "" });
+  const allArticles = items.map(toAdminArticleRow);
+
   /*
-   * What would actually reach the public site, computed by running every
-   * CMS record through the real public projection. It is not a label on the
-   * screen — it is the same `toPublishableArticles` the public pages use, so
-   * the number below cannot drift from what a reader would see.
+   * What actually reaches the public site, computed by running every CMS
+   * record through the real public projection — the same
+   * `toPublishableArticles` the public pages use, so this cannot drift from
+   * what a reader would see. `/resources` now genuinely serves these.
    */
-  const publiclyVisible = toPublishableArticles(cmsArticles());
+  const publiclyVisible = toPublishableArticles(items);
 
   const list = buildAdminList<AdminArticleRow>({
-    rows: demoArticles,
+    rows: allArticles,
     query,
     searchFields: (row) => [row.title, row.slug, row.category, row.excerpt ?? ""],
     filterValue: status,
@@ -140,18 +140,12 @@ export default async function AdminArticlesScreen({
         }
       />
 
-      <ProvenanceNotice
-        provenance="demonstration"
-        entity="articles"
-        detail="No public resources or blog routes exist yet either — the Day 4 country pages render an honest empty state where guides would go."
-      />
-
       <AdminFilterBar
         action="/admin/articles"
         query={query}
         searchLabel="Search articles by title or category"
         searchPlaceholder="Search articles by title, slug, category or excerpt"
-        filterOptions={statusFilterOptions(demoArticles, (row) => row.status, CONTENT_STATUSES)}
+        filterOptions={statusFilterOptions(allArticles, (row) => row.status, CONTENT_STATUSES)}
         activeFilter={status}
         resultSummary={resultSummary(list.matched, list.total, "article")}
       />
@@ -194,19 +188,21 @@ export default async function AdminArticlesScreen({
         </h2>
         <p className="max-w-[92ch] text-caption text-slate">
           <strong className="font-semibold text-navy">
-            {publiclyVisible.length} of {demoArticles.length} records
+            {publiclyVisible.length} of {allArticles.length} records
           </strong>{" "}
-          would pass the public gate — published <em>and</em> carrying a recorded editorial
-          review. The figure is computed by running every record through{" "}
+          pass the public gate — published <em>and</em> carrying a recorded editorial review. The
+          figure is computed by running every record through{" "}
           <code className="font-mono">toPublishableArticles</code>, the same projection the public
           pages use, so it cannot disagree with what a reader would see.
         </p>
         <p className="max-w-[92ch] text-caption text-slate">
-          None of them is actually served:{" "}
+          <code className="font-mono">content:listPublishedResources</code> now genuinely serves
+          these to{" "}
           <Link href="/resources" className="font-medium text-action hover:underline">
             /resources
-          </Link>{" "}
-          reads an empty public repository, because {publicRepositoryStatus.detail.toLowerCase()}
+          </Link>
+          , filtered to <code className="font-mono">published</code> status server-side — the
+          count above is what a reader would actually see there.
         </p>
       </section>
 
@@ -226,8 +222,6 @@ export default async function AdminArticlesScreen({
           platform publishes no rates, thresholds or deadlines at all.
         </p>
       </section>
-
-      <ReadOnlyNotice />
     </div>
   );
 }

@@ -2,10 +2,13 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 /**
- * Phase 1 schema only. Source of truth: documents/DATABASE.md section 2.
- * Phase 2-5 collections (appUsers, organizations, leads, quotes, etc.) are
- * documented there but intentionally not created yet — see DATABASE.md
- * sections 3-6 and PRD.md section 3 (phase gates).
+ * Phase 1 tables, source of truth documents/DATABASE.md section 2, plus
+ * Phase 2 tables as they're actually built (section 3) — each addition
+ * says which Phase 2 week it belongs to. Phase 3-5 collections (leads,
+ * quotes, providerAccounts, payments, etc.) remain intentionally absent:
+ * DATABASE.md's own gate is explicit that no financial-ledger or payment
+ * table gets created before Phase 3's country/provider legal approval, and
+ * that approval is a business decision this schema file can't grant itself.
  *
  * Better Auth owns identity/session/credential storage in its own Convex
  * component; this schema never shadow-copies that data (DATABASE.md section 1).
@@ -259,6 +262,27 @@ export default defineSchema({
     reviewedAt: v.optional(v.number()),
     publishedAt: v.optional(v.number()),
     updatedAt: v.number(),
+    /*
+     * Added alongside the first real `cms:*`/`content:*` mutations
+     * (convex/cms.ts, convex/content.ts). `AdminArticleRow.category` and
+     * `.featuredImage` (src/lib/admin/admin-types.ts) needed somewhere to
+     * live once articles could actually be saved.
+     *
+     * `category` is a plain string, not a `contentCategories` join row —
+     * the editor form is a single-select (one category per article), so a
+     * many-to-many join would add write/read complexity (insert/delete join
+     * rows, resolve on every read) for a relationship the UI never
+     * exercises as many-to-many. `contentCategories`/`contentPageCategories`
+     * stay defined and unused, reserved for if admin-managed, multi-category
+     * taxonomy is ever actually needed.
+     *
+     * `featuredImage` is an embedded `{path, alt}` rather than a
+     * `mediaAssets` reference, matching what `MediaPicker` actually produces
+     * today — a `public/` path string, because the R2 upload integration
+     * that would make a real `mediaAssets` row meaningful doesn't exist yet.
+     */
+    category: v.optional(v.string()),
+    featuredImage: v.optional(v.object({ path: v.string(), alt: v.string() })),
   })
     .index("by_slug_locale", ["slug", "locale"])
     .index("by_kind_status", ["kind", "status"])
@@ -361,5 +385,31 @@ export default defineSchema({
     active: v.boolean(),
     invitedBy: v.optional(v.string()),
     updatedAt: v.number(),
+  }).index("by_auth_subject", ["authSubject"]),
+
+  // ---------------------------------------------------------------------
+  // Phase 2, P2-W1 — public customer/professional accounts
+  // ---------------------------------------------------------------------
+  /*
+   * DATABASE.md section 3. The same Better Auth component `staffMemberships`
+   * already uses — `convex/auth.ts` has never been staff-only, only
+   * `/admin`'s own `requireStaff` gate was. This row is what a *public*
+   * signed-in identity gets: the same bootstrap-on-first-sign-in shape as
+   * `staffMemberships`, but open to anyone rather than admin-invited.
+   *
+   * `accountStatus` mirrors DATABASE.md exactly. `deletion_requested` exists
+   * now, before the actual deletion pipeline (P2-W5's `privacyRequests`
+   * table) does, so the field has somewhere to be read from the moment a
+   * customer first asks — the mutation that sets it lands in P2-W5.
+   */
+  appUsers: defineTable({
+    authSubject: v.string(),
+    displayName: v.optional(v.string()),
+    accountStatus: v.union(
+      v.literal("active"),
+      v.literal("suspended"),
+      v.literal("deletion_requested"),
+    ),
+    createdAt: v.number(),
   }).index("by_auth_subject", ["authSubject"]),
 });

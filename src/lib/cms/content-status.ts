@@ -11,16 +11,18 @@
  * ## What this module is and is not
  * It describes which transitions are *legal* and what each one requires.
  * It does **not** decide who may perform one — that is an authorization
- * question, it is answered server-side, and no authorization exists in this
- * project yet. `transitionAvailability()` therefore reports every transition
- * as unavailable with a reason, and the UI renders them disabled.
+ * question, answered server-side by `requireStaff` inside every `content:*`
+ * mutation (`convex/content.ts`). `transitionAvailability()` reports a
+ * transition as unavailable either because a validation blocker applies or
+ * because the record hasn't been saved yet (`backendReady=false` for a new,
+ * unsaved record) — never because there's no mutation to call.
  *
- * When the authorized mutations land (`content:saveDraft`,
- * `content:requestReview`, `content:publish`, `content:unpublish` — API.md
- * section 3), this module keeps describing the legal shape of the workflow
- * and the server keeps deciding permission. The two must agree, and the
- * server is authoritative: a client-side check is a convenience for the
- * editor, never a control.
+ * The mutations are real now (`content:saveDraft`, `content:requestReview`,
+ * `content:publish`, `content:unpublish`, `content:archive`), and this
+ * module keeps describing the legal shape of the workflow while the server
+ * keeps deciding permission. The two must agree, and the server is
+ * authoritative: a client-side check is a convenience for the editor, never
+ * a control.
  */
 
 export type EditorialStatus = "draft" | "review" | "published" | "archived";
@@ -114,7 +116,7 @@ export const TRANSITIONS: TransitionDefinition[] = [
     from: ["draft", "published"],
     description: "Retire the content, keeping the record and its review history.",
     destructive: true,
-    mutation: "content:unpublish",
+    mutation: "content:archive",
   },
 ];
 
@@ -151,21 +153,14 @@ export interface TransitionAvailability {
 }
 
 /**
- * The single reason every editorial control is currently disabled.
- *
- * Kept as one constant so no screen can drift into a softer wording, and so
- * there is exactly one place to change when the backend lands.
+ * Why a transition is disabled when the only reason is "nothing to
+ * transition yet" — a brand-new, unsaved record. Save a draft first.
  */
-export const NO_BACKEND_REASON =
-  "No authorized Convex mutation exists yet for staff sign-in to authorize. This control is inert rather than pretending to save.";
+export const NO_BACKEND_REASON = "Save this as a draft first — there is no record yet to transition.";
 
 export interface AvailabilityContext {
   status: EditorialStatus;
-  /**
-   * Whether an authorized, permission-checked backend is wired up. Always
-   * `false` today — see `NO_BACKEND_REASON`. Kept as a parameter rather than
-   * hard-coded so the call sites already read correctly once it flips.
-   */
+  /** `false` only for an unsaved new record. `true` once a record exists. */
   backendReady?: boolean;
   /** Blocking problems from `content-validation`, e.g. an unreviewed article. */
   blockers?: Partial<Record<EditorialAction, string>>;

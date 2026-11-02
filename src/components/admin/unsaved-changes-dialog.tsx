@@ -24,9 +24,6 @@ interface UnsavedChangesDialogProps {
  *  - **Following Cancel inside the app** — handled by this dialog, where the
  *    consequence can be stated accurately.
  *
- * That accuracy matters right now: there is no save, so "your changes will
- * be lost" is unconditionally true rather than "unless you save first". The
- * wording says so plainly instead of implying a save is available.
  *
  * `<dialog>` is used for the modal so focus handling, Escape and the
  * backdrop come from the platform rather than from a hand-rolled focus trap.
@@ -83,8 +80,8 @@ export function UnsavedChangesDialog({
                   Discard your changes?
                 </h2>
                 <p className="text-caption text-slate">
-                  This editor has unsaved changes. Saving is not available yet, so leaving this
-                  screen discards them permanently — there is nowhere for them to be kept.
+                  This editor has unsaved changes. Leaving now discards them — use Save draft
+                  first if you want to keep them.
                 </p>
               </div>
             </div>

@@ -8,9 +8,8 @@ import { AdminFilterBar } from "@/components/admin/admin-filter-bar";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminPagination } from "@/components/admin/admin-pagination";
 import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
-import { ProvenanceNotice, ReadOnlyNotice } from "@/components/admin/admin-notices";
-import { demoPages } from "@/lib/admin/admin-fixtures";
 import { formatDate, truncate } from "@/lib/admin/admin-formatters";
+import { contentRepository, toAdminPageRow } from "@/lib/cms/content-adapter";
 import {
   CONTENT_STATUSES,
   buildAdminList,
@@ -47,8 +46,11 @@ export default async function AdminPagesScreen({
   const query = readParam(params, "q");
   const status = readParam(params, "status") || "all";
 
+  const { items } = await contentRepository.listPages({ q: "" });
+  const allPages = items.map(toAdminPageRow);
+
   const list = buildAdminList<AdminPageRow>({
-    rows: demoPages,
+    rows: allPages,
     query,
     searchFields: (row) => [row.title, row.slug, row.summary ?? "", KIND_LABELS[row.kind]],
     filterValue: status,
@@ -132,18 +134,21 @@ export default async function AdminPagesScreen({
         }
       />
 
-      <ProvenanceNotice
-        provenance="demonstration"
-        entity="pages"
-        detail="The routes these records describe (/about, /privacy and so on) do not exist on the public site yet."
-      />
+      <p className="max-w-[92ch] rounded-[1rem] border border-border bg-white px-4 py-3 text-caption text-slate">
+        <strong className="font-semibold text-navy">Real content.</strong> These are live{" "}
+        <code className="rounded bg-subtle px-1 py-0.5 font-mono text-navy">contentPages</code>{" "}
+        rows with a working save, review and publish workflow. No public route reads this kind of
+        record yet — <code className="rounded bg-subtle px-1 py-0.5 font-mono text-navy">/about</code>,{" "}
+        <code className="rounded bg-subtle px-1 py-0.5 font-mono text-navy">/privacy</code> and the
+        rest are static files written directly, not rendered from here.
+      </p>
 
       <AdminFilterBar
         action="/admin/pages"
         query={query}
         searchLabel="Search pages by title or slug"
         searchPlaceholder="Search pages by title, slug or summary"
-        filterOptions={statusFilterOptions(demoPages, (row) => row.status, CONTENT_STATUSES)}
+        filterOptions={statusFilterOptions(allPages, (row) => row.status, CONTENT_STATUSES)}
         activeFilter={status}
         resultSummary={resultSummary(list.matched, list.total, "page")}
       />
@@ -174,8 +179,6 @@ export default async function AdminPagesScreen({
         pageSize={list.pageSize}
         preserve={{ q: query || undefined, status: status !== "all" ? status : undefined }}
       />
-
-      <ReadOnlyNotice />
     </div>
   );
 }

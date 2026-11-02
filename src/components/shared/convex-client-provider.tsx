@@ -4,6 +4,7 @@ import { ConvexReactClient } from "convex/react";
 import { ConvexBetterAuthProvider, type AuthClient } from "@convex-dev/better-auth/react";
 
 import { authClient } from "@/lib/auth/client";
+import { EnsureAppUser } from "@/components/shared/ensure-app-user";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 const convexClient = convexUrl ? new ConvexReactClient(convexUrl) : null;
@@ -36,6 +37,7 @@ export function ConvexClientProvider({ children, initialToken }: ConvexClientPro
       authClient={authClient as unknown as AuthClient}
       initialToken={initialToken}
     >
+      <EnsureAppUser />
       {children}
     </ConvexBetterAuthProvider>
   );

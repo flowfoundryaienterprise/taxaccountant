@@ -7,19 +7,21 @@ import type { DataModel } from "./_generated/dataModel";
 import authConfig from "./auth.config";
 
 /*
- * Staff-only identity provider for the CMS (ARCHITECTURE.md section 6,
- * DAY6_ADMIN_CMS.md section 1 blocker #1). Identity/session/credential
- * storage lives entirely in this component's own tables; `role` is looked
- * up separately in `staffMemberships` (see `convex/staff.ts`) keyed by
- * `identity.tokenIdentifier` — never trust a client-supplied role or
- * subject (AGENTS.md section 5/6).
+ * The one identity provider for the whole app — staff and public
+ * customers/professionals alike. Identity/session/credential storage lives
+ * entirely in this component's own tables; *role* is always looked up
+ * separately, keyed by `identity.tokenIdentifier`, never trusted from a
+ * client-supplied value (AGENTS.md section 5/6):
+ *  - `staffMemberships` (`convex/staff.ts`) — CMS access, admin-provisioned
+ *    only (ARCHITECTURE.md section 6, DAY6_ADMIN_CMS.md section 1).
+ *  - `appUsers` (`convex/users.ts`) — public account, self-registered,
+ *    auto-created on first sign-in (Phase 2, P2-W1, DATABASE.md section 3).
  *
- * `emailAndPassword` is enabled because Phase 1 staff accounts are
- * provisioned directly, not self-registered (ARCHITECTURE.md section 6):
- * having a Better Auth account is necessary but not sufficient to reach
- * `/admin` — `requireStaff` in `convex/staff.ts` additionally requires an
- * `active` `staffMemberships` row, so a stray sign-up through this
- * provider grants no CMS access on its own.
+ * `emailAndPassword` is the only method enabled (PRD.md's phase gates: no
+ * OAuth/social sign-in has been approved). Having a Better Auth account is
+ * necessary but never sufficient for anything privileged on its own — a
+ * stray sign-up grants no CMS access without a `staffMemberships` row, and
+ * grants only an ordinary customer `appUsers` row otherwise.
  */
 const siteUrl = process.env.SITE_URL;
 if (!siteUrl) {
