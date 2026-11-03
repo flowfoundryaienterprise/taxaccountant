@@ -68,6 +68,14 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         <div className="w-full max-w-md rounded-[1.5rem] border border-border bg-white p-6 sm:p-8">
           <AccountAuthForm mode={isSignup ? "signup" : "signin"} />
 
+          {isSignup ? null : (
+            <p className="mt-4 text-center text-caption text-slate">
+              <Link href="/forgot-password" className="font-medium text-action hover:underline">
+                Forgot your password?
+              </Link>
+            </p>
+          )}
+
           <p className="mt-6 text-center text-caption text-slate">
             {isSignup ? (
               <>

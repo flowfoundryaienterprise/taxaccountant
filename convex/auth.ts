@@ -33,6 +33,43 @@ if (!siteUrl) {
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
+/*
+ * Resend sender for password-reset mail (Phase 2, P2-W1). `onboarding@resend.dev`
+ * is Resend's own shared test address — works with no domain verification, swap
+ * for a verified sending domain once one exists (documents/ARCHITECTURE.md
+ * section 6, documents/API.md section 11).
+ */
+const RESEND_FROM_ADDRESS = "onboarding@resend.dev";
+
+async function sendPasswordResetEmail(to: string, url: string) {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (!resendApiKey) {
+    throw new Error(
+      "RESEND_API_KEY is not set on this Convex deployment. Run `npx convex env set " +
+        "RESEND_API_KEY <key>` (see convex/auth.ts) before password reset can send mail.",
+    );
+  }
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: RESEND_FROM_ADDRESS,
+      to,
+      subject: "Reset your TaxAccountant.com password",
+      html: `<p>Someone requested a password reset for this email address.</p><p><a href="${url}">Reset your password</a></p><p>If you didn't request this, you can safely ignore this email.</p>`,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Resend send failed (${response.status}): ${body}`);
+  }
+}
+
 export const createAuth = (ctx: GenericCtx<DataModel>) => {
   return betterAuth({
     baseURL: siteUrl,
@@ -40,6 +77,9 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
+      sendResetPassword: async ({ user, url }) => {
+        await sendPasswordResetEmail(user.email, url);
+      },
     },
     plugins: [convex({ authConfig })],
   });
