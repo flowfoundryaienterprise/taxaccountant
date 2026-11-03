@@ -411,3 +411,198 @@ export const adminResetTwoFactor = mutation({
     return { reset: true as const };
   },
 });
+
+/**
+ * Staff review — claims and publication (Phase 2, P2-W2, task-7-brief.md).
+ *
+ * Any active staff member (`cms_admin` or `cms_editor`) may use the five
+ * functions below — unlike `addStaffByEmail`/`changeStaffRole`/etc. above,
+ * none of them is further restricted to `cms_admin` only, so each calls
+ * only `requireStaff(ctx)`, not an added role check.
+ */
+
+/**
+ * The claims queue `/admin` renders so staff can adjudicate a
+ * `professionalOwnership` row `requestProfessionalClaim`
+ * (`convex/professionalOwnership.ts`) left `"pending"`. Queries the
+ * `by_status` index rather than `.collect()` + filter, and joins in the two
+ * display fields (`professionals.displayName`, `organizations.name`) a
+ * claims-review UI needs but a bare ownership row doesn't carry.
+ */
+export const listPendingClaims = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireStaff(ctx);
+
+    const rows = await ctx.db
+      .query("professionalOwnership")
+      .withIndex("by_status", (q) => q.eq("status", "pending"))
+      .collect();
+
+    return await Promise.all(
+      rows.map(async (row) => {
+        const professional = await ctx.db.get(row.professionalId);
+        const organization = await ctx.db.get(row.organizationId);
+        return {
+          ...row,
+          professionalDisplayName: professional?.displayName ?? "Unknown professional",
+          organizationName: organization?.name ?? "Unknown organization",
+        };
+      }),
+    );
+  },
+});
+
+/**
+ * Adjudicates one pending claim: `"approve"` grants the claiming
+ * organization ownership (`status: "approved"`, which is what
+ * `requireProfessionalEditAccess` actually honors); `"reject"` revokes it
+ * outright (`status: "revoked"`) rather than leaving it `"pending"`
+ * forever. Only ever acts on a currently-`"pending"` row — a claim that has
+ * already been decided cannot be re-decided through this mutation.
+ */
+export const decideClaim = mutation({
+  args: {
+    ownershipId: v.id("professionalOwnership"),
+    decision: v.union(v.literal("approve"), v.literal("reject")),
+  },
+  handler: async (ctx, args) => {
+    const staff = await requireStaff(ctx);
+
+    const ownership = await ctx.db.get(args.ownershipId);
+    if (!ownership) {
+      throw new Error("Ownership claim not found.");
+    }
+    if (ownership.status !== "pending") {
+      throw new Error("This claim has already been decided.");
+    }
+
+    const newStatus = args.decision === "approve" ? ("approved" as const) : ("revoked" as const);
+    const now = Date.now();
+    await ctx.db.patch(args.ownershipId, {
+      status: newStatus,
+      decidedByAuthSubject: staff.authSubject,
+      decidedAt: now,
+    });
+
+    await ctx.db.insert("auditEvents", {
+      actorSubject: staff.authSubject,
+      actorRole: staff.role,
+      action: "professional.claimDecided",
+      resourceType: "professionalOwnership",
+      resourceId: args.ownershipId,
+      metadata: {
+        decision: args.decision,
+        professionalId: ownership.professionalId,
+        organizationId: ownership.organizationId,
+      },
+      createdAt: now,
+    });
+
+    return {};
+  },
+});
+
+/**
+ * The publish-review queue `/admin` renders so staff have something to act
+ * on after `submitForReview` (`convex/professionalOwnership.ts`, Task 6)
+ * moves a listing to `"review"` — that mutation otherwise has no reachable
+ * UI consumer. Queries the existing `professionals.by_publication_status`
+ * index rather than `.collect()` + filter.
+ */
+export const listProfessionalsPendingReview = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireStaff(ctx);
+
+    return await ctx.db
+      .query("professionals")
+      .withIndex("by_publication_status", (q) => q.eq("publicationStatus", "review"))
+      .collect();
+  },
+});
+
+/**
+ * Publishes a listing that is currently in `"review"` — the only state this
+ * may act on, so a listing already `"published"`, or one staff haven't seen
+ * yet (`"draft"`), cannot be published out of band. Sets `approvedProfile`
+ * alongside `publicationStatus`: publication *is* the profile approval this
+ * field represents.
+ */
+export const publishProfessional = mutation({
+  args: { professionalId: v.id("professionals") },
+  handler: async (ctx, args) => {
+    const staff = await requireStaff(ctx);
+
+    const professional = await ctx.db.get(args.professionalId);
+    if (!professional) {
+      throw new Error("Professional not found.");
+    }
+    if (professional.publicationStatus !== "review") {
+      throw new Error("Only a listing in review can be published.");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(args.professionalId, {
+      publicationStatus: "published",
+      approvedProfile: true,
+      updatedAt: now,
+    });
+
+    await ctx.db.insert("auditEvents", {
+      actorSubject: staff.authSubject,
+      actorRole: staff.role,
+      action: "professional.published",
+      resourceType: "professionals",
+      resourceId: args.professionalId,
+      metadata: {},
+      createdAt: now,
+    });
+
+    return {};
+  },
+});
+
+/**
+ * Sends a `"review"` listing back to `"draft"` — deliberately not a new
+ * terminal "rejected" state (design doc section 7.4): `"draft"` is the same
+ * state `createProfessionalDraft` starts a listing in, so the owning org's
+ * draft-only wizard mutations (`requireDraftProfessional`,
+ * `convex/professionalOwnership.ts`) immediately accept edits again, letting
+ * the org act on `reason` and resubmit via `submitForReview`.
+ */
+export const rejectProfessional = mutation({
+  args: {
+    professionalId: v.id("professionals"),
+    reason: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const staff = await requireStaff(ctx);
+
+    const professional = await ctx.db.get(args.professionalId);
+    if (!professional) {
+      throw new Error("Professional not found.");
+    }
+    if (professional.publicationStatus !== "review") {
+      throw new Error("Only a listing in review can be rejected.");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(args.professionalId, {
+      publicationStatus: "draft",
+      updatedAt: now,
+    });
+
+    await ctx.db.insert("auditEvents", {
+      actorSubject: staff.authSubject,
+      actorRole: staff.role,
+      action: "professional.rejected",
+      resourceType: "professionals",
+      resourceId: args.professionalId,
+      metadata: { reason: args.reason },
+      createdAt: now,
+    });
+
+    return {};
+  },
+});
