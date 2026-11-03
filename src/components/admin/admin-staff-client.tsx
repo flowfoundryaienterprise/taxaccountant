@@ -60,9 +60,30 @@ function StaffRoster() {
   const roster = useQuery(api.staff.listStaff, {});
   const changeRole = useMutation(api.staff.changeStaffRole);
   const setActive = useMutation(api.staff.setStaffActive);
+  const addStaff = useMutation(api.staff.addStaffByEmail);
 
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
   const [actionError, setActionError] = React.useState<string | null>(null);
+
+  const [addEmail, setAddEmail] = React.useState("");
+  const [addRole, setAddRole] = React.useState<StaffRole>("cms_editor");
+  const [adding, setAdding] = React.useState(false);
+  const [formError, setFormError] = React.useState<string | null>(null);
+
+  async function handleAddStaff(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setAdding(true);
+    setFormError(null);
+    try {
+      await addStaff({ email: addEmail, role: addRole });
+      setAddEmail("");
+      setFormError(null);
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setAdding(false);
+    }
+  }
 
   async function handleRoleChange(row: ListStaffRow, role: StaffRole) {
     setUpdatingId(row._id);
@@ -154,6 +175,65 @@ function StaffRoster() {
         title="Staff"
         description="CMS staff accounts, roles and access. Changes here are real and audited."
       />
+
+      <form
+        onSubmit={handleAddStaff}
+        className="flex flex-col gap-4 rounded-[1.25rem] border border-border bg-white p-5 sm:flex-row sm:items-end"
+      >
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <label htmlFor="add-staff-email" className="text-caption font-medium text-slate">
+            Email
+          </label>
+          <input
+            id="add-staff-email"
+            type="email"
+            required
+            value={addEmail}
+            onChange={(event) => setAddEmail(event.target.value)}
+            placeholder="name@example.com"
+            className="h-11 rounded-input border border-control bg-white px-3 text-compact text-navy transition-colors duration-150 hover:border-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          />
+          <p className="text-caption text-slate/70">
+            They must already have an account — ask them to sign up at /sign-in first if they
+            don&apos;t.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="add-staff-role" className="text-caption font-medium text-slate">
+            Role
+          </label>
+          <select
+            id="add-staff-role"
+            value={addRole}
+            onChange={(event) => setAddRole(event.target.value as StaffRole)}
+            className="h-11 rounded-input border border-control bg-white px-3 text-compact text-navy transition-colors duration-150 hover:border-action"
+          >
+            {ROLE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          disabled={adding}
+          className={cn(
+            "inline-flex min-h-11 items-center gap-1.5 rounded-input bg-action px-4 text-compact font-medium text-white transition-colors duration-150 hover:bg-[#0668c7]",
+            adding && "cursor-not-allowed bg-action/40 hover:bg-action/40",
+          )}
+        >
+          {adding ? "Adding…" : "Add staff"}
+        </button>
+      </form>
+
+      {formError ? (
+        <p role="alert" className="text-caption font-medium text-danger">
+          {formError}
+        </p>
+      ) : null}
 
       {actionError ? (
         <p role="alert" className="text-caption font-medium text-danger">

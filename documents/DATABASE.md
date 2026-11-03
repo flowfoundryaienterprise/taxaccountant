@@ -46,7 +46,7 @@
 | `publicMessages` | `kind:enum(contact,professional_interest)`, `name:str`, `email:str`, `phone:opt(str)`, `subject:opt(str)`, `serviceId:opt(ref(serviceCategories))`, `message:str`, `consentVersion:str`, `sourcePath:str`, `status:enum(new,reviewing,closed,spam)`, `createdAt:num`, `updatedAt:num` | `by_kind_status_created`, `by_created`; sensitive read restricted to assigned staff |
 | `auditEvents` | `actorSubject:opt(str)`, `actorRole:str`, `action:str`, `resourceType:str`, `resourceId:str`, `metadata:obj` redacted, `createdAt:num` | `by_resource`, `by_actor_created`, `by_created`; append-only, retention policy |
 
-**CMS editorial staff mapping (Phase 1 minimum):** `staffMemberships`: `authSubject:str`, `role:enum(cms_admin,cms_editor)`, `active:bool`, `invitedBy:opt(str)`, `updatedAt:num`; index `by_auth_subject`, role unique per subject. Better Auth still owns actual identity/session fields.
+**CMS editorial staff mapping (Phase 1 minimum):** `staffMemberships`: `authSubject:str`, `role:enum(cms_admin,cms_editor)`, `active:bool`, `invitedBy:opt(str)`, `updatedAt:num`; index `by_auth_subject`, role unique per subject. Better Auth still owns actual identity/session fields. Rows are managed through `/admin/staff` (`convex/staff.ts`'s `addStaffByEmail`/`changeStaffRole`/`setStaffActive`, all `cms_admin`-only and audited) — `claimFirstStaffAccount`'s one-time bootstrap is no longer the only way in, just the recovery path if the table is ever emptied.
 
 ### Phase 1 invariants
 - An indexable profile requires approved source/consent and `publicationStatus=published`; a verified badge additionally requires `verificationStatus=verified` and reviewed evidence.

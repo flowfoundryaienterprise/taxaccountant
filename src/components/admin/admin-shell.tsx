@@ -45,7 +45,7 @@ export function AdminShell({ children, staffRole }: AdminShellProps) {
   return (
     <div className="flex min-h-screen w-full bg-canvas">
       <SkipLink />
-      <AdminSidebar pathname={pathname} open={sidebarOpen} onClose={close} />
+      <AdminSidebar pathname={pathname} open={sidebarOpen} onClose={close} staffRole={staffRole} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminHeader pathname={pathname} staffRole={staffRole} onOpenSidebar={() => setSidebarOpen(true)} />

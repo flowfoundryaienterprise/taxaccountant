@@ -73,11 +73,7 @@ export function StaffLoginForm() {
         >
           <p>
             That account signed in, but has no active CMS role. Ask an existing{" "}
-            <span className="font-medium text-navy">cms_admin</span> to add you in{" "}
-            <code className="rounded bg-subtle px-1 py-0.5 font-mono text-caption text-navy">
-              staffMemberships
-            </code>
-            .
+            <span className="font-medium text-navy">cms_admin</span> to add you from Admin → Staff.
           </p>
           <p className="text-caption text-slate">
             No staff account exists yet on this deployment? The first signed-in account may claim
