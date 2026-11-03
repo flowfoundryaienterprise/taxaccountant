@@ -65,9 +65,12 @@ export const currentStaff = query({
     const membership = await lookupStaffMembership(ctx, identity.tokenIdentifier);
     if (!membership || !membership.active) return null;
 
+    const user = await authComponent.getAuthUser(ctx);
+
     return {
       role: membership.role,
       email: typeof identity.email === "string" ? identity.email : null,
+      twoFactorEnabled: Boolean(user.twoFactorEnabled),
     };
   },
 });
