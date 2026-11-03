@@ -483,16 +483,19 @@ export const submitForReview = mutation({
       .query("professionalServices")
       .withIndex("by_professional", (q) => q.eq("professionalId", args.professionalId))
       .first();
-    if (!hasService) {
-      throw new Error("At least one service is required before submitting for review.");
-    }
-
     const hasLocation = await ctx.db
       .query("professionalLocations")
       .withIndex("by_professional", (q) => q.eq("professionalId", args.professionalId))
       .first();
-    if (!hasLocation) {
-      throw new Error("At least one location is required before submitting for review.");
+    if (!hasService && !hasLocation) {
+      // A purely remote professional may have services but no physical
+      // `professionalLocations` row (and vice versa for an in-person-only
+      // professional with no services configured yet is still incomplete
+      // for other reasons, but that's not this guard's job) — either one
+      // is sufficient; only "neither" blocks submission.
+      throw new Error(
+        "At least one service or location is required before submitting for review.",
+      );
     }
 
     const now = Date.now();

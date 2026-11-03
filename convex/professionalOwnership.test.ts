@@ -531,6 +531,61 @@ test("submitForReview rejects when no services or locations have been set", asyn
   ).rejects.toThrow();
 });
 
+// Services-only and locations-only are each independently sufficient — a
+// purely remote professional (services configured, no physical location)
+// and a purely in-person professional (location configured, no services
+// yet) must both be able to submit for review; only "neither" blocks it.
+
+test("submitForReview succeeds with services configured and no locations (remote-only professional)", async () => {
+  const t = convexTest(schema, modules);
+  const owner = await signedInUser(t, "wizard-remote-only@example.com");
+  const { organizationId } = await owner.mutation(api.organizations.createOrganization, {
+    name: "Remote Only Firm",
+    kind: "professional_firm",
+  });
+  const { professionalId } = await owner.mutation(api.professionalOwnership.createProfessionalDraft, {
+    organizationId,
+    displayName: "Remote Only CPA",
+    kind: "individual",
+  });
+
+  const { taxJurisdictionId, serviceId } = await seedServiceAndJurisdiction(t);
+  await owner.mutation(api.professionalOwnership.setProfessionalServices, {
+    professionalId,
+    services: [{ serviceId, taxJurisdictionId, remote: true }],
+  });
+
+  await owner.mutation(api.professionalOwnership.submitForReview, { professionalId });
+
+  const professional = await t.run(async (ctx) => ctx.db.get(professionalId));
+  expect(professional?.publicationStatus).toBe("review");
+});
+
+test("submitForReview succeeds with a location configured and no services", async () => {
+  const t = convexTest(schema, modules);
+  const owner = await signedInUser(t, "wizard-location-only@example.com");
+  const { organizationId } = await owner.mutation(api.organizations.createOrganization, {
+    name: "Location Only Firm",
+    kind: "professional_firm",
+  });
+  const { professionalId } = await owner.mutation(api.professionalOwnership.createProfessionalDraft, {
+    organizationId,
+    displayName: "Location Only CPA",
+    kind: "individual",
+  });
+
+  const { countryId } = await seedServiceAndJurisdiction(t);
+  await owner.mutation(api.professionalOwnership.setProfessionalLocations, {
+    professionalId,
+    locations: [{ countryId, city: "Austin", isPrimary: true }],
+  });
+
+  await owner.mutation(api.professionalOwnership.submitForReview, { professionalId });
+
+  const professional = await t.run(async (ctx) => ctx.db.get(professionalId));
+  expect(professional?.publicationStatus).toBe("review");
+});
+
 test("submitForReview rejects when displayName is blank even if services and locations exist", async () => {
   const t = convexTest(schema, modules);
   const owner = await signedInUser(t, "wizard-guard-name@example.com");
