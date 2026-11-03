@@ -20,6 +20,7 @@
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "beta",
+		"@edge-runtime/vm": "^5.0.0",
 		"@eslint/js": "latest",
 		"@tailwindcss/postcss": "latest",
 		"@types/node": "latest",
@@ -28,13 +29,15 @@
 		"@vitejs/plugin-react": "latest",
 		"@vitejs/plugin-rsc": "latest",
 		"cf": "^1.0.0-beta.20",
+		"convex-test": "^0.0.67",
 		"eslint": "latest",
 		"eslint-plugin-react-hooks": "latest",
 		"globals": "latest",
 		"tailwindcss": "latest",
 		"typescript": "latest",
 		"typescript-eslint": "latest",
-		"vite": "8.3.0"
+		"vite": "8.3.0",
+		"vitest": "^4.1.12"
 	},
 	"type": "module",
 	"scripts": {
@@ -47,6 +50,7 @@
 		"lint": "eslint .",
 		"test": "node --env-file-if-exists=.env.local --import ./scripts/test-resolver.mjs --test \"src/**/*.test.ts\"",
 		"typecheck": "tsc --noEmit",
-		"convex:dev": "convex dev"
+		"convex:dev": "convex dev",
+		"test:convex": "vitest run convex"
 	}
 }
