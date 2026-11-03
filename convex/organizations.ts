@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 
-import { createAuth } from "./auth";
+import { authComponent, createAuth } from "./auth";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 
@@ -181,6 +181,40 @@ export const currentOrganizations = query({
 });
 
 /**
+ * The full member roster for one organization — the `organizationMembers`
+ * counterpart to `staff.ts`'s `listStaff`, including the same
+ * authSubject→Better-Auth-user lookup for `email`. Unlike
+ * `currentOrganizations` (the caller's own org list, scoped implicitly to
+ * `userId`), this takes a client-supplied `organizationId`, so it must be
+ * `requireOrgMember`-gated rather than trusting the argument: a signed-in
+ * caller who isn't an active member of `organizationId` gets the same "Not
+ * an active member of this organization" refusal as every other
+ * org-scoped query/mutation, never another org's roster just by supplying
+ * its id (AGENTS.md section 5).
+ */
+export const listOrgMembers = query({
+  args: { organizationId: v.id("organizations") },
+  handler: async (ctx, args) => {
+    await requireOrgMember(ctx, args.organizationId);
+
+    const rows = await ctx.db
+      .query("organizationMembers")
+      .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+      .collect();
+
+    return await Promise.all(
+      rows.map(async (row) => {
+        const member = await ctx.db.get(row.userId);
+        const authUser = member
+          ? await authComponent.getAnyUserById(ctx, extractBetterAuthUserId(member.authSubject))
+          : null;
+        return { ...row, email: authUser?.email ?? null };
+      }),
+    );
+  },
+});
+
+/**
  * Duplicated from `convex/staff.ts:44-49` rather than imported — that file's
  * own comment explains why: Convex's `tokenIdentifier` is always
  * `${issuer}|${subject}`, where this deployment's `CONVEX_SITE_URL` is the
@@ -195,6 +229,16 @@ function buildAuthSubject(betterAuthUserId: string): string {
     throw new Error("CONVEX_SITE_URL is not set on this Convex deployment.");
   }
   return `${siteUrl}|${betterAuthUserId}`;
+}
+
+/**
+ * The inverse of `buildAuthSubject` — duplicated from `staff.ts:39-42` for
+ * the same reason as `buildAuthSubject` above: this task's Files block only
+ * touches `convex/organizations.ts`.
+ */
+function extractBetterAuthUserId(authSubject: string): string {
+  const separatorIndex = authSubject.indexOf("|");
+  return separatorIndex === -1 ? authSubject : authSubject.slice(separatorIndex + 1);
 }
 
 async function lookupMembershipByUser(
