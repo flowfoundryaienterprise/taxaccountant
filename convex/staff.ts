@@ -1,3 +1,6 @@
+import { v } from "convex/values";
+
+import { authComponent, createAuth } from "./auth";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 
 /**
@@ -20,6 +23,29 @@ async function lookupStaffMembership(ctx: QueryCtx, tokenIdentifier: string) {
     .query("staffMemberships")
     .withIndex("by_auth_subject", (q) => q.eq("authSubject", tokenIdentifier))
     .unique();
+}
+
+/**
+ * The inverse pair that makes "add staff by email" possible: Convex's
+ * `tokenIdentifier` (what `authSubject` always stores) is
+ * `${issuer}|${subject}`, where the issuer is this deployment's own
+ * `CONVEX_SITE_URL` (`@convex-dev/better-auth`'s `getAuthConfigProvider`)
+ * and the subject is the Better Auth user's own `id` (the `jwt` plugin's
+ * default `sub`, unchanged by this app's `definePayload`). Getting this
+ * format wrong means a newly-granted staff member's row exists but never
+ * matches their real session — silently, with no error anywhere.
+ */
+function extractBetterAuthUserId(authSubject: string): string {
+  const separatorIndex = authSubject.indexOf("|");
+  return separatorIndex === -1 ? authSubject : authSubject.slice(separatorIndex + 1);
+}
+
+function buildAuthSubject(betterAuthUserId: string): string {
+  const siteUrl = process.env.CONVEX_SITE_URL;
+  if (!siteUrl) {
+    throw new Error("CONVEX_SITE_URL is not set on this Convex deployment.");
+  }
+  return `${siteUrl}|${betterAuthUserId}`;
 }
 
 /**
@@ -100,3 +126,111 @@ export async function requireStaff(ctx: QueryCtx) {
   }
   return { ...membership, email: typeof identity.email === "string" ? identity.email : null };
 }
+
+/**
+ * The roster `/admin/staff` renders. `cms_admin` only — a `cms_editor`
+ * gets the same server-side refusal the mutations below give, not just a
+ * hidden nav link (AGENTS.md section 6).
+ */
+export const listStaff = query({
+  args: {},
+  handler: async (ctx) => {
+    const staff = await requireStaff(ctx);
+    if (staff.role !== "cms_admin") {
+      throw new Error("Only a CMS admin may view the staff roster.");
+    }
+
+    const rows = await ctx.db.query("staffMemberships").collect();
+    return await Promise.all(
+      rows.map(async (row) => {
+        const user = await authComponent.getAnyUserById(ctx, extractBetterAuthUserId(row.authSubject));
+        return {
+          _id: row._id,
+          role: row.role,
+          active: row.active,
+          updatedAt: row.updatedAt,
+          email: user?.email ?? null,
+          name: user?.name ?? null,
+          isSelf: row.authSubject === staff.authSubject,
+        };
+      }),
+    );
+  },
+});
+
+/**
+ * Grants (or reactivates) CMS access for whoever already signed up with
+ * `email` — Approach A from the staff-management-ui design: no invite
+ * table, no email-sending dependency. Fails with a clear, actionable
+ * message when nobody has signed up with that email yet, rather than a
+ * raw adapter error or a silent no-op.
+ */
+export const addStaffByEmail = mutation({
+  args: { email: v.string(), role: v.union(v.literal("cms_admin"), v.literal("cms_editor")) },
+  handler: async (ctx, args) => {
+    const staff = await requireStaff(ctx);
+    if (staff.role !== "cms_admin") {
+      throw new Error("Only a CMS admin may add staff.");
+    }
+
+    const email = args.email.trim().toLowerCase();
+    if (!email) {
+      throw new Error("Email is required.");
+    }
+
+    /*
+     * `authComponent.adapter(ctx)` is an `AdapterFactory` (a function Better
+     * Auth itself invokes with its resolved options), not a ready adapter —
+     * confirmed from `@better-auth/core`'s types after `authComponent.adapter(ctx).findOne`
+     * failed to typecheck. The actually-resolved `DBAdapter` lives on the
+     * Better Auth instance's own `$context` (`AuthContext.adapter`,
+     * `@better-auth/core/dist/types/context.d.mts`).
+     */
+    const authContext = await createAuth(ctx).$context;
+    const user = await authContext.adapter.findOne<{ id: string; email: string; name: string }>({
+      model: "user",
+      where: [{ field: "email", value: email }],
+    });
+    if (!user) {
+      throw new Error(`No account found for ${email}. Ask them to sign up at /sign-in first.`);
+    }
+
+    const authSubject = buildAuthSubject(user.id);
+    const existing = await ctx.db
+      .query("staffMemberships")
+      .withIndex("by_auth_subject", (q) => q.eq("authSubject", authSubject))
+      .unique();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, { role: args.role, active: true, updatedAt: Date.now() });
+      await ctx.db.insert("auditEvents", {
+        actorSubject: staff.authSubject,
+        actorRole: staff.role,
+        action: "staff.roleChanged",
+        resourceType: "staffMemberships",
+        resourceId: existing._id,
+        metadata: { email, role: args.role },
+        createdAt: Date.now(),
+      });
+      return { staffId: existing._id, created: false as const };
+    }
+
+    const staffId = await ctx.db.insert("staffMemberships", {
+      authSubject,
+      role: args.role,
+      active: true,
+      invitedBy: staff.authSubject,
+      updatedAt: Date.now(),
+    });
+    await ctx.db.insert("auditEvents", {
+      actorSubject: staff.authSubject,
+      actorRole: staff.role,
+      action: "staff.added",
+      resourceType: "staffMemberships",
+      resourceId: staffId,
+      metadata: { email, role: args.role },
+      createdAt: Date.now(),
+    });
+    return { staffId, created: true as const };
+  },
+});
