@@ -69,15 +69,22 @@ function StaffRoster() {
   const [addRole, setAddRole] = React.useState<StaffRole>("cms_editor");
   const [adding, setAdding] = React.useState(false);
   const [formError, setFormError] = React.useState<string | null>(null);
+  const [formSuccess, setFormSuccess] = React.useState<string | null>(null);
 
   async function handleAddStaff(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setAdding(true);
     setFormError(null);
+    setFormSuccess(null);
     try {
-      await addStaff({ email: addEmail, role: addRole });
+      const roleLabel = ROLE_OPTIONS.find((option) => option.value === addRole)?.label ?? addRole;
+      const { created } = await addStaff({ email: addEmail, role: addRole });
+      setFormSuccess(
+        created
+          ? `Added ${addEmail} as ${roleLabel}.`
+          : `Updated existing member ${addEmail}: role is now ${roleLabel}.`,
+      );
       setAddEmail("");
-      setFormError(null);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -228,6 +235,12 @@ function StaffRoster() {
           {adding ? "Adding…" : "Add staff"}
         </button>
       </form>
+
+      {formSuccess ? (
+        <p role="status" className="text-caption font-medium text-navy">
+          {formSuccess}
+        </p>
+      ) : null}
 
       {formError ? (
         <p role="alert" className="text-caption font-medium text-danger">

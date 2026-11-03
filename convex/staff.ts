@@ -203,16 +203,48 @@ export const addStaffByEmail = mutation({
       .unique();
 
     if (existing) {
+      /*
+       * Re-adding an existing row can both change its role and reactivate
+       * it — guard an actual demotion exactly like `changeStaffRole` does
+       * (only when it is one: re-adding the same role, or reactivating
+       * without changing role, must never throw just because the target
+       * happens to be the last active admin). Without this, the form's
+       * default role ("Editor") meant re-adding an existing admin's own
+       * email silently demoted them, bypassing the last-admin guard
+       * entirely (caught in the final whole-branch review, not
+       * live-verified originally — the plan's Review Focus item 3 path
+       * had never actually run).
+       */
+      if (args.role === "cms_editor" && existing.role === "cms_admin") {
+        await assertCanChangeAdminStatus(ctx, existing);
+      }
+
+      const roleChanged = existing.role !== args.role;
+      const wasInactive = !existing.active;
       await ctx.db.patch(existing._id, { role: args.role, active: true, updatedAt: Date.now() });
-      await ctx.db.insert("auditEvents", {
-        actorSubject: staff.authSubject,
-        actorRole: staff.role,
-        action: "staff.roleChanged",
-        resourceType: "staffMemberships",
-        resourceId: existing._id,
-        metadata: { email, role: args.role },
-        createdAt: Date.now(),
-      });
+
+      if (roleChanged) {
+        await ctx.db.insert("auditEvents", {
+          actorSubject: staff.authSubject,
+          actorRole: staff.role,
+          action: "staff.roleChanged",
+          resourceType: "staffMemberships",
+          resourceId: existing._id,
+          metadata: { email, from: existing.role, to: args.role },
+          createdAt: Date.now(),
+        });
+      }
+      if (wasInactive) {
+        await ctx.db.insert("auditEvents", {
+          actorSubject: staff.authSubject,
+          actorRole: staff.role,
+          action: "staff.activated",
+          resourceType: "staffMemberships",
+          resourceId: existing._id,
+          metadata: { email },
+          createdAt: Date.now(),
+        });
+      }
       return { staffId: existing._id, created: false as const };
     }
 
