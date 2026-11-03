@@ -1,6 +1,7 @@
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { betterAuth } from "better-auth/minimal";
+import { twoFactor } from "better-auth/plugins";
 
 import { components } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
@@ -70,6 +71,42 @@ async function sendPasswordResetEmail(to: string, url: string) {
   }
 }
 
+/*
+ * Staff MFA (Phase 2, P2-W1, docs/superpowers/specs/2026-11-03-staff-mfa-design.md).
+ * Same Resend sender/limitation as sendPasswordResetEmail — a cms_admin
+ * other than the Resend account's own verified address cannot currently
+ * complete sign-in once they enable this, until a sending domain is
+ * verified (documents/ARCHITECTURE.md section 6).
+ */
+async function sendTwoFactorOtpEmail(to: string, code: string) {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (!resendApiKey) {
+    throw new Error(
+      "RESEND_API_KEY is not set on this Convex deployment. Run `npx convex env set " +
+        "RESEND_API_KEY <key>` (see convex/auth.ts) before MFA codes can send mail.",
+    );
+  }
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: RESEND_FROM_ADDRESS,
+      to,
+      subject: "Your TaxAccountant.com sign-in code",
+      html: `<p>Your sign-in code is:</p><p style="font-size:24px;font-weight:600;letter-spacing:4px;">${code}</p><p>This code expires shortly. If you didn't request this, you can safely ignore this email.</p>`,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Resend send failed (${response.status}): ${body}`);
+  }
+}
+
 export const createAuth = (ctx: GenericCtx<DataModel>) => {
   return betterAuth({
     baseURL: siteUrl,
@@ -81,6 +118,15 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
         await sendPasswordResetEmail(user.email, url);
       },
     },
-    plugins: [convex({ authConfig })],
+    plugins: [
+      convex({ authConfig }),
+      twoFactor({
+        otpOptions: {
+          sendOTP: async ({ user, otp }) => {
+            await sendTwoFactorOtpEmail(user.email, otp);
+          },
+        },
+      }),
+    ],
   });
 };

@@ -65,9 +65,12 @@ export const currentStaff = query({
     const membership = await lookupStaffMembership(ctx, identity.tokenIdentifier);
     if (!membership || !membership.active) return null;
 
+    const user = await authComponent.getAuthUser(ctx);
+
     return {
       role: membership.role,
       email: typeof identity.email === "string" ? identity.email : null,
+      twoFactorEnabled: Boolean(user.twoFactorEnabled),
     };
   },
 });
@@ -351,5 +354,60 @@ export const setStaffActive = mutation({
       createdAt: Date.now(),
     });
     return { changed: true as const };
+  },
+});
+
+/**
+ * Lets a `cms_admin` rescue another staff member who lost access to both
+ * their email and their backup codes — not a self-service path:
+ * `disableTwoFactor` (requires the caller's own password) already covers
+ * that. Reaches past the plugin's own session-scoped API, straight
+ * through the Better Auth adapter, the same way `addStaffByEmail`
+ * resolves identities (docs/superpowers/specs/2026-11-03-staff-mfa-design.md).
+ */
+export const adminResetTwoFactor = mutation({
+  args: { id: v.id("staffMemberships") },
+  handler: async (ctx, args) => {
+    const staff = await requireStaff(ctx);
+    if (staff.role !== "cms_admin") {
+      throw new Error("Only a CMS admin may reset another staff member's MFA.");
+    }
+
+    const target = await ctx.db.get(args.id);
+    if (!target) {
+      throw new Error("Staff record not found.");
+    }
+    if (target.authSubject === staff.authSubject) {
+      throw new Error(
+        "Cannot reset your own MFA this way — use the disable option on /admin/security instead.",
+      );
+    }
+
+    const targetUserId = extractBetterAuthUserId(target.authSubject);
+    const authContext = await createAuth(ctx).$context;
+    const deletedCount = await authContext.adapter.deleteMany({
+      model: "twoFactor",
+      where: [{ field: "userId", value: targetUserId }],
+    });
+
+    if (deletedCount === 0) {
+      return { reset: false as const };
+    }
+
+    await authContext.adapter.update({
+      model: "user",
+      where: [{ field: "id", value: targetUserId }],
+      update: { twoFactorEnabled: false },
+    });
+    await ctx.db.insert("auditEvents", {
+      actorSubject: staff.authSubject,
+      actorRole: staff.role,
+      action: "staff.mfaReset",
+      resourceType: "staffMemberships",
+      resourceId: args.id,
+      metadata: {},
+      createdAt: Date.now(),
+    });
+    return { reset: true as const };
   },
 });
