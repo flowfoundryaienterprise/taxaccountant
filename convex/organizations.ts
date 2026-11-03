@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 
+import { createAuth } from "./auth";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 
@@ -176,5 +177,226 @@ export const currentOrganizations = query({
     );
 
     return rows.filter((row): row is NonNullable<typeof row> => row !== null);
+  },
+});
+
+/**
+ * Duplicated from `convex/staff.ts:44-49` rather than imported — that file's
+ * own comment explains why: Convex's `tokenIdentifier` is always
+ * `${issuer}|${subject}`, where this deployment's `CONVEX_SITE_URL` is the
+ * issuer and a Better Auth user's own `id` (the `jwt` plugin's default
+ * `sub`) is the subject. Importing it would create a two-way dependency
+ * between `staff.ts` and `organizations.ts` for a trivial string template;
+ * this task's Files block only touches `convex/organizations.ts`.
+ */
+function buildAuthSubject(betterAuthUserId: string): string {
+  const siteUrl = process.env.CONVEX_SITE_URL;
+  if (!siteUrl) {
+    throw new Error("CONVEX_SITE_URL is not set on this Convex deployment.");
+  }
+  return `${siteUrl}|${betterAuthUserId}`;
+}
+
+async function lookupMembershipByUser(
+  ctx: QueryCtx,
+  organizationId: Id<"organizations">,
+  userId: Id<"appUsers">,
+) {
+  return ctx.db
+    .query("organizationMembers")
+    .withIndex("by_org_user", (q) => q.eq("organizationId", organizationId).eq("userId", userId))
+    .unique();
+}
+
+/**
+ * Grants (or re-sends, for a never-accepted invite) membership for whoever
+ * already has a Better Auth account at `email` — the `organizationMembers`
+ * counterpart to `staff.ts`'s `addStaffByEmail`, including its exact
+ * adapter-lookup shape and not-found message. Unlike `addStaffByEmail`
+ * (which only ever points at an existing `staffMemberships` row because
+ * every staff candidate already called `ensureAppUser` once to reach the
+ * CMS), an invitee here may have a Better Auth account with no `appUsers`
+ * row yet — nothing requires signing up through this app's own account flow
+ * before someone else can invite you — so this mutation provisions that row
+ * itself, inline, the same shape `ensureAppUser` would have produced.
+ *
+ * Re-inviting an already-`active` member is a deliberate no-op (same
+ * reasoning as `addStaffByEmail`'s guard against an accidental demotion):
+ * the caller gets back the existing membership unchanged rather than a
+ * silently duplicated row or a role change nobody asked for by re-using the
+ * invite form.
+ */
+export const inviteMember = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    email: v.string(),
+    role: v.union(v.literal("admin"), v.literal("member"), v.literal("viewer")),
+  },
+  handler: async (ctx, args) => {
+    const { user: actor, membership: actorMembership } = await requireOrgRole(
+      ctx,
+      args.organizationId,
+      ["owner", "admin"],
+    );
+
+    const email = args.email.trim().toLowerCase();
+    if (!email) {
+      throw new Error("Email is required.");
+    }
+
+    // Same adapter-lookup shape as `addStaffByEmail` (convex/staff.ts:193-200):
+    // `authComponent.adapter(ctx)` is an `AdapterFactory`, not a resolved
+    // adapter; the actually-resolved `DBAdapter` lives on `createAuth(ctx).$context.adapter`.
+    const authContext = await createAuth(ctx).$context;
+    const authUser = await authContext.adapter.findOne<{ id: string; email: string; name: string }>({
+      model: "user",
+      where: [{ field: "email", value: email }],
+    });
+    if (!authUser) {
+      throw new Error(`No account found for ${email}. Ask them to sign up at /sign-in first.`);
+    }
+
+    const authSubject = buildAuthSubject(authUser.id);
+    let invitedUser = await lookupAppUser(ctx, authSubject);
+    if (!invitedUser) {
+      const invitedUserId = await ctx.db.insert("appUsers", {
+        authSubject,
+        accountStatus: "active",
+        createdAt: Date.now(),
+      });
+      invitedUser = await ctx.db.get(invitedUserId);
+      if (!invitedUser) {
+        throw new Error("Failed to provision an account for the invited user.");
+      }
+    }
+
+    const existingMembership = await lookupMembershipByUser(
+      ctx,
+      args.organizationId,
+      invitedUser._id,
+    );
+
+    if (existingMembership && existingMembership.status === "active") {
+      return { membershipId: existingMembership._id };
+    }
+
+    const now = Date.now();
+    let membershipId: Id<"organizationMembers">;
+    if (existingMembership) {
+      await ctx.db.patch(existingMembership._id, { role: args.role, status: "invited" });
+      membershipId = existingMembership._id;
+    } else {
+      membershipId = await ctx.db.insert("organizationMembers", {
+        organizationId: args.organizationId,
+        userId: invitedUser._id,
+        role: args.role,
+        status: "invited",
+        createdAt: now,
+      });
+    }
+
+    await ctx.db.insert("auditEvents", {
+      actorSubject: actor.authSubject,
+      actorRole: actorMembership.role,
+      action: "organization.memberInvited",
+      resourceType: "organizationMembers",
+      resourceId: membershipId,
+      metadata: { email, role: args.role },
+      createdAt: now,
+    });
+
+    return { membershipId };
+  },
+});
+
+/** Lets the caller accept their own pending invite to `organizationId`. */
+export const acceptInvite = mutation({
+  args: { organizationId: v.id("organizations") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not signed in.");
+    }
+    const user = await lookupAppUser(ctx, identity.tokenIdentifier);
+    if (!user) {
+      throw new Error("No pending invite found for this organization.");
+    }
+    const membership = await lookupMembershipByUser(ctx, args.organizationId, user._id);
+    if (!membership || membership.status !== "invited") {
+      throw new Error("No pending invite found for this organization.");
+    }
+
+    await ctx.db.patch(membership._id, { status: "active" });
+    return {};
+  },
+});
+
+/** Lets the caller decline their own pending invite to `organizationId`. */
+export const declineInvite = mutation({
+  args: { organizationId: v.id("organizations") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not signed in.");
+    }
+    const user = await lookupAppUser(ctx, identity.tokenIdentifier);
+    if (!user) {
+      throw new Error("No pending invite found for this organization.");
+    }
+    const membership = await lookupMembershipByUser(ctx, args.organizationId, user._id);
+    if (!membership || membership.status !== "invited") {
+      throw new Error("No pending invite found for this organization.");
+    }
+
+    await ctx.db.delete(membership._id);
+    return {};
+  },
+});
+
+/**
+ * Removes a member — owner/admin only, and refuses to remove the last
+ * active `owner` (the one way this could otherwise lock everyone out of the
+ * organization, same reasoning as `staff.ts`'s `assertCanChangeAdminStatus`
+ * guard against removing the last active CMS admin).
+ */
+export const removeMember = mutation({
+  args: { membershipId: v.id("organizationMembers") },
+  handler: async (ctx, args) => {
+    const target = await ctx.db.get(args.membershipId);
+    if (!target) {
+      throw new Error("Membership not found.");
+    }
+
+    const { user: actor, membership: actorMembership } = await requireOrgRole(
+      ctx,
+      target.organizationId,
+      ["owner", "admin"],
+    );
+
+    if (target.role === "owner" && target.status === "active") {
+      const orgMembers = await ctx.db
+        .query("organizationMembers")
+        .withIndex("by_org", (q) => q.eq("organizationId", target.organizationId))
+        .collect();
+      const otherActiveOwners = orgMembers.filter(
+        (member) => member._id !== target._id && member.role === "owner" && member.status === "active",
+      );
+      if (otherActiveOwners.length === 0) {
+        throw new Error("Cannot remove the last owner of this organization.");
+      }
+    }
+
+    await ctx.db.patch(target._id, { status: "removed" });
+    await ctx.db.insert("auditEvents", {
+      actorSubject: actor.authSubject,
+      actorRole: actorMembership.role,
+      action: "organization.memberRemoved",
+      resourceType: "organizationMembers",
+      resourceId: target._id,
+      metadata: {},
+      createdAt: Date.now(),
+    });
+
+    return {};
   },
 });
