@@ -16,6 +16,8 @@ import type * as devProvision from "../devProvision.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
 import type * as organizations from "../organizations.js";
+import type * as professionalOwnership from "../professionalOwnership.js";
+import type * as professionals from "../professionals.js";
 import type * as staff from "../staff.js";
 import type * as users from "../users.js";
 
@@ -34,6 +36,8 @@ declare const fullApi: ApiFromModules<{
   healthCheck: typeof healthCheck;
   http: typeof http;
   organizations: typeof organizations;
+  professionalOwnership: typeof professionalOwnership;
+  professionals: typeof professionals;
   staff: typeof staff;
   users: typeof users;
 }>;
