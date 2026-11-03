@@ -10,6 +10,7 @@ import {
   Scale,
   Search,
   Settings,
+  ShieldCheck,
   Users,
 } from "lucide-react";
 
@@ -28,6 +29,8 @@ export interface AdminNavItem {
   icon: LucideIcon;
   /** Short description used by the overview quick-links and tooltips. */
   description: string;
+  /** Hidden from a `cms_editor`'s nav — the page itself still re-checks the role server-side. */
+  adminOnly?: boolean;
 }
 
 export const ADMIN_ROOT = "/admin";
@@ -99,6 +102,13 @@ export const adminNavigation: AdminNavItem[] = [
     icon: Settings,
     description: "Site identity, navigation and display configuration.",
   },
+  {
+    href: "/admin/staff",
+    label: "Staff",
+    icon: ShieldCheck,
+    description: "CMS staff accounts, roles and access.",
+    adminOnly: true,
+  },
 ];
 
 /**
@@ -133,6 +143,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   media: "Media library",
   seo: "SEO management",
   settings: "Site settings",
+  staff: "Staff",
 };
 
 /**

@@ -12,6 +12,8 @@ interface AdminSidebarProps {
   /** Mobile drawer state. On `lg` and above the sidebar is always present. */
   open: boolean;
   onClose: () => void;
+  /** Hides `adminOnly` nav entries from a `cms_editor`. */
+  staffRole: "cms_admin" | "cms_editor";
 }
 
 /**
@@ -22,8 +24,11 @@ interface AdminSidebarProps {
  * it traps nothing but is labelled, closes on Escape and on backdrop click
  * (both wired by `AdminShell`), and every link closes it on navigation.
  */
-export function AdminSidebar({ pathname, open, onClose }: AdminSidebarProps) {
+export function AdminSidebar({ pathname, open, onClose, staffRole }: AdminSidebarProps) {
   const active = activeNavHref(pathname);
+  const visibleNavigation = adminNavigation.filter(
+    (item) => !item.adminOnly || staffRole === "cms_admin",
+  );
 
   return (
     <>
@@ -78,7 +83,7 @@ export function AdminSidebar({ pathname, open, onClose }: AdminSidebarProps) {
 
         <nav aria-label="CMS navigation" className="flex-1 overflow-y-auto p-3">
           <ul className="flex flex-col gap-1">
-            {adminNavigation.map((item) => {
+            {visibleNavigation.map((item) => {
               const isActive = item.href === active;
 
               return (
