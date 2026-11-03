@@ -115,6 +115,101 @@ test("createProfessionalDraft rejects a viewer", async () => {
   ).rejects.toThrow();
 });
 
+// --- requestProfessionalClaim shares createProfessionalDraft's role+kind
+// guard (Review Focus 2 and 3 name both mutations); mirrors the two tests
+// above for that same guard, on requestProfessionalClaim instead. ---
+
+test("requestProfessionalClaim rejects a customer_business org", async () => {
+  const t = convexTest(schema, modules);
+
+  // An existing, unclaimed directory listing to target the claim at — the
+  // guard throws before this row is ever looked up, but a real id keeps the
+  // test from depending on that ordering.
+  const professionalId = await t.run(async (ctx) =>
+    ctx.db.insert("professionals", {
+      slug: "claim-target-customer-business",
+      displayName: "Claim Target",
+      kind: "individual",
+      bio: "",
+      approvedProfile: false,
+      verificationStatus: "not_reviewed",
+      publicationStatus: "published",
+      remoteServices: false,
+      publicContactMode: "contact_form",
+      featured: false,
+      updatedAt: Date.now(),
+    }),
+  );
+
+  const owner = await signedInUser(t, "claim-customer@example.com");
+  const { organizationId } = await owner.mutation(api.organizations.createOrganization, {
+    name: "Jane's Bakery",
+    kind: "customer_business",
+  });
+
+  await expect(
+    owner.mutation(api.professionalOwnership.requestProfessionalClaim, {
+      organizationId,
+      professionalId,
+    }),
+  ).rejects.toThrow();
+});
+
+test("requestProfessionalClaim rejects a viewer", async () => {
+  const t = convexTest(schema, modules);
+
+  const professionalId = await t.run(async (ctx) =>
+    ctx.db.insert("professionals", {
+      slug: "claim-target-viewer",
+      displayName: "Claim Target",
+      kind: "individual",
+      bio: "",
+      approvedProfile: false,
+      verificationStatus: "not_reviewed",
+      publicationStatus: "published",
+      remoteServices: false,
+      publicContactMode: "contact_form",
+      featured: false,
+      updatedAt: Date.now(),
+    }),
+  );
+
+  const owner = await signedInUser(t, "claim-viewer-owner@example.com");
+  const { organizationId } = await owner.mutation(api.organizations.createOrganization, {
+    name: "Acme Tax LLP",
+    kind: "professional_firm",
+  });
+
+  // Same directly-inserted active viewer membership shortcut as
+  // "createProfessionalDraft rejects a viewer" above.
+  const viewer = await signedInUser(t, "claim-viewer-only@example.com");
+  const viewerUser = await t.run(async (ctx) =>
+    ctx.db
+      .query("appUsers")
+      .withIndex("by_auth_subject", (q) =>
+        q.eq("authSubject", "https://example.convex.site|claim-viewer-only@example.com"),
+      )
+      .unique(),
+  );
+  if (!viewerUser) throw new Error("test setup failed: viewer appUsers row missing");
+  await t.run((ctx) =>
+    ctx.db.insert("organizationMembers", {
+      organizationId,
+      userId: viewerUser._id,
+      role: "viewer",
+      status: "active",
+      createdAt: Date.now(),
+    }),
+  );
+
+  await expect(
+    viewer.mutation(api.professionalOwnership.requestProfessionalClaim, {
+      organizationId,
+      professionalId,
+    }),
+  ).rejects.toThrow();
+});
+
 // --- (d) requestProfessionalClaim creates a pending row with no edit access ---
 
 test("requestProfessionalClaim creates a pending ownership row that grants no edit access while pending", async () => {
