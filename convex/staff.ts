@@ -1,7 +1,8 @@
 import { v } from "convex/values";
 
 import { authComponent, createAuth } from "./auth";
-import { mutation, query, type QueryCtx } from "./_generated/server";
+import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
 
 /**
  * Staff role lookup and the CMS auth boundary.
@@ -232,5 +233,91 @@ export const addStaffByEmail = mutation({
       createdAt: Date.now(),
     });
     return { staffId, created: true as const };
+  },
+});
+
+/**
+ * Stops a `cms_admin` from demoting or deactivating the last active admin
+ * — the one way this feature could otherwise lock everyone out of
+ * `/admin` (`claimFirstStaffAccount`'s self-recovery path only fires when
+ * the table is entirely empty, not when it's all editors). Only fires
+ * when `target` is *currently* an active admin; demoting/deactivating a
+ * `cms_editor` is never blocked by this.
+ */
+async function assertCanChangeAdminStatus(
+  ctx: MutationCtx,
+  target: Doc<"staffMemberships">,
+): Promise<void> {
+  if (target.role !== "cms_admin" || !target.active) return;
+  const rows = await ctx.db.query("staffMemberships").collect();
+  const otherActiveAdmins = rows.filter(
+    (row) => row._id !== target._id && row.role === "cms_admin" && row.active,
+  );
+  if (otherActiveAdmins.length === 0) {
+    throw new Error("Cannot remove the last active CMS admin.");
+  }
+}
+
+export const changeStaffRole = mutation({
+  args: { id: v.id("staffMemberships"), role: v.union(v.literal("cms_admin"), v.literal("cms_editor")) },
+  handler: async (ctx, args) => {
+    const staff = await requireStaff(ctx);
+    if (staff.role !== "cms_admin") {
+      throw new Error("Only a CMS admin may change roles.");
+    }
+    const target = await ctx.db.get(args.id);
+    if (!target) {
+      throw new Error("Staff record not found.");
+    }
+    if (target.role === args.role) {
+      return { changed: false as const };
+    }
+    if (args.role === "cms_editor" && target.role === "cms_admin") {
+      await assertCanChangeAdminStatus(ctx, target);
+    }
+
+    await ctx.db.patch(args.id, { role: args.role, updatedAt: Date.now() });
+    await ctx.db.insert("auditEvents", {
+      actorSubject: staff.authSubject,
+      actorRole: staff.role,
+      action: "staff.roleChanged",
+      resourceType: "staffMemberships",
+      resourceId: args.id,
+      metadata: { from: target.role, to: args.role },
+      createdAt: Date.now(),
+    });
+    return { changed: true as const };
+  },
+});
+
+export const setStaffActive = mutation({
+  args: { id: v.id("staffMemberships"), active: v.boolean() },
+  handler: async (ctx, args) => {
+    const staff = await requireStaff(ctx);
+    if (staff.role !== "cms_admin") {
+      throw new Error("Only a CMS admin may activate or deactivate staff.");
+    }
+    const target = await ctx.db.get(args.id);
+    if (!target) {
+      throw new Error("Staff record not found.");
+    }
+    if (target.active === args.active) {
+      return { changed: false as const };
+    }
+    if (!args.active) {
+      await assertCanChangeAdminStatus(ctx, target);
+    }
+
+    await ctx.db.patch(args.id, { active: args.active, updatedAt: Date.now() });
+    await ctx.db.insert("auditEvents", {
+      actorSubject: staff.authSubject,
+      actorRole: staff.role,
+      action: args.active ? "staff.activated" : "staff.deactivated",
+      resourceType: "staffMemberships",
+      resourceId: args.id,
+      metadata: {},
+      createdAt: Date.now(),
+    });
+    return { changed: true as const };
   },
 });
