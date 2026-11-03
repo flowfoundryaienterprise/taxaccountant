@@ -412,4 +412,36 @@ export default defineSchema({
     ),
     createdAt: v.number(),
   }).index("by_auth_subject", ["authSubject"]),
+
+  organizations: defineTable({
+    name: v.string(),
+    kind: v.union(v.literal("customer_business"), v.literal("professional_firm")),
+    ownerUserId: v.id("appUsers"),
+    status: v.union(v.literal("active"), v.literal("suspended")),
+    createdAt: v.number(),
+  }).index("by_owner", ["ownerUserId"]),
+
+  organizationMembers: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("appUsers"),
+    role: v.union(v.literal("owner"), v.literal("admin"), v.literal("member"), v.literal("viewer")),
+    status: v.union(v.literal("invited"), v.literal("active"), v.literal("removed")),
+    createdAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_user", ["userId"])
+    .index("by_org_user", ["organizationId", "userId"]),
+
+  professionalOwnership: defineTable({
+    professionalId: v.id("professionals"),
+    organizationId: v.id("organizations"),
+    status: v.union(v.literal("pending"), v.literal("approved"), v.literal("revoked")),
+    requestedByUserId: v.id("appUsers"),
+    requestedAt: v.number(),
+    decidedByAuthSubject: v.optional(v.string()),
+    decidedAt: v.optional(v.number()),
+  })
+    .index("by_professional", ["professionalId"])
+    .index("by_org", ["organizationId"])
+    .index("by_status", ["status"]),
 });
