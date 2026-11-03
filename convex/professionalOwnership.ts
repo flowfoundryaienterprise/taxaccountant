@@ -41,20 +41,46 @@ async function findOwnershipRows(
 export async function requireProfessionalEditAccess(
   ctx: QueryCtx,
   professionalId: Id<"professionals">,
-): Promise<{ organization: Doc<"organizations">; ownership: Doc<"professionalOwnership"> }> {
+): Promise<{
+  user: Doc<"appUsers">;
+  membership: Doc<"organizationMembers">;
+  organization: Doc<"organizations">;
+  ownership: Doc<"professionalOwnership">;
+}> {
   const rows = await findOwnershipRows(ctx, professionalId);
   const ownership = rows.find((row) => row.status === "approved");
   if (!ownership) {
     throw new Error("Your organization does not own this listing.");
   }
 
-  const { organization } = await requireOrgRole(ctx, ownership.organizationId, [
+  const { user, membership, organization } = await requireOrgRole(ctx, ownership.organizationId, [
     "owner",
     "admin",
     "member",
   ]);
 
-  return { organization, ownership };
+  return { user, membership, organization, ownership };
+}
+
+/**
+ * Loads the `professionals` row a wizard-step mutation is about to edit and
+ * enforces the draft-only guard every one of Task 6's seven mutations
+ * shares: once a listing has left `"draft"` (into `review`, `published`,
+ * `suspended`, or `archived`) it is no longer the onboarding wizard's to
+ * edit — a later review/profile-edit flow (Task 9+) owns it instead.
+ */
+async function requireDraftProfessional(
+  ctx: QueryCtx,
+  professionalId: Id<"professionals">,
+): Promise<Doc<"professionals">> {
+  const professional = await ctx.db.get(professionalId);
+  if (!professional) {
+    throw new Error("Professional not found.");
+  }
+  if (professional.publicationStatus !== "draft") {
+    throw new Error("Cannot edit a listing that is not in draft.");
+  }
+  return professional;
 }
 
 function slugify(input: string): string {
@@ -219,5 +245,272 @@ export const requestProfessionalClaim = mutation({
     });
 
     return { ownershipId };
+  },
+});
+
+/**
+ * Onboarding wizard step mutations (Phase 2, P2-W2, task-6-brief.md).
+ *
+ * Every mutation below is gated by the same two checks, in this order:
+ * `requireProfessionalEditAccess` (does the caller's org own this listing,
+ * with a role that is not `viewer`?) then `requireDraftProfessional` (is the
+ * listing still editable — i.e. still `"draft"`?). Together they mean the
+ * wizard can only ever move a listing *out of* `"draft"`
+ * (`submitForReview`'s own patch), never edit it once it has left.
+ */
+
+export const updateProfessionalBasics = mutation({
+  args: {
+    professionalId: v.id("professionals"),
+    displayName: v.string(),
+    kind: v.union(v.literal("individual"), v.literal("firm")),
+    firmName: v.optional(v.string()),
+    bio: v.string(),
+    remoteServices: v.boolean(),
+    inPersonServices: v.optional(v.boolean()),
+    publicContactMode: v.union(
+      v.literal("contact_form"),
+      v.literal("external"),
+      v.literal("none"),
+    ),
+  },
+  handler: async (ctx, args) => {
+    await requireProfessionalEditAccess(ctx, args.professionalId);
+    await requireDraftProfessional(ctx, args.professionalId);
+
+    await ctx.db.patch(args.professionalId, {
+      displayName: args.displayName,
+      kind: args.kind,
+      firmName: args.firmName,
+      bio: args.bio,
+      remoteServices: args.remoteServices,
+      inPersonServices: args.inPersonServices,
+      publicContactMode: args.publicContactMode,
+      updatedAt: Date.now(),
+    });
+
+    return {};
+  },
+});
+
+export const setProfessionalServices = mutation({
+  args: {
+    professionalId: v.id("professionals"),
+    services: v.array(
+      v.object({
+        serviceId: v.id("serviceCategories"),
+        taxJurisdictionId: v.id("taxJurisdictions"),
+        remote: v.boolean(),
+        description: v.optional(v.string()),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    await requireProfessionalEditAccess(ctx, args.professionalId);
+    await requireDraftProfessional(ctx, args.professionalId);
+
+    const existing = await ctx.db
+      .query("professionalServices")
+      .withIndex("by_professional", (q) => q.eq("professionalId", args.professionalId))
+      .collect();
+    for (const row of existing) {
+      await ctx.db.delete(row._id);
+    }
+
+    for (const service of args.services) {
+      await ctx.db.insert("professionalServices", {
+        professionalId: args.professionalId,
+        serviceId: service.serviceId,
+        taxJurisdictionId: service.taxJurisdictionId,
+        enabled: true,
+        description: service.description,
+        remote: service.remote,
+      });
+    }
+
+    return {};
+  },
+});
+
+export const setProfessionalLocations = mutation({
+  args: {
+    professionalId: v.id("professionals"),
+    locations: v.array(
+      v.object({
+        countryId: v.id("countries"),
+        city: v.string(),
+        region: v.optional(v.string()),
+        publicLocationText: v.optional(v.string()),
+        isPrimary: v.boolean(),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    await requireProfessionalEditAccess(ctx, args.professionalId);
+    await requireDraftProfessional(ctx, args.professionalId);
+
+    const existing = await ctx.db
+      .query("professionalLocations")
+      .withIndex("by_professional", (q) => q.eq("professionalId", args.professionalId))
+      .collect();
+    for (const row of existing) {
+      await ctx.db.delete(row._id);
+    }
+
+    for (const location of args.locations) {
+      await ctx.db.insert("professionalLocations", {
+        professionalId: args.professionalId,
+        countryId: location.countryId,
+        city: location.city,
+        region: location.region,
+        publicLocationText: location.publicLocationText,
+        isPrimary: location.isPrimary,
+      });
+    }
+
+    return {};
+  },
+});
+
+export const setProfessionalLanguages = mutation({
+  args: {
+    professionalId: v.id("professionals"),
+    languageIds: v.array(v.id("languages")),
+  },
+  handler: async (ctx, args) => {
+    await requireProfessionalEditAccess(ctx, args.professionalId);
+    await requireDraftProfessional(ctx, args.professionalId);
+
+    const existing = await ctx.db
+      .query("professionalLanguages")
+      .withIndex("by_professional", (q) => q.eq("professionalId", args.professionalId))
+      .collect();
+    for (const row of existing) {
+      await ctx.db.delete(row._id);
+    }
+
+    for (const languageId of args.languageIds) {
+      await ctx.db.insert("professionalLanguages", {
+        professionalId: args.professionalId,
+        languageId,
+      });
+    }
+
+    return {};
+  },
+});
+
+/**
+ * Adds one public-facing credential claim. Always starts `unverified` —
+ * `publicDisplayStatus` only ever becomes `verified`/`expired` through a
+ * staff review action (outside this task's scope), never by the owning
+ * org's own say-so.
+ */
+export const addPublicCredential = mutation({
+  args: {
+    professionalId: v.id("professionals"),
+    designation: v.string(),
+    issuer: v.optional(v.string()),
+    jurisdictionId: v.optional(v.id("taxJurisdictions")),
+  },
+  handler: async (ctx, args) => {
+    await requireProfessionalEditAccess(ctx, args.professionalId);
+    await requireDraftProfessional(ctx, args.professionalId);
+
+    const designation = args.designation.trim();
+    if (!designation) {
+      throw new Error("Credential designation is required.");
+    }
+
+    const credentialId = await ctx.db.insert("professionalPublicCredentials", {
+      professionalId: args.professionalId,
+      designation,
+      issuer: args.issuer,
+      jurisdictionId: args.jurisdictionId,
+      publicDisplayStatus: "unverified",
+    });
+
+    return { credentialId };
+  },
+});
+
+/**
+ * Removes a credential claim. Access is still gated by the credential's
+ * *professional*, not a bare id check — the credential doc is loaded first
+ * purely to discover which `professionalId` it belongs to.
+ */
+export const removePublicCredential = mutation({
+  args: {
+    credentialId: v.id("professionalPublicCredentials"),
+  },
+  handler: async (ctx, args) => {
+    const credential = await ctx.db.get(args.credentialId);
+    if (!credential) {
+      throw new Error("Credential not found.");
+    }
+
+    await requireProfessionalEditAccess(ctx, credential.professionalId);
+    await requireDraftProfessional(ctx, credential.professionalId);
+
+    await ctx.db.delete(args.credentialId);
+
+    return {};
+  },
+});
+
+/**
+ * Moves a `"draft"` listing into `"review"` — the one wizard-step mutation
+ * allowed to change `publicationStatus` at all (every other mutation above
+ * only ever touches it via the shared draft-only guard, never writes it).
+ * Required-fields checks use `.first()` against each join table's
+ * `by_professional` index rather than `.collect()`: existence is all that
+ * matters here, so there is no reason to read every row just to find out
+ * whether at least one exists.
+ */
+export const submitForReview = mutation({
+  args: {
+    professionalId: v.id("professionals"),
+  },
+  handler: async (ctx, args) => {
+    const { user, membership } = await requireProfessionalEditAccess(ctx, args.professionalId);
+    const professional = await requireDraftProfessional(ctx, args.professionalId);
+
+    if (!professional.displayName.trim()) {
+      throw new Error("Display name is required before submitting for review.");
+    }
+
+    const hasService = await ctx.db
+      .query("professionalServices")
+      .withIndex("by_professional", (q) => q.eq("professionalId", args.professionalId))
+      .first();
+    if (!hasService) {
+      throw new Error("At least one service is required before submitting for review.");
+    }
+
+    const hasLocation = await ctx.db
+      .query("professionalLocations")
+      .withIndex("by_professional", (q) => q.eq("professionalId", args.professionalId))
+      .first();
+    if (!hasLocation) {
+      throw new Error("At least one location is required before submitting for review.");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(args.professionalId, {
+      publicationStatus: "review",
+      updatedAt: now,
+    });
+
+    await ctx.db.insert("auditEvents", {
+      actorSubject: user.authSubject,
+      actorRole: membership.role,
+      action: "professional.submittedForReview",
+      resourceType: "professionals",
+      resourceId: args.professionalId,
+      metadata: { organizationId: membership.organizationId },
+      createdAt: now,
+    });
+
+    return {};
   },
 });

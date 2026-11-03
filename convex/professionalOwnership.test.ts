@@ -346,3 +346,257 @@ test("searchPublishedProfessionals only matches published listings by name subst
   expect(results).toHaveLength(1);
   expect(results[0].displayName).toBe("Jane Doe CPA");
 });
+
+// ---------------------------------------------------------------------------
+// Task 6: onboarding wizard step mutations
+// ---------------------------------------------------------------------------
+
+async function seedServiceAndJurisdiction(t: ReturnType<typeof convexTest>) {
+  return t.run(async (ctx) => {
+    const countryId = await ctx.db.insert("countries", {
+      code: "US",
+      name: "United States",
+      defaultLocale: "en-US",
+      displayCurrency: "USD",
+      discoverable: true,
+      onboardingEnabled: true,
+      transactionEnabled: false,
+      paymentEnabled: false,
+      status: "published",
+      updatedAt: Date.now(),
+    });
+    const taxJurisdictionId = await ctx.db.insert("taxJurisdictions", {
+      code: "US-FED",
+      countryId,
+      label: "US Federal",
+      level: "national",
+      active: true,
+    });
+    const serviceId = await ctx.db.insert("serviceCategories", {
+      slug: "individual-tax-returns",
+      name: "Individual Tax Returns",
+      summary: "Preparation and filing of individual income tax returns.",
+      sortOrder: 1,
+      publicationStatus: "published",
+      seo: {},
+    });
+    const languageId = await ctx.db.insert("languages", {
+      code: "en",
+      label: "English",
+      enabled: true,
+    });
+    return { countryId, taxJurisdictionId, serviceId, languageId };
+  });
+}
+
+// --- (a) happy path through all wizard steps to submitForReview ---
+
+test("onboarding wizard: happy path through all steps reaches review", async () => {
+  const t = convexTest(schema, modules);
+  const owner = await signedInUser(t, "wizard-owner@example.com");
+  const { organizationId } = await owner.mutation(api.organizations.createOrganization, {
+    name: "Wizard Firm",
+    kind: "professional_firm",
+  });
+  const { professionalId } = await owner.mutation(api.professionalOwnership.createProfessionalDraft, {
+    organizationId,
+    displayName: "Wizard CPA",
+    kind: "individual",
+  });
+
+  const { countryId, taxJurisdictionId, serviceId, languageId } =
+    await seedServiceAndJurisdiction(t);
+
+  await owner.mutation(api.professionalOwnership.updateProfessionalBasics, {
+    professionalId,
+    displayName: "Wizard CPA Updated",
+    kind: "individual",
+    bio: "Experienced CPA serving individuals and small businesses.",
+    remoteServices: true,
+    publicContactMode: "contact_form",
+  });
+
+  await owner.mutation(api.professionalOwnership.setProfessionalServices, {
+    professionalId,
+    services: [{ serviceId, taxJurisdictionId, remote: true, description: "Full-service tax prep." }],
+  });
+
+  await owner.mutation(api.professionalOwnership.setProfessionalLocations, {
+    professionalId,
+    locations: [{ countryId, city: "Austin", region: "TX", isPrimary: true }],
+  });
+
+  await owner.mutation(api.professionalOwnership.setProfessionalLanguages, {
+    professionalId,
+    languageIds: [languageId],
+  });
+
+  const { credentialId } = await owner.mutation(api.professionalOwnership.addPublicCredential, {
+    professionalId,
+    designation: "CPA",
+    issuer: "State Board of Accountancy",
+  });
+  expect(credentialId).toBeDefined();
+
+  await owner.mutation(api.professionalOwnership.submitForReview, { professionalId });
+
+  const professional = await t.run(async (ctx) => ctx.db.get(professionalId));
+  expect(professional?.publicationStatus).toBe("review");
+  expect(professional?.displayName).toBe("Wizard CPA Updated");
+
+  const services = await t.run(async (ctx) =>
+    ctx.db
+      .query("professionalServices")
+      .withIndex("by_professional", (q) => q.eq("professionalId", professionalId))
+      .collect(),
+  );
+  expect(services).toHaveLength(1);
+
+  const locations = await t.run(async (ctx) =>
+    ctx.db
+      .query("professionalLocations")
+      .withIndex("by_professional", (q) => q.eq("professionalId", professionalId))
+      .collect(),
+  );
+  expect(locations).toHaveLength(1);
+
+  const languages = await t.run(async (ctx) =>
+    ctx.db
+      .query("professionalLanguages")
+      .withIndex("by_professional", (q) => q.eq("professionalId", professionalId))
+      .collect(),
+  );
+  expect(languages).toHaveLength(1);
+
+  const credentials = await t.run(async (ctx) =>
+    ctx.db
+      .query("professionalPublicCredentials")
+      .withIndex("by_professional", (q) => q.eq("professionalId", professionalId))
+      .collect(),
+  );
+  expect(credentials).toHaveLength(1);
+  expect(credentials[0].publicDisplayStatus).toBe("unverified");
+});
+
+// --- (b) cross-org rejection: caller's org doesn't own the professional ---
+
+test("wizard-step mutations reject a caller whose org does not own the professional", async () => {
+  const t = convexTest(schema, modules);
+  const owner = await signedInUser(t, "wizard-ownerb@example.com");
+  const { organizationId } = await owner.mutation(api.organizations.createOrganization, {
+    name: "Owning Firm",
+    kind: "professional_firm",
+  });
+  const { professionalId } = await owner.mutation(api.professionalOwnership.createProfessionalDraft, {
+    organizationId,
+    displayName: "Owned CPA",
+    kind: "individual",
+  });
+
+  const outsider = await signedInUser(t, "wizard-outsider@example.com");
+  await outsider.mutation(api.organizations.createOrganization, {
+    name: "Outsider Firm",
+    kind: "professional_firm",
+  });
+
+  await expect(
+    outsider.mutation(api.professionalOwnership.updateProfessionalBasics, {
+      professionalId,
+      displayName: "Hijacked",
+      kind: "individual",
+      bio: "",
+      remoteServices: false,
+      publicContactMode: "none",
+    }),
+  ).rejects.toThrow();
+});
+
+// --- (c) submitForReview's required-fields guard ---
+
+test("submitForReview rejects when no services or locations have been set", async () => {
+  const t = convexTest(schema, modules);
+  const owner = await signedInUser(t, "wizard-guard@example.com");
+  const { organizationId } = await owner.mutation(api.organizations.createOrganization, {
+    name: "Guard Firm",
+    kind: "professional_firm",
+  });
+  const { professionalId } = await owner.mutation(api.professionalOwnership.createProfessionalDraft, {
+    organizationId,
+    displayName: "Guard CPA",
+    kind: "individual",
+  });
+
+  await expect(
+    owner.mutation(api.professionalOwnership.submitForReview, { professionalId }),
+  ).rejects.toThrow();
+});
+
+test("submitForReview rejects when displayName is blank even if services and locations exist", async () => {
+  const t = convexTest(schema, modules);
+  const owner = await signedInUser(t, "wizard-guard-name@example.com");
+  const { organizationId } = await owner.mutation(api.organizations.createOrganization, {
+    name: "Guard Name Firm",
+    kind: "professional_firm",
+  });
+  const { professionalId } = await owner.mutation(api.professionalOwnership.createProfessionalDraft, {
+    organizationId,
+    displayName: "Temp Name",
+    kind: "individual",
+  });
+
+  const { countryId, taxJurisdictionId, serviceId } = await seedServiceAndJurisdiction(t);
+  await owner.mutation(api.professionalOwnership.setProfessionalServices, {
+    professionalId,
+    services: [{ serviceId, taxJurisdictionId, remote: true }],
+  });
+  await owner.mutation(api.professionalOwnership.setProfessionalLocations, {
+    professionalId,
+    locations: [{ countryId, city: "Austin", isPrimary: true }],
+  });
+
+  // Blank the display name directly — updateProfessionalBasics has no
+  // non-empty guard of its own; only submitForReview enforces one.
+  await t.run((ctx) => ctx.db.patch(professionalId, { displayName: "   " }));
+
+  await expect(
+    owner.mutation(api.professionalOwnership.submitForReview, { professionalId }),
+  ).rejects.toThrow();
+});
+
+// --- (d) rejection when publicationStatus isn't "draft" ---
+
+test("wizard-step mutations reject editing a listing that is already in review", async () => {
+  const t = convexTest(schema, modules);
+  const owner = await signedInUser(t, "wizard-review@example.com");
+  const { organizationId } = await owner.mutation(api.organizations.createOrganization, {
+    name: "Review Firm",
+    kind: "professional_firm",
+  });
+  const { professionalId } = await owner.mutation(api.professionalOwnership.createProfessionalDraft, {
+    organizationId,
+    displayName: "Review CPA",
+    kind: "individual",
+  });
+
+  const { countryId, taxJurisdictionId, serviceId } = await seedServiceAndJurisdiction(t);
+  await owner.mutation(api.professionalOwnership.setProfessionalServices, {
+    professionalId,
+    services: [{ serviceId, taxJurisdictionId, remote: true }],
+  });
+  await owner.mutation(api.professionalOwnership.setProfessionalLocations, {
+    professionalId,
+    locations: [{ countryId, city: "Austin", isPrimary: true }],
+  });
+  await owner.mutation(api.professionalOwnership.submitForReview, { professionalId });
+
+  await expect(
+    owner.mutation(api.professionalOwnership.updateProfessionalBasics, {
+      professionalId,
+      displayName: "Should Not Apply",
+      kind: "individual",
+      bio: "",
+      remoteServices: false,
+      publicContactMode: "none",
+    }),
+  ).rejects.toThrow();
+});
