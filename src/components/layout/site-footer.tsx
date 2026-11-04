@@ -3,7 +3,7 @@ import { Container } from "@/components/layout/container";
 import { BrandLogo } from "@/components/shared/brand-logo";
 const groups = [
   {title: "Explore", links: [{label: "Home", href: "/"}, {label: "Find an Accountant", href: "/find-accountant"}, {label: "Services", href: "/services"}, {label: "About us", href: "/about"}]},
-  {title: "Professionals", links: [{label: "List your practice", href: "/for-professionals"}, {label: "Professional sign in", href: "/sign-in"}, {label: "How it works", href: "/how-it-works"}]},
+  {title: "Professionals", links: [{label: "List your practice", href: "/for-professionals"}, {label: "Professional sign in", href: "/login"}, {label: "How it works", href: "/how-it-works"}]},
   {title: "Resources", links: [{label: "Blog", href: "/resources"}, {label: "Help center", href: "/help"}, {label: "Contact", href: "/contact"}]},
   {title: "Legal", links: [{label: "Privacy policy", href: "/privacy"}, {label: "Terms of service", href: "/terms"}]},
 ];

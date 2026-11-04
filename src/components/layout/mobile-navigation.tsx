@@ -200,14 +200,14 @@ export function MobileNavigation({ primaryLinks, sections }: MobileNavigationPro
 
           <div className="flex flex-col gap-2 border-t border-border pt-4">
             <Link
-              href="/sign-in"
+              href="/login"
               onClick={() => setOpen(false)}
               className={cn(buttonVariants({ variant: "outline", size: "md" }))}
             >
               Sign In
             </Link>
             <Link
-              href="/sign-in?intent=signup"
+              href="/signup"
               onClick={() => setOpen(false)}
               className={cn(buttonVariants({ variant: "primary", size: "md" }))}
             >

@@ -24,7 +24,7 @@ import type { DirectoryProfessional } from "@/lib/directory/types";
  *    photo and fall back to the initials avatar rather than reusing one
  *    person's face under a second name.
  */
-export const directoryFixtures: DirectoryProfessional[] = [
+export const directoryFixtures: DirectoryProfessional[] = process.env.NODE_ENV === "production" ? [] : [
   {
     slug: "sarah-johnson",
     displayName: "Sarah Johnson",

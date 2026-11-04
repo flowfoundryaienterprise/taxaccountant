@@ -1,5 +1,6 @@
-import test from "node:test";
+import test, { mock } from "node:test";
 import assert from "node:assert/strict";
+import { getFunctionName, type FunctionReference } from "convex/server";
 
 import {
   getPublishedProfile,
@@ -8,8 +9,20 @@ import {
 } from "@/lib/professionals/profile-fixtures";
 import { getCountry, isDiscoverable, discoverableCountryCodes } from "@/lib/marketplace/countries";
 import { getService, serviceCatalogSlugs } from "@/lib/marketplace/services";
-import { publicContentRepository } from "@/lib/cms/public-content-adapter";
-import { buildSitemapEntries } from "@/lib/seo/sitemap-entries";
+// This adapter/sitemap unit suite must not depend on a live deployment being empty.
+// A non-routable client origin plus a strict query mock prevents network access.
+process.env.NEXT_PUBLIC_CONVEX_URL = "https://unit-test.convex.cloud";
+const { publicConvexClient } = await import("@/lib/convex/public-client");
+mock.method(publicConvexClient, "query", async (reference: FunctionReference<"query">) => {
+  switch (getFunctionName(reference)) {
+    case "content:listPublishedResources": return { items: [], hasMore: false };
+    case "content:getPublishedBySlug": return null;
+    case "content:listCategories": return [];
+    default: throw new Error("Unexpected public query in isolated test");
+  }
+});
+const { publicContentRepository } = await import("@/lib/cms/public-content-adapter");
+const { buildSitemapEntries } = await import("@/lib/seo/sitemap-entries");
 
 /**
  * What the public side is allowed to hand out.
@@ -48,8 +61,7 @@ test("no public profile claims a verification it has not been given", () => {
 });
 
 test("the public content repository returns nothing while nothing is published", async () => {
-  // If this starts failing, real content has landed — and the sitemap and
-  // /resources must be re-checked against it rather than this being relaxed.
+  // The backend publication boundary is separate; this exercises the empty response mapping.
   const page = await publicContentRepository.listArticles();
   assert.deepEqual(page.items, []);
   assert.equal(page.hasMore, false);

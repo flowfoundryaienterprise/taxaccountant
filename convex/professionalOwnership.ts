@@ -1,7 +1,11 @@
 import { v } from "convex/values";
+import schema from "./schema";
+import { onboardingDraftValidator } from "./profileFields";
+import { ownedProfessionalProfiles, requireActiveUser } from "./users";
+import { api, internal } from "./_generated/api";
 
 import { requireOrgRole } from "./organizations";
-import { mutation, type MutationCtx, type QueryCtx } from "./_generated/server";
+import { action, internalMutation, mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 
 /**
@@ -23,6 +27,11 @@ async function findOwnershipRows(
   ctx: QueryCtx,
   professionalId: Id<"professionals">,
 ): Promise<Array<Doc<"professionalOwnership">>> {
+  // `.collect()`, not `.take(100)` — this backs `requireProfessionalEditAccess`'s
+  // search for the single `approved` row. A listing that has accumulated
+  // more than 100 ownership rows over time (repeated claims/rejections) would
+  // silently lose access for its real owner the moment the approved row
+  // falls past position 100 in `.take()`'s cursor order.
   return ctx.db
     .query("professionalOwnership")
     .withIndex("by_professional", (q) => q.eq("professionalId", professionalId))
@@ -475,6 +484,7 @@ export const submitForReview = mutation({
     const { user, membership } = await requireProfessionalEditAccess(ctx, args.professionalId);
     const professional = await requireDraftProfessional(ctx, args.professionalId);
 
+    if (professional.onboardingDraft) throw new Error("Submit this profile through the onboarding review screen.");
     if (!professional.displayName.trim()) {
       throw new Error("Display name is required before submitting for review.");
     }
@@ -516,4 +526,125 @@ export const submitForReview = mutation({
 
     return {};
   },
+});
+
+export const myProfiles = query({
+  args: {}, returns: v.array(schema.doc("professionals")),
+  handler: async ctx => ownedProfessionalProfiles(ctx),
+});
+export const getOwnedProfile = query({
+  args: { professionalId: v.id("professionals") },
+  returns: v.object({profile: schema.doc("professionals"), photoUrl: v.union(v.string(), v.null())}),
+  handler: async (ctx, {professionalId}) => {
+    await requireProfessionalEditAccess(ctx, professionalId);
+    const profile = await ctx.db.get(professionalId);
+    if (!profile) throw new Error("Profile not found.");
+    return {profile, photoUrl: profile.profilePhotoId ? await ctx.storage.getUrl(profile.profilePhotoId) : null};
+  },
+});
+/** One transaction creates both the firm and its first draft, retry-safe per caller. */
+export const beginOnboarding = mutation({
+  args: {}, returns: v.id("professionals"),
+  handler: async (ctx): Promise<Id<"professionals">> => {
+    const user = await requireActiveUser(ctx);
+    if (user.role !== "professional") throw new Error("A service provider account is required.");
+    const profiles = await ownedProfessionalProfiles(ctx);
+    const draft = profiles.find(p => p.publicationStatus === "draft");
+    if (draft) return draft._id;
+    // Only an actively-submitted profile (review/published) is a reason to
+    // stop here — `profiles.length` alone also matches a suspended or
+    // archived profile with no draft, which is not "already submitted" and
+    // has no dashboard to open; that used to dead-end the caller with a
+    // message describing a state they weren't in.
+    if (profiles.some(p => p.publicationStatus === "review" || p.publicationStatus === "published")) {
+      throw new Error("Your existing profile is already submitted. Open your dashboard.");
+    }
+    const name = user.displayName?.trim() || "My practice";
+    const {organizationId} = await ctx.runMutation(api.organizations.createOrganization, {name, kind: "professional_firm"});
+    const result = await ctx.runMutation(api.professionalOwnership.createProfessionalDraft, {organizationId, displayName: name, kind: "individual"});
+    return result.professionalId;
+  },
+});
+export const saveOnboardingDraft = mutation({
+  args: {professionalId: v.id("professionals"), draft: onboardingDraftValidator}, returns: v.null(),
+  handler: async (ctx, {professionalId, draft}) => {
+    await requireProfessionalEditAccess(ctx, professionalId);
+    await requireDraftProfessional(ctx, professionalId);
+    if (!Number.isInteger(draft.step) || draft.step < 0 || draft.step > 8) throw new Error("Invalid onboarding step.");
+    if (draft.displayName.length > 120 || draft.businessName.length > 160 || draft.bio.length > 4000 || draft.city.length > 100 || draft.region.length > 100) throw new Error("A profile field is too long.");
+    if (draft.serviceIds.length > 20 || draft.jurisdictionIds.length > 30 || draft.credentials.length > 10 || draft.credentials.some(c => c.designation.length > 100 || c.issuer.length > 160)) throw new Error("Too many selections or a credential is too long.");
+    await ctx.db.patch(professionalId, {onboardingDraft: draft, updatedAt: Date.now()});
+    return null;
+  },
+});
+export const attachProfilePhoto = internalMutation({
+  args: {professionalId: v.id("professionals"), storageId: v.id("_storage")}, returns: v.null(),
+  handler: async (ctx, args) => {
+    await requireProfessionalEditAccess(ctx, args.professionalId);
+    const profile = await requireDraftProfessional(ctx, args.professionalId);
+    await ctx.db.patch(args.professionalId, {profilePhotoId: args.storageId, updatedAt: Date.now()});
+    if (profile.profilePhotoId && profile.profilePhotoId !== args.storageId) await ctx.storage.delete(profile.profilePhotoId);
+    return null;
+  },
+});
+export const uploadProfilePhoto = action({
+  args: {professionalId: v.id("professionals"), bytes: v.bytes()}, returns: v.null(),
+  handler: async (ctx, args): Promise<null> => {
+    const {profile} = await ctx.runQuery(api.professionalOwnership.getOwnedProfile, {professionalId: args.professionalId});
+    if (profile.publicationStatus !== "draft") throw new Error("Only draft profiles can be edited.");
+    const bytes = new Uint8Array(args.bytes);
+    if (!bytes.length || bytes.length > 750000) throw new Error("Choose a JPG or PNG smaller than 750 KB.");
+    const png = bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71 && bytes[4] === 13 && bytes[5] === 10 && bytes[6] === 26 && bytes[7] === 10;
+    const jpeg = bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255;
+    if (!png && !jpeg) throw new Error("Only JPG and PNG photographs are supported.");
+    const storageId = await ctx.storage.store(new Blob([args.bytes], {type: png ? "image/png" : "image/jpeg"}));
+    try { await ctx.runMutation(internal.professionalOwnership.attachProfilePhoto, {professionalId: args.professionalId, storageId}); }
+    catch (error) { await ctx.storage.delete(storageId); throw error; }
+    return null;
+  },
+});
+export const submitOnboarding = mutation({
+  args: {professionalId: v.id("professionals")}, returns: v.null(),
+  handler: async (ctx, {professionalId}) => {
+    await requireProfessionalEditAccess(ctx, professionalId);
+    const profile = await requireDraftProfessional(ctx, professionalId);
+    const draft = profile.onboardingDraft;
+    if (!draft || !draft.displayName.trim() || !draft.businessName.trim() || draft.bio.trim().length < 50 || !draft.city.trim() || !draft.countryId || !profile.profilePhotoId || !draft.credentials.some(c => c.designation.trim()) || !draft.serviceIds.length || !draft.jurisdictionIds.length) throw new Error("Complete all profile steps before submitting.");
+    const country = await ctx.db.get(draft.countryId);
+    if (!country?.onboardingEnabled || country.code !== "US" || country.status !== "published") throw new Error("Onboarding is currently available for USA practices.");
+    for (const id of draft.serviceIds) {
+      const service = await ctx.db.get(id);
+      if (service?.publicationStatus !== "published") throw new Error("Select a published service.");
+    }
+    for (const id of draft.jurisdictionIds) {
+      const jurisdiction = await ctx.db.get(id);
+      if (!jurisdiction?.active || jurisdiction.countryId !== draft.countryId) throw new Error("Select an active jurisdiction for your country.");
+    }
+    await ctx.runMutation(api.professionalOwnership.updateProfessionalBasics, {professionalId, displayName: draft.displayName.trim(), kind: profile.kind, firmName: draft.businessName.trim(), bio: draft.bio.trim(), remoteServices: draft.remote, inPersonServices: !draft.remote, publicContactMode: "contact_form"});
+    await ctx.runMutation(api.professionalOwnership.setProfessionalServices, {professionalId, services: [...new Set(draft.serviceIds)].flatMap(serviceId => [...new Set(draft.jurisdictionIds)].map(taxJurisdictionId => ({serviceId, taxJurisdictionId, remote: draft.remote})))});
+    await ctx.runMutation(api.professionalOwnership.setProfessionalLocations, {professionalId, locations: [{countryId: draft.countryId, city: draft.city.trim(), region: draft.region.trim(), isPrimary: true}]});
+    const oldCredentials = await ctx.db.query("professionalPublicCredentials").withIndex("by_professional", q => q.eq("professionalId", professionalId)).take(100);
+    for (const credential of oldCredentials) await ctx.db.delete(credential._id);
+    for (const credential of draft.credentials) {
+      if (credential.designation.trim()) await ctx.db.insert("professionalPublicCredentials", {professionalId, designation: credential.designation.trim(), issuer: credential.issuer.trim(), publicDisplayStatus: "unverified"});
+    }
+    const {user, membership} = await requireProfessionalEditAccess(ctx, professionalId);
+    await ctx.db.patch(professionalId, {onboardingCompletedAt: Date.now(), publicationStatus: "review", approvedProfile: false, updatedAt: Date.now()});
+    await ctx.db.insert("auditEvents", {actorSubject: user.authSubject, actorRole: membership.role, action: "professional.submittedForReview", resourceType: "professionals", resourceId: professionalId, metadata: {}, createdAt: Date.now()});
+    return null;
+  },
+});
+
+/** Editing a published profile first withdraws it; publication always needs a new staff review. */
+export const reopenForEditing = mutation({
+ args: {professionalId: v.id("professionals")}, returns: v.null(),
+ handler: async (ctx, {professionalId}) => {
+  const {user,membership} = await requireProfessionalEditAccess(ctx,professionalId);
+  const profile=await ctx.db.get(professionalId);
+  if(!profile || (profile.publicationStatus!=="published" && profile.publicationStatus!=="review")) throw new Error("This profile cannot be reopened.");
+  if(!profile.onboardingDraft) throw new Error("Contact support to migrate this older profile before editing.");
+  await ctx.db.patch(professionalId,{publicationStatus:"draft",approvedProfile:false,updatedAt:Date.now()});
+  await ctx.db.insert("auditEvents",{actorSubject:user.authSubject,actorRole:membership.role,action:"professional.withdrawnForEditing",resourceType:"professionals",resourceId:professionalId,metadata:{},createdAt:Date.now()});
+  return null;
+ }
 });

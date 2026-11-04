@@ -47,6 +47,7 @@ export function SiteChrome({ header, footer, children }: SiteChromeProps) {
     pathname.startsWith("/admin/") ||
     pathname === "/customer/dashboard" ||
     pathname.startsWith("/customer/dashboard/") ||
+    pathname === "/professional/profile" ||
     pathname === "/professional/dashboard" ||
     pathname.startsWith("/professional/dashboard/") ||
     pathname === "/professional/subscription" ||

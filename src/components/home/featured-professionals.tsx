@@ -4,9 +4,9 @@ import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/layout/container";
 import { ProfessionalCard } from "@/components/shared/professional-card";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { featuredSlugs } from "@/lib/home-content";
+import { loadDirectory } from "@/lib/directory/public-directory";
 import { toCardModel } from "@/lib/directory/card-model";
-import { directoryFixtures } from "@/lib/directory/fixtures";
+
 import { professionalHref } from "@/lib/marketplace/query-params";
 
 /**
@@ -14,15 +14,9 @@ import { professionalHref } from "@/lib/marketplace/query-params";
  * a static 3-up grid matching the approved mockup ("Meet the professionals").
  * `ProfessionalCard` itself is untouched.
  */
-const featured = featuredSlugs.map((slug) => {
-  const row = directoryFixtures.find((fixture) => fixture.slug === slug);
-  if (!row) {
-    throw new Error(`Homepage highlight references unknown fixture slug: ${slug}`);
-  }
-  return { slug, card: toCardModel(row) };
-});
-
-export function FeaturedProfessionals() {
+export async function FeaturedProfessionals() {
+  const directory = await loadDirectory();
+  const featured = directory.items.slice(0, 6).map(row => ({slug:row.slug,card:toCardModel(row)}));
   return (
     <section id="professionals" className="bg-tint py-16 sm:py-24">
       <Container className="flex flex-col gap-10">
@@ -30,7 +24,7 @@ export function FeaturedProfessionals() {
           <SectionHeading
             eyebrow="Meet the professionals"
             title="Accountants & tax specialists."
-            description="Preview the profile format. USA professional listings are coming soon."
+            description={directory.preview ? "Preview the profile format. USA professional listings are coming soon." : "Explore approved USA professionals by expertise and location."}
           />
           <Link
             href="/find-accountant"
@@ -42,10 +36,11 @@ export function FeaturedProfessionals() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {(process.env.NODE_ENV === "production" ? [] : featured).map(({ slug, card }) => (
+          {featured.map(({ slug, card }) => (
             <div key={slug}>
               <ProfessionalCard
                 compact
+                example={directory.preview}
                 professional={card}
                 profileHref={professionalHref(slug)}
                 className="h-full"
@@ -55,10 +50,10 @@ export function FeaturedProfessionals() {
           ))}
         </div>
 
-        {process.env.NODE_ENV === "production" ? <p className="rounded-card border border-border bg-white p-8 text-slate">Approved USA professional listings will appear here when available.</p> : <p className="text-caption text-slate">
+        {!directory.preview && !featured.length ? <p className="rounded-card border border-border bg-white p-8 text-slate">Approved USA professional listings will appear here when available.</p> : directory.preview ? <p className="text-caption text-slate">
           Illustrative profiles for design preview, not active marketplace listings. No example profile has been verified
           yet, and each record states its own review status.
-        </p>}
+        </p> : null}
       </Container>
     </section>
   );

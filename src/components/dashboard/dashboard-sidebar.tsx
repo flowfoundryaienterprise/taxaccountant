@@ -1,4 +1,5 @@
 "use client";
+import { SidebarSignout } from "./sidebar-signout";
 
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
@@ -94,6 +95,7 @@ export function DashboardSidebar({ eyebrow, pathname, items }: DashboardSidebarP
       </nav>
 
       <div className="shrink-0 border-t border-white/10 p-4">
+        <SidebarSignout />
         <Link
           href="/"
           className="text-caption font-medium text-white/70 transition-colors duration-150 hover:text-white"

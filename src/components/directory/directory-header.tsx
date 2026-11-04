@@ -11,7 +11,7 @@ import { Reveal } from "@/components/shared/reveal";
  * not from a Convex query, and AGENTS.md/DESIGN.md section 11 both require
  * that a preview never reads as live inventory.
  */
-export function DirectoryHeader({ resultCount }: { resultCount: number }) {
+export function DirectoryHeader({ resultCount, preview = true }: { resultCount: number; preview?: boolean }) {
   return (
     <div className="relative overflow-hidden border-b border-border bg-tint/50">
       <span
@@ -51,7 +51,7 @@ export function DirectoryHeader({ resultCount }: { resultCount: number }) {
           </p>
         </Reveal>
 
-        <Reveal delayMs={100}>
+        {preview ? <Reveal delayMs={100}>
           <p className="flex max-w-[80ch] gap-2 rounded-card border border-border bg-white px-4 py-3 text-caption text-slate">
             <FlaskConical className="mt-0.5 h-3.5 w-3.5 shrink-0 text-action" aria-hidden />
             <span>
@@ -65,7 +65,7 @@ export function DirectoryHeader({ resultCount }: { resultCount: number }) {
               reason.
             </span>
           </p>
-        </Reveal>
+        </Reveal> : <p className="text-compact text-slate">Approved USA listings. Search covers up to 100 recently published profiles. Publication does not verify every self-reported credential.</p>}
       </div>
     </div>
   );

@@ -24,19 +24,23 @@ import type { DashboardNavItem } from "@/components/dashboard/dashboard-sidebar"
  * dashboards.
  */
 export const customerNavItems: DashboardNavItem[] = [
-  { label: "Overview", href: "/customer/dashboard", icon: LayoutDashboard },
+  { label: "Dashboard", href: "/customer/dashboard", icon: LayoutDashboard },
   { label: "Find Professionals", href: "/find-accountant", icon: Search },
-  { label: "My Enquiries", href: "/customer/enquiries", icon: Inbox, available: false },
+  { label: "My Enquiries", href: "/customer/dashboard#enquiries", icon: Inbox },
   { label: "Saved Professionals", href: "/customer/saved", icon: Heart, available: false },
   { label: "Notifications", href: "/customer/notifications", icon: Bell, available: false },
+  { label: "Profile", href: "/customer/profile", icon: UserRound, available: false },
   { label: "Account Settings", href: "/customer/settings", icon: Settings, available: false },
 ];
 
 export const professionalNavItems: DashboardNavItem[] = [
-  { label: "Overview", href: "/professional/dashboard", icon: LayoutDashboard },
-  { label: "My Profile", href: "/professional/onboarding", icon: UserRound },
-  { label: "Lead Inbox", href: "/professional/leads", icon: Inbox, available: false },
+  { label: "Dashboard", href: "/professional/dashboard", icon: LayoutDashboard },
+  { label: "My Profile", href: "/professional/profile", icon: UserRound },
+  { label: "Edit Profile", href: "/professional/profile", icon: UserRound },
+  { label: "Lead Inbox", href: "/professional/dashboard#enquiries", icon: Inbox },
+  { label: "Enquiries", href: "/professional/dashboard#enquiries", icon: Inbox },
   { label: "Subscription", href: "/professional/subscription", icon: CreditCard },
+  { label: "Billing", href: "/professional/subscription", icon: CreditCard },
   { label: "Notifications", href: "/professional/notifications", icon: Bell, available: false },
   { label: "Account Settings", href: "/professional/settings", icon: Settings, available: false },
 ];

@@ -3,6 +3,81 @@ import { paginationOptsValidator } from "convex/server";
 
 import { mutation, query } from "./_generated/server";
 import { requireStaff } from "./staff";
+import { requireActiveUser } from "./users";
+import { requireProfessionalEditAccess } from "./professionalOwnership";
+import schema from "./schema";
+
+/** Private enquiry contracts: identity and firm ownership are resolved on the server. */
+export const myEnquiries = query({
+  args: {professionalId: v.optional(v.id("professionals"))},
+  returns: v.array(v.object({...schema.doc("leads").fields,serviceName:v.string(),professionalName:v.string()})),
+  handler: async (ctx, {professionalId}) => {
+    const user = await requireActiveUser(ctx);
+    if (professionalId) await requireProfessionalEditAccess(ctx, professionalId);
+    const leads=professionalId
+      ? await ctx.db.query("leads").withIndex("by_professional_created", q => q.eq("professionalId", professionalId)).order("desc").take(100)
+      : await ctx.db.query("leads").withIndex("by_customer", q => q.eq("customerUserId", user._id)).order("desc").take(100);
+    return Promise.all(leads.map(async lead=>({...lead,serviceName:(await ctx.db.get(lead.serviceId))?.name??"Unavailable service",professionalName:(await ctx.db.get(lead.professionalId))?.displayName??"Unavailable professional"})));
+  },
+});
+
+export const createEnquiry = mutation({
+  args: {professionalId: v.id("professionals"), serviceId: v.id("serviceCategories"), jurisdictionId: v.id("taxJurisdictions"), description: v.string()},
+  returns: v.id("leads"),
+  handler: async (ctx, args) => {
+    const user = await requireActiveUser(ctx);
+    if (user.role !== "customer") throw new Error("A customer account is required.");
+    const description = args.description.trim();
+    if (description.length < 20 || description.length > 2000) throw new Error("Describe your enquiry in 20–2,000 characters.");
+    const profile = await ctx.db.get(args.professionalId);
+    if (!profile?.approvedProfile || profile.publicationStatus !== "published" || profile.publicContactMode !== "contact_form") throw new Error("This professional is not accepting enquiries.");
+    const service = await ctx.db.get(args.serviceId);
+    const jurisdiction = await ctx.db.get(args.jurisdictionId);
+    const country = jurisdiction ? await ctx.db.get(jurisdiction.countryId) : null;
+    if (service?.publicationStatus !== "published" || !jurisdiction?.active || country?.code !== "US" || !country.discoverable || country.status !== "published") throw new Error("Choose an available USA service and jurisdiction.");
+    const offerings = await ctx.db.query("professionalServices").withIndex("by_professional", q => q.eq("professionalId", args.professionalId)).take(601);
+    if (!offerings.some(o => o.serviceId === args.serviceId && o.taxJurisdictionId === args.jurisdictionId && o.enabled)) throw new Error("This professional does not offer the selected service in this jurisdiction.");
+    return ctx.db.insert("leads", {...args, description, customerUserId: user._id, status: "new", createdAt: Date.now()});
+  },
+});
+
+export const closeEnquiry = mutation({
+  args: {enquiryId: v.id("leads")}, returns: v.null(),
+  handler: async (ctx, {enquiryId}) => {
+    const user = await requireActiveUser(ctx);
+    const lead = await ctx.db.get(enquiryId);
+    if (!lead) throw new Error("Enquiry not found.");
+    const isCustomer = lead.customerUserId === user._id;
+    if (!isCustomer) await requireProfessionalEditAccess(ctx, lead.professionalId);
+    if (lead.status === "closed" || lead.status === "canceled") return null;
+    await ctx.db.patch(enquiryId, {status: isCustomer ? "canceled" : "closed"});
+    return null;
+  },
+});
+
+/** Project public labels only; private onboarding drafts never leave this query. */
+export const enquiryOptions = query({
+  args: {}, returns: v.array(v.object({professionalId: v.id("professionals"), displayName: v.string(), serviceId: v.id("serviceCategories"), serviceName: v.string(), jurisdictionId: v.id("taxJurisdictions"), jurisdictionName: v.string()})),
+  handler: async ctx => {
+    await requireActiveUser(ctx);
+    const profiles = await ctx.db.query("professionals").withIndex("by_publication_status", q => q.eq("publicationStatus", "published")).take(50);
+    const result = [];
+    for (const profile of profiles) {
+      if (!profile.approvedProfile || profile.publicContactMode !== "contact_form") continue;
+      const offerings = await ctx.db.query("professionalServices").withIndex("by_professional", q => q.eq("professionalId", profile._id)).take(50);
+      for (const offering of offerings) {
+        if (!offering.enabled) continue;
+        const service = await ctx.db.get(offering.serviceId);
+        const jurisdiction = await ctx.db.get(offering.taxJurisdictionId);
+        const country = jurisdiction ? await ctx.db.get(jurisdiction.countryId) : null;
+        if (service?.publicationStatus !== "published" || !jurisdiction?.active || country?.code !== "US" || !country.discoverable || country.status !== "published") continue;
+        result.push({professionalId: profile._id, displayName: profile.displayName, serviceId: service._id, serviceName: service.name, jurisdictionId: jurisdiction._id, jurisdictionName: jurisdiction.label});
+        if (result.length === 100) return result;
+      }
+    }
+    return result;
+  },
+});
 
 /**
  * Public contact / professional-interest intake (PRD.md P1-F08).

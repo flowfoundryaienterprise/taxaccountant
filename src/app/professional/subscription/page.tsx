@@ -42,9 +42,11 @@ export default async function ProfessionalSubscriptionPage() {
     fetchAuthQuery(api.organizations.currentOrganizations, {}),
   ]);
 
-  if (!user) {
+  if (!user || user.accountStatus !== "active") {
     redirect("/sign-in?intent=professional-dashboard");
   }
+
+  if (user.role !== "professional") redirect("/customer/dashboard");
 
   const accountLabel = user.displayName ?? user.email ?? "Your account";
   const firm = organizations.find((org) => org.kind === "professional_firm");

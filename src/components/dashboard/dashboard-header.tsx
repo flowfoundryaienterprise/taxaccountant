@@ -31,12 +31,13 @@ export function DashboardHeader({ title, accountLabel }: DashboardHeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 flex h-[72px] shrink-0 items-center justify-between gap-3 border-b border-border bg-white px-4 sm:px-6">
-      <h1 className="truncate text-compact font-semibold text-navy">{title}</h1>
+      <p className="truncate text-compact font-semibold text-navy">{title}</p>
 
       <div className="flex shrink-0 items-center gap-2">
         <button
           type="button"
-          aria-label="Notifications"
+          aria-label="Notifications — not available yet"
+          disabled
           className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate transition-colors duration-150 hover:bg-subtle"
         >
           <Bell className="h-4.5 w-4.5" aria-hidden />

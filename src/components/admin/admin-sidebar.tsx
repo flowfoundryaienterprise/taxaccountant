@@ -4,6 +4,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 
 import { BrandLogo } from "@/components/shared/brand-logo";
+import { SidebarSignout } from "@/components/dashboard/sidebar-signout";
 import {
   ADMIN_NAV_GROUP_ORDER,
   activeNavHref,
@@ -54,14 +55,17 @@ export function AdminSidebar({ pathname, open, onClose, staffRole }: AdminSideba
       />
 
       <aside
+        data-admin-sidebar
+        role={open ? "dialog" : undefined}
+        aria-modal={open ? true : undefined}
         aria-label="CMS sections"
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-navy/60 bg-navy transition-transform duration-200 ease-out",
+          "fixed inset-y-0 left-0 z-50 flex w-[248px] shrink-0 flex-col border-r border-navy/60 bg-navy transition-transform duration-200 ease-out",
           "lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0",
-          open ? "translate-x-0" : "-translate-x-full",
+          open ? "translate-x-0" : "hidden -translate-x-full lg:flex",
         )}
       >
-        <div className="flex h-[72px] shrink-0 items-center justify-between gap-2 border-b border-white/10 px-5">
+        <div className="flex h-[80px] shrink-0 items-center justify-between gap-2 border-b border-white/10 px-5">
           {/*
             The mark with its wordmark, matching the public header. Naming
             the product also tells a staff member which site's CMS they have
@@ -79,7 +83,7 @@ export function AdminSidebar({ pathname, open, onClose, staffRole }: AdminSideba
               <span className="min-w-0 truncate text-compact font-semibold text-white">
                 TaxAccountant
               </span>
-              <span className="text-[0.65rem] font-medium tracking-wide text-white/50 uppercase">
+              <span className="text-[0.65rem] font-medium tracking-wide text-white/75 uppercase">
                 Admin console
               </span>
             </span>
@@ -98,12 +102,13 @@ export function AdminSidebar({ pathname, open, onClose, staffRole }: AdminSideba
         <nav aria-label="CMS navigation" className="flex-1 overflow-y-auto p-3">
           {groups.map(({ group, items }) => (
             <div key={group} className="mb-5">
-              <p className="px-3 pb-1 text-[0.65rem] font-semibold tracking-wide text-white/40 uppercase">
+              <p className="px-3 pb-1 text-[0.65rem] font-semibold tracking-wide text-white/75 uppercase">
                 {group}
               </p>
               <ul className="flex flex-col gap-1">
                 {items.map((item) => {
                   const isActive = item.href === active;
+                  if(item.available===false) return <li key={item.href}><span title={item.description} className="flex min-h-11 items-center gap-3 rounded-input px-3 py-2 text-compact font-medium text-white/40"><item.icon className="h-5 w-5 shrink-0" aria-hidden />{item.label}<span className="sr-only"> — not available yet</span></span></li>;
 
                   return (
                     <li key={item.href} className="relative">
@@ -118,7 +123,7 @@ export function AdminSidebar({ pathname, open, onClose, staffRole }: AdminSideba
                             : "text-white/70 hover:translate-x-0.5 hover:bg-white/10 hover:text-white",
                         )}
                       >
-                        <item.icon className="h-4 w-4 shrink-0" aria-hidden />
+                        <item.icon className="h-5 w-5 shrink-0" aria-hidden />
                         <span className="min-w-0 break-words">{item.label}</span>
                       </Link>
                     </li>
@@ -137,6 +142,8 @@ export function AdminSidebar({ pathname, open, onClose, staffRole }: AdminSideba
           >
             View website
           </Link>
+          <p className="mt-4 border-t border-white/10 pt-3 text-compact font-semibold text-white">{staffRole==='cms_admin'?'Administrator':'Content editor'}</p>
+          <SidebarSignout />
         </div>
       </aside>
     </>

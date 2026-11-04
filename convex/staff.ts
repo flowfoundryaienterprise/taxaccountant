@@ -1,8 +1,62 @@
 import { v } from "convex/values";
 
 import { authComponent, createAuth } from "./auth";
-import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
+import { internalMutation, mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
+import schema from "./schema";
+
+export const latestEnquiries = query({
+  args:{},returns:v.array(v.object({id:v.id("leads"),description:v.string(),service:v.string(),professional:v.string(),status:v.string(),createdAt:v.number()})),
+  handler:async ctx=>{
+    const staff=await requireStaff(ctx);
+    if(staff.role!=="cms_admin")throw new Error("Administrator access is required.");
+    const leads=await ctx.db.query("leads").order("desc").take(100);
+    return Promise.all(leads.map(async lead=>({id:lead._id,description:lead.description,service:(await ctx.db.get(lead.serviceId))?.name??"Unavailable service",professional:(await ctx.db.get(lead.professionalId))?.displayName??"Unavailable professional",status:lead.status,createdAt:lead.createdAt})));
+  }
+});
+
+/** Bounded operational counts, explicitly displayed as 100+ when the cap is reached. */
+export const marketplaceOverview = query({
+  args:{},returns:v.object({published:v.string(),pending:v.string(),enquiries:v.string(),subscribers:v.string(),latest:v.array(v.object({id:v.id("leads"),service:v.string(),professional:v.string(),status:v.string(),createdAt:v.number()}))}),
+  handler:async ctx=>{
+    await requireStaff(ctx);
+    const published=await ctx.db.query("professionals").withIndex("by_publication_approval",q=>q.eq("publicationStatus","published").eq("approvedProfile",true)).take(101);
+    const pending=await ctx.db.query("professionals").withIndex("by_publication_status",q=>q.eq("publicationStatus","review")).take(101);
+    const enquiries=await ctx.db.query("leads").withIndex("by_status_created",q=>q.eq("status","new")).order("desc").take(101);
+    const subscribers=await ctx.db.query("professionalSubscriptions").withIndex("by_status",q=>q.eq("status","active")).take(101);
+    const count=(rows:unknown[])=>rows.length>100?"100+":String(rows.length);
+    const latest=await Promise.all(enquiries.slice(0,3).map(async lead=>({id:lead._id,service:(await ctx.db.get(lead.serviceId))?.name??"Service unavailable",professional:(await ctx.db.get(lead.professionalId))?.displayName??"Professional unavailable",status:lead.status,createdAt:lead.createdAt})));
+    return {published:count(published),pending:count(pending),enquiries:count(enquiries),subscribers:count(subscribers),latest};
+  }
+});
+
+export const applicationDetails = query({
+  args: {professionalId:v.id("professionals")},
+  returns:v.object({services:v.array(v.string()),credentials:v.array(v.string()),photoUrl:v.union(v.string(),v.null())}),
+  handler:async(ctx,{professionalId})=>{
+    const staff=await requireStaff(ctx);
+    if(staff.role!=="cms_admin") throw new Error("Administrator access is required.");
+    const profile=await ctx.db.get(professionalId);
+    if(!profile) throw new Error("Profile not found.");
+    const offerings=await ctx.db.query("professionalServices").withIndex("by_professional",q=>q.eq("professionalId",professionalId)).take(601);
+    const services=await Promise.all(offerings.filter(o=>o.enabled).map(async o=>{
+      const service=await ctx.db.get(o.serviceId);const jurisdiction=await ctx.db.get(o.taxJurisdictionId);
+      return `${service?.name??"Unavailable service"} · ${jurisdiction?.label??"Unavailable jurisdiction"}`;
+    }));
+    const credentials=await ctx.db.query("professionalPublicCredentials").withIndex("by_professional",q=>q.eq("professionalId",professionalId)).take(100);
+    return {services,credentials:credentials.map(c=>`${c.designation} · ${c.issuer??"Issuer not provided"} · ${c.publicDisplayStatus}`),photoUrl:profile.profilePhotoId?await ctx.storage.getUrl(profile.profilePhotoId):null};
+  }
+});
+
+export const applicationQueue = query({
+  args: {status: v.union(v.literal("review"),v.literal("published"),v.literal("draft"))},
+  returns: v.array(schema.doc("professionals")),
+  handler: async (ctx,{status}) => {
+    const staff = await requireStaff(ctx);
+    if (staff.role !== "cms_admin") throw new Error("Administrator access is required.");
+    return ctx.db.query("professionals").withIndex("by_publication_status", q=>q.eq("publicationStatus",status)).order("desc").take(100);
+  },
+});
 
 /**
  * Staff role lookup and the CMS auth boundary.
@@ -103,8 +157,9 @@ export const staffBootstrapClaimed = query({
   },
 });
 
-export const claimFirstStaffAccount = mutation({
+export const claimFirstStaffAccount = internalMutation({
   args: {},
+  returns: v.object({ role: v.literal("cms_admin") }),
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -549,6 +604,7 @@ export const publishProfessional = mutation({
   args: { professionalId: v.id("professionals") },
   handler: async (ctx, args) => {
     const staff = await requireStaff(ctx);
+    if (staff.role !== "cms_admin") throw new Error("Only a CMS administrator may review profiles.");
 
     const professional = await ctx.db.get(args.professionalId);
     if (!professional) {
@@ -594,6 +650,8 @@ export const rejectProfessional = mutation({
   },
   handler: async (ctx, args) => {
     const staff = await requireStaff(ctx);
+    if (staff.role !== "cms_admin") throw new Error("Only a CMS administrator may review profiles.");
+    if (!args.reason.trim() || args.reason.length > 2000) throw new Error("Give a reason of 1–2,000 characters.");
 
     const professional = await ctx.db.get(args.professionalId);
     if (!professional) {
@@ -606,6 +664,8 @@ export const rejectProfessional = mutation({
     const now = Date.now();
     await ctx.db.patch(args.professionalId, {
       publicationStatus: "draft",
+      approvedProfile: false,
+      reviewFeedback: args.reason.trim(),
       updatedAt: now,
     });
 

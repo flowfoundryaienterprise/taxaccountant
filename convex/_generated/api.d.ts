@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as billingUrls from "../billingUrls.js";
 import type * as cms from "../cms.js";
 import type * as contact from "../contact.js";
 import type * as content from "../content.js";
@@ -18,6 +19,7 @@ import type * as http from "../http.js";
 import type * as organizations from "../organizations.js";
 import type * as professionalOwnership from "../professionalOwnership.js";
 import type * as professionals from "../professionals.js";
+import type * as profileFields from "../profileFields.js";
 import type * as staff from "../staff.js";
 import type * as stripe from "../stripe.js";
 import type * as stripeBilling from "../stripeBilling.js";
@@ -32,6 +34,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  billingUrls: typeof billingUrls;
   cms: typeof cms;
   contact: typeof contact;
   content: typeof content;
@@ -41,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   organizations: typeof organizations;
   professionalOwnership: typeof professionalOwnership;
   professionals: typeof professionals;
+  profileFields: typeof profileFields;
   staff: typeof staff;
   stripe: typeof stripe;
   stripeBilling: typeof stripeBilling;

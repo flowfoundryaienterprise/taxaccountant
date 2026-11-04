@@ -4,7 +4,7 @@ import { SectionHeading } from "@/components/shared/section-heading";
 const steps = [
   {icon: Search, title: "Explore your options", description: "Choose the service and expertise you need."},
   {icon: UsersRound, title: "Compare professionals", description: "Review profiles, specialties and locations."},
-  {icon: ClipboardCheck, title: "Submit an enquiry", description: "Direct professional enquiries are coming soon."},
+  {icon: ClipboardCheck, title: "Submit an enquiry", description: "Sign in and send an enquiry to an available professional."},
 ];
 export function HowItWorks() {
   return <section id="how-it-works" className="py-12"><Container>
