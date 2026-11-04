@@ -1,3 +1,4 @@
+import { EnquiryInbox } from "@/components/dashboard/enquiry-inbox";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -57,9 +58,11 @@ export default async function CustomerDashboardPage() {
     fetchAuthQuery(api.organizations.currentOrganizations, {}),
   ]);
 
-  if (!user) {
+  if (!user || user.accountStatus !== "active") {
     redirect("/sign-in?intent=customer-dashboard");
   }
+
+  if (user.role !== "customer") redirect("/professional/dashboard");
 
   const accountLabel = user.displayName ?? user.email ?? "Your account";
 
@@ -73,7 +76,7 @@ export default async function CustomerDashboardPage() {
       <div className="flex flex-col gap-8">
         <AdminPageHeader
           title={`Welcome back${user.displayName ? `, ${user.displayName}` : ""}`}
-          description="Find a professional, and track what you've sent them once enquiries are live."
+          description="Find a professional and manage your enquiries."
           actions={
             <Link href="/find-accountant" className={cn(buttonVariants({ variant: "primary", size: "sm" }))}>
               <Search className="h-4 w-4" aria-hidden />
@@ -94,7 +97,7 @@ export default async function CustomerDashboardPage() {
             caption={organizations.length === 1 ? "business you belong to" : "businesses you belong to"}
             href={organizations[0] ? `/organization/${organizations[0].organizationId}` : "/organization/new"}
           />
-          <AdminStatCard label="Open enquiries" value="—" caption="Enquiries aren't live yet" />
+          <AdminStatCard label="Enquiries" value="View inbox" caption="Your latest submissions and their status" href="#enquiries" />
         </div>
 
         {organizations.length > 0 ? (
@@ -119,14 +122,7 @@ export default async function CustomerDashboardPage() {
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-3 rounded-[1.25rem] border border-border bg-tint p-6">
-          <h2 className="text-compact font-semibold text-navy">What's not live yet</h2>
-          <p className="text-compact text-slate">
-            Enquiries, saved professionals and notifications don't have a backing record in Convex
-            yet — those panels appear once that Phase 2 work ships, rather than showing invented
-            activity now.
-          </p>
-        </div>
+        <EnquiryInbox />
       </div>
     </DashboardShell>
   );

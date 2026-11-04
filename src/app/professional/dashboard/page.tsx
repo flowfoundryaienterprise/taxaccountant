@@ -1,3 +1,4 @@
+import { EnquiryInbox } from "@/components/dashboard/enquiry-inbox";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -52,9 +53,14 @@ export default async function ProfessionalDashboardPage() {
     fetchAuthQuery(api.organizations.currentOrganizations, {}),
   ]);
 
-  if (!user) {
+  if (!user || user.accountStatus !== "active") {
     redirect("/sign-in?intent=professional-dashboard");
   }
+
+  if (user.role !== "professional") redirect("/customer/dashboard");
+
+  const profiles = await fetchAuthQuery(api.professionalOwnership.myProfiles, {});
+  if (!profiles.some(profile => profile.publicationStatus === "review" || profile.publicationStatus === "published")) redirect("/professional/onboarding");
 
   const accountLabel = user.displayName ?? user.email ?? "Your account";
   const firms = organizations.filter((org) => org.kind === "professional_firm");
@@ -72,22 +78,22 @@ export default async function ProfessionalDashboardPage() {
       <div className="flex flex-col gap-8">
         <AdminPageHeader
           title={`Welcome back${user.displayName ? `, ${user.displayName}` : ""}`}
-          description="Create or claim your listing, and track its review status once it's submitted."
+          description="Manage your profile, review status and subscription."
           actions={
             <Link
-              href="/professional/onboarding"
+              href="/professional/profile"
               className={cn(buttonVariants({ variant: "primary", size: "sm" }))}
             >
-              List your practice
+              My profile
             </Link>
           }
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <AdminStatCard
-            label="Account status"
-            value={user.accountStatus === "active" ? "Active" : user.accountStatus}
-            caption="From your TaxAccountant.com account"
+            label="Profile review"
+            value={profiles[0].publicationStatus === "review" ? "Pending review" : statusLabel(profiles[0].publicationStatus)}
+            caption="Only approved profiles are published"
           />
           <AdminStatCard
             label="Firms"
@@ -138,14 +144,7 @@ export default async function ProfessionalDashboardPage() {
           </div>
         )}
 
-        <div className="flex flex-col gap-3 rounded-[1.25rem] border border-border bg-tint p-6">
-          <h2 className="text-compact font-semibold text-navy">What's not live yet</h2>
-          <p className="text-compact text-slate">
-            Lead inbox and notifications don't have a backing record in Convex yet — this is Phase
-            4 work (lead routing), so that panel appears once it ships rather than showing invented
-            activity now. Subscription billing is live — see the Subscription tab.
-          </p>
-        </div>
+        {profiles.map(profile => <div key={profile._id}><h2 className="mb-3 font-semibold">{profile.displayName}</h2><EnquiryInbox professionalId={profile._id} /></div>)}
       </div>
     </DashboardShell>
   );

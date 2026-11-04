@@ -64,10 +64,11 @@ export function AdminApplicationsPanel({ rows }: { rows: AdminProfessionalRow[] 
           <button
             key={key}
             type="button"
+            aria-pressed={tab === key}
             onClick={() => setTab(key)}
             className={cn(
               "rounded-[0.4rem] px-3 py-1.5 text-caption font-medium transition-colors duration-150",
-              tab === key ? "bg-navy text-white" : "text-slate hover:text-navy",
+              tab === key ? "bg-action text-white" : "text-slate hover:text-navy",
             )}
           >
             {label} ({counts[key]})
@@ -78,7 +79,7 @@ export function AdminApplicationsPanel({ rows }: { rows: AdminProfessionalRow[] 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[560px] border-collapse text-left">
           <thead>
-            <tr className="border-b border-border text-caption text-slate">
+            <tr className="border-b border-border bg-tint text-caption text-navy">
               <th className="py-2 pr-3 font-medium">Professional</th>
               <th className="py-2 pr-3 font-medium">Type</th>
               <th className="py-2 pr-3 font-medium">Country</th>

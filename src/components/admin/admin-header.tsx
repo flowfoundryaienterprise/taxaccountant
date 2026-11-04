@@ -60,7 +60,7 @@ export function AdminHeader({ pathname, staffRole, onOpenSidebar, lastCrumbLabel
   }, [crumbs]);
 
   return (
-    <header className="sticky top-0 z-30 flex flex-col gap-3 border-b border-border bg-white px-4 py-3 sm:px-6">
+    <header className="reference-admin-header sticky top-0 z-30 flex flex-col gap-3 border-b border-border bg-white px-4 py-3 sm:px-6">
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -93,8 +93,9 @@ export function AdminHeader({ pathname, staffRole, onOpenSidebar, lastCrumbLabel
 
         <button
           type="button"
-          aria-label="Notifications"
-          className="relative hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate transition-colors duration-150 hover:bg-subtle sm:inline-flex"
+          aria-label="Notifications are not available yet"
+          disabled
+          className="relative hidden disabled:opacity-50 h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate transition-colors duration-150 hover:bg-subtle sm:inline-flex"
         >
           <Bell className="h-4.5 w-4.5" aria-hidden />
         </button>

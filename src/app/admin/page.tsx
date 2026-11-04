@@ -50,7 +50,6 @@ export default async function AdminOverviewPage() {
 
   const publishedListings = professionals.filter((row) => row.status === "published").length;
   const pendingApplications = professionals.filter((row) => row.status === "review").length;
-  const publishedArticles = articles.filter((article) => article.editorial.status === "published").length;
   const newInquiryCount = newMessages.page.length;
 
   const drafts = [
@@ -74,7 +73,7 @@ export default async function AdminOverviewPage() {
     .slice(0, 3);
 
   const quickActions = [
-    { label: "Review applications", href: "/admin/professionals", icon: FileText },
+    { label: "Review applications", href: "/admin/applications", icon: FileText },
     { label: "Create blog article", href: "/admin/articles/new", icon: Newspaper },
     { label: "Edit homepage", href: "/admin/pages", icon: MessageSquareText },
     { label: "Manage services", href: "/admin/services", icon: Wrench },
@@ -100,40 +99,38 @@ export default async function AdminOverviewPage() {
             <Link href="/" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
               View website
             </Link>
-            <Link
-              href="/admin/professionals"
-              className={cn(buttonVariants({ variant: "primary", size: "sm" }))}
-            >
-              <Plus className="h-4 w-4" aria-hidden />
-              Add professional
-            </Link>
+            <button type="button" disabled title="Professional creation is not available in this console" className={cn(buttonVariants({ variant: "primary", size: "sm" }))}><Plus className="h-4 w-4" aria-hidden />Add professional</button>
           </>
         }
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard
+          icon="profiles"
           label="Published profiles"
           value={publishedListings}
           caption={`of ${professionals.length} professional records`}
           href="/admin/professionals"
         />
         <AdminStatCard
+          icon="applications"
           label="Pending applications"
           value={pendingApplications}
           caption={pendingApplications > 0 ? "Needs review" : "Nothing waiting"}
           href="/admin/professionals"
         />
         <AdminStatCard
+          icon="enquiries"
           label="New inquiries"
           value={newInquiryCount}
           caption="unread contact and interest submissions"
           href="/admin/messages"
         />
         <AdminStatCard
-          label="Published articles"
-          value={publishedArticles}
-          caption={`of ${articles.length} article records`}
+          icon="articles"
+          label="Active subscribers"
+          value="—"
+          caption="Aggregate not connected in this preview"
           href="/admin/articles"
         />
       </div>
@@ -151,7 +148,7 @@ export default async function AdminOverviewPage() {
                 <li key={action.href}>
                   <Link
                     href={action.href}
-                    className="flex items-center justify-between gap-2 rounded-[0.625rem] px-2.5 py-2.5 text-compact font-medium text-navy transition-colors duration-150 hover:bg-subtle"
+                    className="flex items-center justify-between gap-2 rounded-input border border-border px-2.5 py-2 text-compact font-medium text-navy transition-colors duration-150 hover:bg-subtle"
                   >
                     <span className="flex items-center gap-2.5">
                       <action.icon className="h-4 w-4 text-action" aria-hidden />
@@ -239,7 +236,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       <p className="max-w-[92ch] text-caption text-slate">
-        Pending applications, published profiles and their types come from the professional
+        Only approved content is published to the website. Pending applications, published profiles and their types come from the professional
         fixture catalogue used throughout this CMS preview. Published pages, articles and new
         inquiries are read live from Convex.
       </p>
