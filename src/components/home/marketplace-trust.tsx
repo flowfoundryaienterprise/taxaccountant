@@ -2,8 +2,6 @@ import { Calendar, Globe2, Layers, MessageSquareText } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
-import { discoverableCountries } from "@/lib/marketplace/countries";
-import { jurisdictionOptions } from "@/lib/directory/taxonomy";
 
 /**
  * Light trust band directly under the hero, matching the approved
@@ -24,7 +22,7 @@ interface TrustFact {
 const facts: TrustFact[] = [
   {
     icon: Globe2,
-    label: `${discoverableCountries.length} countries · ${jurisdictionOptions.length} jurisdictions`,
+    label: "Search by service & location",
   },
   { icon: Layers, label: "Personal & business services" },
   { icon: MessageSquareText, label: "Multiple languages" },
@@ -33,7 +31,7 @@ const facts: TrustFact[] = [
 
 export function MarketplaceTrust() {
   return (
-    <section className="border-y border-border bg-tint">
+    <section className="reference-trust">
       <Container className="grid grid-cols-1 gap-y-6 py-7 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-6">
         {facts.map((fact) => (
           <div key={fact.label} className="flex items-center gap-3">

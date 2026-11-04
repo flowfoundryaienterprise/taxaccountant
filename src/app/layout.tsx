@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Inter } from "next/font/google";
 
 import { SiteChrome } from "@/components/layout/site-chrome";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -10,15 +10,8 @@ import { SITE_DESCRIPTION, SITE_NAME, SITE_ORIGIN } from "@/lib/seo/site";
 
 import "./globals.css";
 
-/*
- * Redesign (see documents/DESIGN.md override approved for this pass): Inter
- * read as the default font of every AI-generated interface. Outfit keeps the
- * same geometric, highly-legible sans shape the brand needs for a financial
- * product, but carries enough personality in its rounded terminals that the
- * site stops reading as a template. Variable font, so every weight from 300
- * (captions) to 700 (hero) ships in one file.
- */
-const outfit = Outfit({
+/* Neutral sans-serif typography follows the supplied reference. */
+const referenceFont = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
@@ -65,7 +58,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const token = await getToken();
 
   return (
-    <html lang="en" className={outfit.variable}>
+    <html lang="en" className={referenceFont.variable}>
       <body className="flex min-h-screen flex-col">
         <ConvexClientProvider initialToken={token}>
           {/*

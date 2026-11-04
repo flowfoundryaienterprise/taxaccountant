@@ -40,6 +40,7 @@ export interface ProfessionalCardModel {
 
 interface ProfessionalCardProps {
   professional: ProfessionalCardModel;
+  compact?: boolean;
   /**
    * Where "View Profile" goes. Build it with `professionalHref` so every
    * caller uses the one canonical `/professionals/[slug]` route. The
@@ -99,6 +100,7 @@ function MetaRow({
 
 export function ProfessionalCard({
   professional,
+  compact = false,
   profileHref = "/find-accountant",
   cta = "link",
   saveable = false,
@@ -128,13 +130,13 @@ export function ProfessionalCard({
             src={professional.photo}
             alt={professional.photoAlt}
             sizes={sizes}
-            className="relative aspect-[4/5] w-full overflow-hidden bg-tint"
+            className={cn("relative w-full overflow-hidden bg-tint", compact ? "aspect-[5/3]" : "aspect-[4/5]")}
           />
         ) : (
           <div
             role="img"
             aria-label={professional.photoAlt}
-            className="relative flex aspect-[4/5] w-full items-center justify-center overflow-hidden bg-tint"
+            className={cn("relative flex w-full items-center justify-center overflow-hidden bg-tint", compact ? "aspect-[5/3]" : "aspect-[4/5]")}
           >
             <span
               aria-hidden
@@ -156,9 +158,10 @@ export function ProfessionalCard({
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
+      <div className={cn("flex flex-1 flex-col", compact ? "gap-2 p-4" : "gap-3 p-5")}>
         <div>
           <h3 className="text-compact font-medium text-navy">{professional.name}</h3>
+          {compact ? <p className="text-caption font-medium text-slate">Example profile</p> : null}
 
           {professional.designation ? (
             <p
@@ -190,7 +193,7 @@ export function ProfessionalCard({
           {professional.city}, {professional.countryName}
         </p>
 
-        {professional.jurisdictions?.length ? (
+        {!compact && professional.jurisdictions?.length ? (
           /* The signature detail: authorised jurisdictions set in mono, so
              the one fact that distinguishes this directory from a local
              listings site is also the one thing on the card that looks
@@ -202,23 +205,23 @@ export function ProfessionalCard({
           </MetaRow>
         ) : null}
 
-        {professional.languages?.length ? (
+        {!compact && professional.languages?.length ? (
           <MetaRow icon={Languages} label="Languages">
             {professional.languages.join(", ")}
           </MetaRow>
         ) : null}
 
-        {modeLabel ? (
+        {!compact && modeLabel ? (
           <MetaRow icon={Globe2} label="Consultation">
             {modeLabel}
           </MetaRow>
         ) : null}
 
         <div className="flex flex-wrap gap-1.5">
-          {professional.services.map((service) => (
+          {(compact ? professional.services.slice(0, 2) : professional.services).map((service) => (
             <span
               key={service}
-              className="rounded-full bg-tint px-2.5 py-1 text-caption font-medium text-navy"
+              className={cn("text-caption text-navy", compact ? "" : "rounded-full bg-tint px-2.5 py-1 font-medium")}
             >
               {service}
             </span>
@@ -242,7 +245,7 @@ export function ProfessionalCard({
         {cta === "link" ? (
           <Link
             href={profileHref}
-            className="mt-auto inline-flex h-10 items-center justify-center rounded-input bg-action text-compact font-medium text-white transition-colors duration-150 hover:bg-[#0668c7] active:scale-[0.98]"
+            className={cn("mt-auto inline-flex text-compact font-semibold", compact ? "items-center text-action hover:underline" : "h-10 items-center justify-center rounded-input bg-action text-white hover:bg-[#075984]")}
           >
             View profile
           </Link>
