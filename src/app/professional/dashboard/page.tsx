@@ -7,6 +7,7 @@ import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { buttonVariants } from "@/components/ui/button";
+import { statusLabel } from "@/lib/admin/admin-formatters";
 import { fetchAuthMutation, fetchAuthQuery, isAuthenticated } from "@/lib/auth/server";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
@@ -25,10 +26,11 @@ export const metadata: Metadata = {
  * "My Profile" routes to `/professional/onboarding` — the real Phase 2
  * wizard (`createProfessionalDraft`/`requestProfessionalClaim`,
  * `convex/professionalOwnership.ts`) that creates or claims a listing,
- * since that is genuinely where profile editing lives today. Lead inbox,
- * subscription and notifications have no backing table yet, so they render
- * locked in the sidebar rather than linking to a page with nothing behind
- * it.
+ * since that is genuinely where profile editing lives today. Lead inbox
+ * and notifications have no backing table yet, so they render locked in
+ * the sidebar rather than linking to a page with nothing behind it.
+ * Subscription is live (brief section 8) — `/professional/subscription`,
+ * Stripe Checkout and Customer Portal via `convex/stripe.ts`.
  *
  * This page provisions its own `appUsers` row
  * (`fetchAuthMutation(ensureAppUser, { role: "professional" })`) rather
@@ -56,6 +58,9 @@ export default async function ProfessionalDashboardPage() {
 
   const accountLabel = user.displayName ?? user.email ?? "Your account";
   const firms = organizations.filter((org) => org.kind === "professional_firm");
+  const subscription = firms[0]
+    ? await fetchAuthQuery(api.stripeBilling.mySubscription, { organizationId: firms[0].organizationId })
+    : null;
 
   return (
     <DashboardShell
@@ -90,7 +95,12 @@ export default async function ProfessionalDashboardPage() {
             caption={firms.length === 1 ? "professional firm you belong to" : "professional firms you belong to"}
             href={firms[0] ? `/organization/${firms[0].organizationId}` : "/organization/new"}
           />
-          <AdminStatCard label="New leads" value="—" caption="Lead inbox isn't live yet" />
+          <AdminStatCard
+            label="Subscription"
+            value={subscription ? statusLabel(subscription.status) : "None"}
+            caption={subscription ? "See the Subscription tab for billing details" : "Not subscribed yet"}
+            href="/professional/subscription"
+          />
         </div>
 
         {firms.length > 0 ? (
@@ -131,9 +141,9 @@ export default async function ProfessionalDashboardPage() {
         <div className="flex flex-col gap-3 rounded-[1.25rem] border border-border bg-tint p-6">
           <h2 className="text-compact font-semibold text-navy">What's not live yet</h2>
           <p className="text-compact text-slate">
-            Lead inbox, subscription billing and notifications don't have a backing record in
-            Convex yet — this is Phase 3/4 work (Stripe subscriptions and lead routing), so those
-            panels appear once that work ships rather than showing invented activity now.
+            Lead inbox and notifications don't have a backing record in Convex yet — this is Phase
+            4 work (lead routing), so that panel appears once it ships rather than showing invented
+            activity now. Subscription billing is live — see the Subscription tab.
           </p>
         </div>
       </div>

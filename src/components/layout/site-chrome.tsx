@@ -15,14 +15,20 @@ interface SiteChromeProps {
 /**
  * Chooses between the public site chrome and a bare shell.
  *
- * The CMS at `/admin`, and the signed-in `/customer/dashboard` and
- * `/professional/dashboard` screens, each have their own full-height
- * layout — a dark sidebar, their own header, their own `<main>` — and must
- * not be wrapped in the marketing header and footer. Next.js nests every
- * route under the single root layout, and the alternative (splitting the
- * app into `(public)` and `(app)` route groups with separate root layouts)
- * would mean moving every existing public route, which the Day 6 brief
- * rules out.
+ * The CMS at `/admin`, and the signed-in `/customer/dashboard`,
+ * `/professional/dashboard` and `/professional/subscription` screens, each
+ * have their own full-height layout — a dark sidebar, their own header,
+ * their own `<main>` — and must not be wrapped in the marketing header and
+ * footer. Next.js nests every route under the single root layout, and the
+ * alternative (splitting the app into `(public)` and `(app)` route groups
+ * with separate root layouts) would mean moving every existing public
+ * route, which the Day 6 brief rules out.
+ *
+ * Each dashboard-shell route is listed explicitly rather than matched by a
+ * `/customer/`/`/professional/` prefix — `/professional/onboarding` lives
+ * under the same `/professional/` segment but deliberately keeps the
+ * public header/footer (it uses `Container`, not `DashboardShell`), so a
+ * prefix match would wrap the wrong one.
  *
  * So the decision is made here instead, in one small client component.
  * `header` and `footer` are rendered on the server by the root layout and
@@ -42,7 +48,9 @@ export function SiteChrome({ header, footer, children }: SiteChromeProps) {
     pathname === "/customer/dashboard" ||
     pathname.startsWith("/customer/dashboard/") ||
     pathname === "/professional/dashboard" ||
-    pathname.startsWith("/professional/dashboard/");
+    pathname.startsWith("/professional/dashboard/") ||
+    pathname === "/professional/subscription" ||
+    pathname.startsWith("/professional/subscription/");
 
   if (isBareShell) return <>{children}</>;
 

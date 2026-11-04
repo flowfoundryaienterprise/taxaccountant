@@ -454,4 +454,77 @@ export default defineSchema({
     .index("by_professional", ["professionalId"])
     .index("by_org", ["organizationId"])
     .index("by_status", ["status"]),
+
+  // ---------------------------------------------------------------------
+  // Phase 3 — Stripe monthly subscriptions (brief section 8)
+  // ---------------------------------------------------------------------
+  /**
+   * One row per `professional_firm` organization's billing relationship.
+   * `category` is the professional type the org picked on the billing
+   * screen — it drives which Stripe Price ID a checkout session uses
+   * (resolved server-side only, `convex/stripeNode.ts`; never a
+   * client-supplied amount, brief section 8 "Security requirements"). It
+   * is independent of `professionalPublicCredentials.designation`, which
+   * is self-declared free text on the public profile, not a controlled
+   * billing category.
+   *
+   * `status` mirrors the Stripe Subscription's own status values exactly
+   * (not a simplified in-house enum), because the admin and professional
+   * dashboards both need to tell "past_due" apart from "canceled" and
+   * from "incomplete" (never completed its first payment) rather than
+   * collapsing all of them into one "inactive" state.
+   */
+  professionalSubscriptions: defineTable({
+    /**
+     * Optional only for the narrow case a webhook event's customer id
+     * matches no row yet (a Stripe subscription created outside this
+     * app's own checkout flow) — `convex/stripeBilling.ts`'s
+     * `adminAttachSubscriptionOrganization` is how a staff member fixes
+     * that. Every row this app's own checkout flow creates has one from
+     * the start.
+     */
+    organizationId: v.optional(v.id("organizations")),
+    /** Optional for the same unattached-row case as `organizationId` — a bare subscription event carries no category. */
+    category: v.optional(
+      v.union(
+        v.literal("cpa_accountant"),
+        v.literal("tax_attorney"),
+        v.literal("bookkeeper"),
+        v.literal("wealth_advisor"),
+      ),
+    ),
+    stripeCustomerId: v.string(),
+    stripeSubscriptionId: v.optional(v.string()),
+    stripePriceId: v.optional(v.string()),
+    status: v.union(
+      v.literal("incomplete"),
+      v.literal("incomplete_expired"),
+      v.literal("trialing"),
+      v.literal("active"),
+      v.literal("past_due"),
+      v.literal("canceled"),
+      v.literal("unpaid"),
+      v.literal("paused"),
+    ),
+    currentPeriodEnd: v.optional(v.number()),
+    cancelAtPeriodEnd: v.optional(v.boolean()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_organization", ["organizationId"])
+    .index("by_stripe_customer", ["stripeCustomerId"])
+    .index("by_stripe_subscription", ["stripeSubscriptionId"]),
+
+  /**
+   * One row per processed Stripe webhook event id — the idempotency guard
+   * `convex/stripeNode.ts`'s webhook handler checks before applying any
+   * event, so a Stripe retry (same event id, which Stripe does send more
+   * than once by design) never double-applies a status change (brief
+   * section 8: "Handle duplicate webhook events idempotently").
+   */
+  stripeWebhookEvents: defineTable({
+    stripeEventId: v.string(),
+    type: v.string(),
+    processedAt: v.number(),
+  }).index("by_stripe_event_id", ["stripeEventId"]),
 });

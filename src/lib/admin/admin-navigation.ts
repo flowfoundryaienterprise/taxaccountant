@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  CreditCard,
   FileText,
   Folder,
   Globe2,
@@ -17,10 +18,11 @@ import {
 /**
  * CMS sidebar navigation.
  *
- * Phase 1 content management only. Deliberately absent: bookings, payments,
- * payouts, subscriptions, lead credits, sponsored placements and financial
- * reporting — those are Phase 3/4 modules and the Day 6 brief forbids
- * surfacing them here (section 4).
+ * Phase 1 content management, plus Phase 3's Stripe subscriptions
+ * (`/admin/subscriptions`, brief section 8: "Admin dashboard displays
+ * subscription records"). Still deliberately absent: bookings, payouts,
+ * lead credits, sponsored placements and financial reporting — those
+ * remain later-phase modules.
  */
 
 /** Groups the sidebar renders as labelled sections, in this order. */
@@ -81,6 +83,13 @@ export const adminNavigation: AdminNavItem[] = [
     label: "Inquiries",
     icon: Inbox,
     description: "Contact and professional-interest submissions.",
+    group: "Manage",
+  },
+  {
+    href: "/admin/subscriptions",
+    label: "Subscriptions",
+    icon: CreditCard,
+    description: "Stripe monthly billing records for professional firms.",
     group: "Manage",
   },
   {
@@ -159,6 +168,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   professionals: "Professionals",
   articles: "Articles and resources",
   messages: "Messages",
+  subscriptions: "Subscriptions",
   media: "Media library",
   seo: "SEO management",
   settings: "Site settings",
