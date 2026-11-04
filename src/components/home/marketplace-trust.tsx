@@ -1,52 +1,46 @@
+import { Calendar, Globe2, Layers, MessageSquareText } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
 import { Container } from "@/components/layout/container";
 import { discoverableCountries } from "@/lib/marketplace/countries";
-import { jurisdictionOptions, languageOptions } from "@/lib/directory/taxonomy";
-import { services } from "@/lib/home-content";
+import { jurisdictionOptions } from "@/lib/directory/taxonomy";
 
 /**
- * What the directory indexes, counted from the catalogues themselves.
+ * Light trust band directly under the hero, matching the approved
+ * light-blue mockup: four short facts with an icon each, not a stat wall.
  *
- * This band used to carry five figures from the reference template —
- * "10,000+ Verified Professionals", "50+ Countries Covered", "100,000+
- * Happy Clients", "4.9/5 Average Rating", "24/7 Customer Support" — above
- * a tinted icon tile each. None was true, and the second one was not even
- * the right order of magnitude: eight countries are open for discovery,
- * not fifty.
- *
- * Every figure here is `array.length` on the vocabulary the filters
- * actually run against, so the band cannot drift from the product: open a
- * jurisdiction in Convex and this reads one higher the same day. Figures
- * are mono and tabular so the four sit on one baseline and one rhythm.
- *
- * No icons. A stat is a number and its label; a globe beside the word
- * "countries" is decoration standing in for a fifth fact that does not
- * exist.
+ * The country/jurisdiction count is still derived from the catalogues
+ * (`discoverableCountries.length`, `jurisdictionOptions.length`) so it
+ * cannot drift from what the directory actually indexes — see the removed
+ * `statsBand` note in `@/lib/home-content` for why invented figures are not
+ * an option here. The remaining three describe a capability the filters
+ * genuinely offer rather than a claim this marketplace cannot support.
  */
-const scope = [
-  { value: services.length, label: "Service categories" },
-  { value: discoverableCountries.length, label: "Countries open" },
-  { value: jurisdictionOptions.length, label: "Tax jurisdictions" },
-  { value: languageOptions.length, label: "Languages recorded" },
+interface TrustFact {
+  icon: LucideIcon;
+  label: string;
+}
+
+const facts: TrustFact[] = [
+  {
+    icon: Globe2,
+    label: `${discoverableCountries.length} countries · ${jurisdictionOptions.length} jurisdictions`,
+  },
+  { icon: Layers, label: "Personal & business services" },
+  { icon: MessageSquareText, label: "Multiple languages" },
+  { icon: Calendar, label: "Remote & in-person options" },
 ];
 
 export function MarketplaceTrust() {
   return (
-    <section className="border-y border-border bg-navy">
-      <Container className="flex flex-col gap-6 py-12 sm:flex-row sm:items-end sm:justify-between">
-        <h2 className="flex items-center gap-2 text-caption text-white/60">
-          <span aria-hidden className="h-1.5 w-1.5 shrink-0 animate-pulse-soft rounded-full bg-action" />
-          What this directory indexes today
-        </h2>
-        <dl className="grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-4">
-          {scope.map((item) => (
-            <div key={item.label} className="flex flex-col gap-1">
-              <dd className="font-mono text-4xl font-semibold tabular-nums text-white sm:text-5xl">
-                {item.value}
-              </dd>
-              <dt className="text-caption text-white/60">{item.label}</dt>
-            </div>
-          ))}
-        </dl>
+    <section className="border-y border-border bg-tint">
+      <Container className="grid grid-cols-1 gap-y-6 py-7 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-6">
+        {facts.map((fact) => (
+          <div key={fact.label} className="flex items-center gap-3">
+            <fact.icon className="h-5 w-5 shrink-0 text-action" aria-hidden />
+            <p className="text-compact font-medium text-navy">{fact.label}</p>
+          </div>
+        ))}
       </Container>
     </section>
   );

@@ -15,12 +15,14 @@ interface SiteChromeProps {
 /**
  * Chooses between the public site chrome and a bare shell.
  *
- * The CMS at `/admin` has its own full-height layout — sidebar, admin
- * header, its own `<main>` — and must not be wrapped in the marketing
- * header and footer. Next.js nests every route under the single root
- * layout, and the alternative (splitting the app into `(public)` and
- * `(admin)` route groups with separate root layouts) would mean moving every
- * existing public route, which the Day 6 brief rules out.
+ * The CMS at `/admin`, and the signed-in `/customer/dashboard` and
+ * `/professional/dashboard` screens, each have their own full-height
+ * layout — a dark sidebar, their own header, their own `<main>` — and must
+ * not be wrapped in the marketing header and footer. Next.js nests every
+ * route under the single root layout, and the alternative (splitting the
+ * app into `(public)` and `(app)` route groups with separate root layouts)
+ * would mean moving every existing public route, which the Day 6 brief
+ * rules out.
  *
  * So the decision is made here instead, in one small client component.
  * `header` and `footer` are rendered on the server by the root layout and
@@ -34,9 +36,15 @@ interface SiteChromeProps {
  */
 export function SiteChrome({ header, footer, children }: SiteChromeProps) {
   const pathname = usePathname();
-  const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
+  const isBareShell =
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/") ||
+    pathname === "/customer/dashboard" ||
+    pathname.startsWith("/customer/dashboard/") ||
+    pathname === "/professional/dashboard" ||
+    pathname.startsWith("/professional/dashboard/");
 
-  if (isAdmin) return <>{children}</>;
+  if (isBareShell) return <>{children}</>;
 
   return (
     <>

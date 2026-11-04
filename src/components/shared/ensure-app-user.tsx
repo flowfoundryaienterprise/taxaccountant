@@ -10,6 +10,18 @@ import { api } from "@/convex/_generated/api";
  * `convex/users.ts`'s `ensureAppUser`) as a side effect of Convex's own
  * auth state, not of any one sign-in form's submit handler.
  *
+ * Belt-and-braces only: `/customer/dashboard` and `/professional/dashboard`
+ * (the only screens a fresh sign-up lands on today) each call
+ * `fetchAuthMutation(api.users.ensureAppUser, { role })` themselves during
+ * SSR — see the comment there for why relying on *this* component's effect
+ * to have already run before that first render was the actual bug behind
+ * a brand-new account bouncing back to `/sign-in`. This component still
+ * matters for any other authenticated screen reached without going through
+ * one of those two pages first (a straight `/sign-in` deep link, for
+ * instance), so every `appUsers`-dependent query still has a row to find
+ * once Convex's reactivity catches up, without each of those screens
+ * needing its own provisioning call.
+ *
  * ## Two bugs, and why this landed on `useQuery`, not `useConvexAuth` alone
  * First attempt called `ensureAppUser` from `AccountAuthForm`'s submit
  * handler, right after `authClient.signUp`/`signIn` resolved — confirmed
@@ -35,6 +47,10 @@ import { api } from "@/convex/_generated/api";
  * cover, verified live after this rewrite: signing up as a second distinct
  * account while already signed in as a first one now provisions the
  * second account's own row, not the first's.
+ *
+ * No `role` argument here — a row this component creates (one not reached
+ * through either dashboard first) has no role to set, same as it never did
+ * before role existed on the schema.
  */
 export function EnsureAppUser() {
   const { isAuthenticated } = useConvexAuth();

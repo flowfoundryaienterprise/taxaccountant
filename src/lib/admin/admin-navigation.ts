@@ -23,12 +23,17 @@ import {
  * surfacing them here (section 4).
  */
 
+/** Groups the sidebar renders as labelled sections, in this order. */
+export type AdminNavGroup = "Overview" | "Manage" | "Content" | "System";
+
 export interface AdminNavItem {
   href: string;
   label: string;
   icon: LucideIcon;
   /** Short description used by the overview quick-links and tooltips. */
   description: string;
+  /** Sidebar section this item renders under. */
+  group: AdminNavGroup;
   /** Hidden from a `cms_editor`'s nav — the page itself still re-checks the role server-side. */
   adminOnly?: boolean;
 }
@@ -38,78 +43,92 @@ export const ADMIN_ROOT = "/admin";
 export const adminNavigation: AdminNavItem[] = [
   {
     href: "/admin",
-    label: "Overview",
+    label: "Dashboard",
     icon: LayoutDashboard,
     description: "What is published, what is in draft, and what needs review.",
-  },
-  {
-    href: "/admin/pages",
-    label: "Pages",
-    icon: FileText,
-    description: "Standalone website pages, guides and glossary entries.",
-  },
-  {
-    href: "/admin/services",
-    label: "Services",
-    icon: Folder,
-    description: "The public service category taxonomy.",
-  },
-  {
-    href: "/admin/countries",
-    label: "Countries",
-    icon: Globe2,
-    description: "Country records, discovery status and activation flags.",
-  },
-  {
-    href: "/admin/jurisdictions",
-    label: "Tax jurisdictions",
-    icon: Scale,
-    description: "Tax authorities, grouped by country.",
+    group: "Overview",
   },
   {
     href: "/admin/professionals",
     label: "Professionals",
     icon: Users,
     description: "Professional listing records and publication state.",
+    group: "Manage",
   },
   {
-    href: "/admin/articles",
-    label: "Articles and resources",
-    icon: Newspaper,
-    description: "Editorial content with author and reviewer attribution.",
+    href: "/admin/services",
+    label: "Services",
+    icon: Folder,
+    description: "The public service category taxonomy.",
+    group: "Manage",
+  },
+  {
+    href: "/admin/countries",
+    label: "Countries",
+    icon: Globe2,
+    description: "Country records, discovery status and activation flags.",
+    group: "Manage",
+  },
+  {
+    href: "/admin/jurisdictions",
+    label: "Tax jurisdictions",
+    icon: Scale,
+    description: "Tax authorities, grouped by country.",
+    group: "Manage",
   },
   {
     href: "/admin/messages",
-    label: "Messages",
+    label: "Inquiries",
     icon: Inbox,
     description: "Contact and professional-interest submissions.",
+    group: "Manage",
+  },
+  {
+    href: "/admin/pages",
+    label: "Homepage & pages",
+    icon: FileText,
+    description: "Standalone website pages, guides and glossary entries.",
+    group: "Content",
+  },
+  {
+    href: "/admin/articles",
+    label: "Blog",
+    icon: Newspaper,
+    description: "Editorial content with author and reviewer attribution.",
+    group: "Content",
   },
   {
     href: "/admin/media",
     label: "Media library",
     icon: ImageIcon,
     description: "Approved public website assets.",
+    group: "Content",
   },
   {
     href: "/admin/seo",
     label: "SEO management",
     icon: Search,
     description: "Titles, descriptions and indexing eligibility per route.",
+    group: "System",
   },
   {
     href: "/admin/settings",
-    label: "Site settings",
+    label: "Settings",
     icon: Settings,
     description: "Site identity, navigation and display configuration.",
+    group: "System",
   },
   {
     href: "/admin/staff",
-    label: "Staff",
+    label: "Team & permissions",
     icon: ShieldCheck,
     description: "CMS staff accounts, roles and access.",
+    group: "System",
     adminOnly: true,
   },
 ];
+
+export const ADMIN_NAV_GROUP_ORDER: AdminNavGroup[] = ["Overview", "Manage", "Content", "System"];
 
 /**
  * Longest-prefix match, so `/admin/pages/new` highlights "Pages" while

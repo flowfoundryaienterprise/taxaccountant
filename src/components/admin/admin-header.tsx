@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ExternalLink, LogOut, Menu, Search } from "lucide-react";
+import { Bell, ExternalLink, LogOut, Menu, Search, UserRound } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { authClient } from "@/lib/auth/client";
@@ -44,7 +44,7 @@ export function AdminHeader({ pathname, staffRole, onOpenSidebar, lastCrumbLabel
   async function handleSignOut() {
     setSigningOut(true);
     await authClient.signOut();
-    router.push("/staff-login");
+    router.push("/sign-in");
     router.refresh();
   }
 
@@ -75,26 +75,6 @@ export function AdminHeader({ pathname, staffRole, onOpenSidebar, lastCrumbLabel
           <Breadcrumbs items={crumbs} />
         </div>
 
-        <span
-          className={cn(
-            "hidden shrink-0 items-center gap-2 rounded-full border border-border bg-subtle px-3 py-1",
-            "text-caption font-medium text-navy sm:inline-flex",
-          )}
-        >
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" aria-hidden />
-          {ROLE_LABEL[staffRole]}
-        </span>
-
-        <button
-          type="button"
-          onClick={handleSignOut}
-          disabled={signingOut}
-          className="hidden shrink-0 items-center gap-1.5 rounded-input px-3 py-2 text-caption font-medium text-slate transition-colors duration-150 hover:bg-subtle disabled:opacity-50 sm:inline-flex"
-        >
-          <LogOut className="h-3.5 w-3.5" aria-hidden />
-          {signingOut ? "Signing out…" : "Sign out"}
-        </button>
-
         {/*
           Always visible, every screen size — previously `hidden sm:inline-flex`,
           so a signed-in staff member on a phone had no way back to the
@@ -105,11 +85,51 @@ export function AdminHeader({ pathname, staffRole, onOpenSidebar, lastCrumbLabel
         <Link
           href="/"
           aria-label="View public site"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-input border border-border px-2.5 py-2 text-caption font-medium text-action transition-colors duration-150 hover:bg-subtle sm:px-3"
+          className="hidden shrink-0 items-center gap-1.5 rounded-input border border-border px-2.5 py-2 text-caption font-medium text-action transition-colors duration-150 hover:bg-subtle sm:inline-flex sm:px-3"
         >
           <span className="hidden sm:inline">View public site</span>
           <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
         </Link>
+
+        <button
+          type="button"
+          aria-label="Notifications"
+          className="relative hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate transition-colors duration-150 hover:bg-subtle sm:inline-flex"
+        >
+          <Bell className="h-4.5 w-4.5" aria-hidden />
+        </button>
+
+        <div className="group relative hidden shrink-0 sm:block">
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded-full py-1 pr-2 pl-1 text-compact font-medium text-navy transition-colors duration-150 hover:bg-subtle"
+          >
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-tint text-action">
+              <UserRound className="h-4 w-4" aria-hidden />
+            </span>
+            <span className="hidden lg:inline">{ROLE_LABEL[staffRole]}</span>
+          </button>
+
+          <div
+            className={cn(
+              "absolute top-full right-0 z-10 mt-2 hidden w-44 flex-col gap-1 rounded-card border border-border bg-white p-1.5 shadow-[var(--shadow-float)]",
+              "group-focus-within:flex",
+            )}
+          >
+            <span className="px-2.5 py-1.5 text-caption text-slate">
+              Signed in as {ROLE_LABEL[staffRole]}
+            </span>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={signingOut}
+              className="flex items-center gap-1.5 rounded-[0.5rem] px-2.5 py-2 text-left text-compact font-medium text-slate transition-colors duration-150 hover:bg-subtle disabled:opacity-50"
+            >
+              <LogOut className="h-3.5 w-3.5" aria-hidden />
+              {signingOut ? "Signing out…" : "Sign out"}
+            </button>
+          </div>
+        </div>
       </div>
 
       <form action={target} className="flex items-center gap-2">

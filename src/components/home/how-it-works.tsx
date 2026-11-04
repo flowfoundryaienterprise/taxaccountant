@@ -25,7 +25,7 @@ const item = {
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="bg-tint py-16 sm:py-24">
+    <section id="how-it-works" className="py-16 sm:py-24">
       <Container className="flex flex-col gap-10">
         <SectionHeading
           eyebrow="How it works"

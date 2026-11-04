@@ -16,9 +16,17 @@ interface ServiceCardProps {
   href?: string;
   ctaLabel?: string;
   className?: string;
+  /** Dark navy fill instead of the white card — one lead category per grid. */
+  highlighted?: boolean;
 }
 
-export function ServiceCard({ service, href, ctaLabel = "Learn more", className }: ServiceCardProps) {
+export function ServiceCard({
+  service,
+  href,
+  ctaLabel = "Learn more",
+  className,
+  highlighted = false,
+}: ServiceCardProps) {
   const Icon = service.icon;
 
   return (
@@ -31,7 +39,10 @@ export function ServiceCard({ service, href, ctaLabel = "Learn more", className 
          * passes over it, because it is not a physical object and nothing
          * about the hover means "closer".
          */
-        "group flex h-full flex-col gap-4 rounded-card border border-border bg-white p-6 transition-colors duration-150 hover:border-action focus-visible:border-action",
+        "group flex h-full flex-col gap-4 rounded-card border p-6 transition-colors duration-150",
+        highlighted
+          ? "border-navy bg-navy"
+          : "border-border bg-white hover:border-action focus-visible:border-action",
         className,
       )}
     >
@@ -42,12 +53,21 @@ export function ServiceCard({ service, href, ctaLabel = "Learn more", className 
         The icon stays, at the muted text role, sized and stroked like
         every other icon on the site.
       */}
-      <Icon className="h-[18px] w-[18px] text-slate" aria-hidden />
+      <Icon className={cn("h-[18px] w-[18px]", highlighted ? "text-white/80" : "text-slate")} aria-hidden />
       <div className="flex flex-col gap-1.5">
-        <h3 className="text-compact font-medium text-navy">{service.title}</h3>
-        <p className="text-compact text-slate">{service.description}</p>
+        <h3 className={cn("text-compact font-medium", highlighted ? "text-white" : "text-navy")}>
+          {service.title}
+        </h3>
+        <p className={cn("text-compact", highlighted ? "text-white/70" : "text-slate")}>
+          {service.description}
+        </p>
       </div>
-      <span className="mt-auto inline-flex items-center gap-1.5 pt-1 text-compact font-medium text-action">
+      <span
+        className={cn(
+          "mt-auto inline-flex items-center gap-1.5 pt-1 text-compact font-medium",
+          highlighted ? "text-white" : "text-action",
+        )}
+      >
         {ctaLabel}
         <ArrowRight
           className="h-3.5 w-3.5 transition-transform duration-150 group-hover:translate-x-0.5"

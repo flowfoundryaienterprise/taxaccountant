@@ -171,6 +171,8 @@ export interface AdminProfessionalRow {
   slug: string;
   displayName: string;
   firmName?: string;
+  /** The professional's primary declared designation, e.g. "CPA". */
+  designation?: string;
   countryCode: string;
   city: string;
   serviceSlugs: string[];

@@ -87,6 +87,22 @@ export const currentStaff = query({
  * a client-supplied subject/email/role (AGENTS.md section 5: "No client
  * privilege from submitted userId, role... or similar").
  */
+/**
+ * Whether `staffMemberships` has any row yet — i.e. whether
+ * `claimFirstStaffAccount` below would still succeed. No identity check
+ * and no PII in the response, just a boolean: safe to call signed out, so
+ * the public sign-up form (`AccountAuthForm`) can show its "CMS Admin"
+ * toggle only while claiming it would actually work, rather than letting
+ * someone pick it and then fail after submitting.
+ */
+export const staffBootstrapClaimed = query({
+  args: {},
+  handler: async (ctx) => {
+    const existing = await ctx.db.query("staffMemberships").take(1);
+    return existing.length > 0;
+  },
+});
+
 export const claimFirstStaffAccount = mutation({
   args: {},
   handler: async (ctx) => {

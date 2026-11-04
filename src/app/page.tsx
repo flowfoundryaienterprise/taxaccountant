@@ -48,13 +48,13 @@ export default function Home() {
         Convex and has rows. See the note in `@/lib/home-content`.
       */}
       <HeroSection />
-      <ServicesSection />
       <MarketplaceTrust />
+      <ServicesSection />
       <FeaturedProfessionals />
       <HowItWorks />
+      <LatestArticles />
       <GlobalCoverage />
       <WhyChooseUs />
-      <LatestArticles />
       <ProfessionalCTA />
     </>
   );

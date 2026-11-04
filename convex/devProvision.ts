@@ -10,8 +10,9 @@ import { createAuth } from "./auth";
  * `npx convex run devProvision:signUpStaff '{"email":"...","password":"...","name":"..."}'`.
  * `internalAction` only — never reachable from the browser or any public
  * API surface. The created account still has no CMS access on its own;
- * sign in once through `/staff-login` and call the `staff:claimFirstStaffAccount`
- * mutation (or let the UI do it) to attach the first `staffMemberships` row.
+ * sign in once through `/sign-in` and call the `staff:claimFirstStaffAccount`
+ * mutation (or pick "CMS Admin" on the sign-up form, which calls the same
+ * mutation) to attach the first `staffMemberships` row.
  */
 export const signUpStaff = internalAction({
   args: { email: v.string(), password: v.string(), name: v.string() },
