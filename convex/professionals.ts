@@ -38,6 +38,7 @@ export const searchPublishedProfessionals = query({
       .take(MAX_CANDIDATES_SCANNED);
 
     const matches = candidates.filter((professional) => {
+      if (!professional.approvedProfile) return false;
       const displayName = professional.displayName.toLowerCase();
       const firmName = professional.firmName?.toLowerCase() ?? "";
       return displayName.includes(needle) || firmName.includes(needle);

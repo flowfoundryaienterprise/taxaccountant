@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { Doc } from "./_generated/dataModel";
 
 import { mutation, query, type QueryCtx } from "./_generated/server";
 
@@ -108,4 +109,43 @@ export async function requireActiveUser(ctx: QueryCtx) {
     throw new Error("No active account.");
   }
   return { ...user, email: typeof identity.email === "string" ? identity.email : null };
+}
+
+/** Session-derived route selection. Signup selection can never grant a staff role. */
+export const accountDestination = query({
+  args: {},
+  returns: v.string(),
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return "/login";
+    const staff = await ctx.db.query("staffMemberships").withIndex("by_auth_subject", q => q.eq("authSubject", identity.tokenIdentifier)).unique();
+    if (staff?.active) return "/admin/dashboard";
+    const user = await lookupAppUser(ctx, identity.tokenIdentifier);
+    if (!user || user.accountStatus !== "active") return "/login?reason=inactive";
+    if (user.role !== "professional") return "/customer/dashboard";
+    const profiles = await ownedProfessionalProfiles(ctx);
+    return profiles.some(p => p.publicationStatus === "review" || p.publicationStatus === "published")
+      ? "/professional/dashboard" : "/professional/onboarding";
+  },
+});
+
+/** Editable profiles of active firms belonging to this caller; bounded and identity scoped. */
+export async function ownedProfessionalProfiles(ctx: QueryCtx) {
+  const user = await requireActiveUser(ctx);
+  const memberships = await ctx.db.query("organizationMembers").withIndex("by_user", q => q.eq("userId", user._id)).take(51);
+  if (memberships.length > 50) throw new Error("Too many memberships; contact support.");
+  const profiles: Doc<"professionals">[] = [];
+  for (const member of memberships) {
+    if (member.status !== "active" || member.role === "viewer") continue;
+    const org = await ctx.db.get(member.organizationId);
+    if (!org || org.status !== "active" || org.kind !== "professional_firm") continue;
+    const ownerships = await ctx.db.query("professionalOwnership").withIndex("by_org", q => q.eq("organizationId", org._id)).take(51);
+    if (ownerships.length > 50) throw new Error("Too many profiles; contact support.");
+    for (const ownership of ownerships) {
+      if (ownership.status !== "approved") continue;
+      const profile = await ctx.db.get(ownership.professionalId);
+      if (profile && !profiles.some(p => p._id === profile._id)) profiles.push(profile);
+    }
+  }
+  return profiles;
 }

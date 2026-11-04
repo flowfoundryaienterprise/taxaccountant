@@ -16,8 +16,8 @@ export function SiteHeader() {
     <Link href="/" aria-label="TaxAccountant home" className="flex shrink-0 items-center gap-2 text-xl font-bold tracking-tight"><BrandLogo size={30} />TaxAccountant</Link>
     <nav aria-label="Primary" className="hidden items-center gap-5 xl:flex">{links.map(link => <NavLink key={link.href} {...link} matchNested={link.href !== "/"} />)}</nav>
     <div className="hidden items-center gap-4 xl:flex">
-      <Link href="/sign-in" className="text-caption font-semibold">Sign In</Link>
-      <Link href="/sign-in?intent=signup" className="text-caption font-semibold">Sign Up</Link>
+      <Link href="/login" className="text-caption font-semibold">Sign In</Link>
+      <Link href="/signup" className="text-caption font-semibold">Sign Up</Link>
       <Link href="/find-accountant" className={buttonVariants({size: "sm"})}>Find an Accountant <ArrowUpRight size={14} aria-hidden /></Link>
     </div>
     <MobileNavigation primaryLinks={links} sections={[]} />

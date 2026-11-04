@@ -1,10 +1,11 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { onboardingDraftValidator } from "./profileFields";
 
 /**
  * Phase 1 tables, source of truth documents/DATABASE.md section 2, plus
  * Phase 2 tables as they're actually built (section 3) — each addition
- * says which Phase 2 week it belongs to. Phase 3-5 collections (leads,
+ * says which Phase 2 week it belongs to. Financial collections (
  * quotes, providerAccounts, payments, etc.) remain intentionally absent:
  * DATABASE.md's own gate is explicit that no financial-ledger or payment
  * table gets created before Phase 3's country/provider legal approval, and
@@ -22,6 +23,15 @@ const seoFields = v.object({
 });
 
 export default defineSchema({
+  leads: defineTable({
+    customerUserId: v.id("appUsers"),
+    professionalId: v.id("professionals"),
+    jurisdictionId: v.id("taxJurisdictions"),
+    serviceId: v.id("serviceCategories"),
+    description: v.string(),
+    status: v.union(v.literal("new"), v.literal("quoted"), v.literal("engaged"), v.literal("closed"), v.literal("canceled")),
+    createdAt: v.number(),
+  }).index("by_customer", ["customerUserId"]).index("by_professional_status", ["professionalId", "status"]),
   // ---------------------------------------------------------------------
   // Geography and taxonomy
   // ---------------------------------------------------------------------
@@ -101,6 +111,10 @@ export default defineSchema({
   // Professionals and search (public directory contract, DATABASE.md L35)
   // ---------------------------------------------------------------------
   professionals: defineTable({
+    reviewFeedback: v.optional(v.string()),
+    onboardingDraft: v.optional(onboardingDraftValidator),
+    profilePhotoId: v.optional(v.id("_storage")),
+    onboardingCompletedAt: v.optional(v.number()),
     slug: v.string(),
     displayName: v.string(),
     kind: v.union(v.literal("individual"), v.literal("firm")),

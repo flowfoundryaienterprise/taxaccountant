@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { action, httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { resolvePriceId, type SubscriptionCategory } from "./stripeBilling";
+import { approvedBillingUrl } from "./billingUrls";
 
 /**
  * The Stripe-SDK half of billing, kept separate from
@@ -125,8 +126,8 @@ export const createCheckoutSession = action({
       mode: "subscription",
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: args.successUrl,
-      cancel_url: args.cancelUrl,
+      success_url: approvedBillingUrl(args.successUrl, process.env.SITE_URL),
+      cancel_url: approvedBillingUrl(args.cancelUrl, process.env.SITE_URL),
       metadata: { organizationId: args.organizationId, category: args.category },
       subscription_data: {
         metadata: { organizationId: args.organizationId, category: args.category },
@@ -175,7 +176,7 @@ export const createPortalSession = action({
     const stripe = requireStripeClient();
     const portal = await stripe.billingPortal.sessions.create({
       customer: existing.stripeCustomerId,
-      return_url: args.returnUrl,
+      return_url: approvedBillingUrl(args.returnUrl, process.env.SITE_URL),
     });
     return { url: portal.url };
   },

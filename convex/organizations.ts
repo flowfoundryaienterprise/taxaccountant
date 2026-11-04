@@ -55,7 +55,7 @@ export async function requireOrgMember(
   }
 
   const user = await lookupAppUser(ctx, identity.tokenIdentifier);
-  if (!user) {
+  if (!user || user.accountStatus !== "active") {
     throw new Error("Not an active member of this organization.");
   }
 

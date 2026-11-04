@@ -28,7 +28,7 @@ async function createStaffAdmin(t: ReturnType<typeof convexTest>, email: string,
     name,
   });
   const asStaff = t.withIdentity({ subject: userId, issuer: "https://example.convex.site" });
-  await asStaff.mutation(api.staff.claimFirstStaffAccount, {});
+  await asStaff.mutation(internal.staff.claimFirstStaffAccount, {});
   return { asStaff, authSubject: `https://example.convex.site|${userId}` };
 }
 
