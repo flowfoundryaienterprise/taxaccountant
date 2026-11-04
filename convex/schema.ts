@@ -31,7 +31,7 @@ export default defineSchema({
     description: v.string(),
     status: v.union(v.literal("new"), v.literal("quoted"), v.literal("engaged"), v.literal("closed"), v.literal("canceled")),
     createdAt: v.number(),
-  }).index("by_customer", ["customerUserId"]).index("by_professional_status", ["professionalId", "status"]),
+  }).index("by_customer", ["customerUserId"]).index("by_professional_status", ["professionalId", "status"]).index("by_professional_created", ["professionalId", "createdAt"]).index("by_status_created", ["status", "createdAt"]),
   // ---------------------------------------------------------------------
   // Geography and taxonomy
   // ---------------------------------------------------------------------
@@ -165,6 +165,7 @@ export default defineSchema({
   })
     .index("by_slug", ["slug"])
     .index("by_publication_status", ["publicationStatus"])
+    .index("by_publication_approval", ["publicationStatus", "approvedProfile"])
     .index("by_featured", ["featured"]),
 
   professionalServices: defineTable({
@@ -525,6 +526,7 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   })
+    .index("by_status", ["status"])
     .index("by_organization", ["organizationId"])
     .index("by_stripe_customer", ["stripeCustomerId"])
     .index("by_stripe_subscription", ["stripeSubscriptionId"]),

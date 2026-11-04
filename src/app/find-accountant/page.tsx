@@ -11,7 +11,7 @@ import { ProfessionalResults } from "@/components/directory/professional-results
 import { SortDropdown } from "@/components/directory/sort-dropdown";
 import { Container } from "@/components/layout/container";
 import { allCityTokens, availableCities, searchDirectory } from "@/lib/directory/filters";
-import { directoryFixtures } from "@/lib/directory/fixtures";
+import { loadDirectory } from "@/lib/directory/public-directory";
 import {
   parseDirectoryFilters,
   type RawSearchParams,
@@ -58,19 +58,21 @@ interface FindAccountantPageProps {
  * examples. There is no `convex/professionals` module yet;
  * `professionals:search` is IMPLEMENTATION_PLAN.md Day 9 and the Day 3 brief
  * explicitly forbids creating backend search here. The swap is contained:
- * replace the `searchDirectory(directoryFixtures, filters)` call with the
+ * replace the `searchDirectory(listings, filters)` call with the
  * query's cursor-paginated result and keep the `DirectoryResults` shape.
  */
 export default async function FindAccountantPage({ searchParams }: FindAccountantPageProps) {
   const raw = await searchParams;
+  const directory = await loadDirectory();
+  const listings = directory.items;
 
   // City tokens are validated against the data, so a stale or hand-edited
   // `?city=` value is dropped instead of silently returning zero results.
-  const filters = parseDirectoryFilters(raw, allCityTokens(directoryFixtures));
+  const filters = parseDirectoryFilters(raw, allCityTokens(listings));
 
-  const results = searchDirectory(directoryFixtures, filters);
-  const cityOptions = availableCities(directoryFixtures, filters.countries);
-  const allCityOptions = availableCities(directoryFixtures, []);
+  const results = searchDirectory(listings, filters);
+  const cityOptions = availableCities(listings, filters.countries);
+  const allCityOptions = availableCities(listings, []);
 
   // Serialized once and handed to every card, so a profile opened from
   // these results can offer a "Back to Search Results" link that restores
@@ -82,7 +84,7 @@ export default async function FindAccountantPage({ searchParams }: FindAccountan
 
   return (
     <>
-      <DirectoryHeader resultCount={directoryFixtures.length} />
+      <DirectoryHeader resultCount={listings.length} preview={directory.preview} />
 
       <Container className="flex flex-col gap-8 py-10 sm:py-12">
         <AccountantSearchBar key={searchBarKey(filters)} filters={filters} />

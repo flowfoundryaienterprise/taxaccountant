@@ -33,17 +33,7 @@ export function AccountAuthForm({mode}: {mode: "signin" | "signup"}) {
   }, [awaitingSession, isAuthenticated, ensureUser, mode, role]);
   React.useEffect(() => {
     if (!destination) return;
-    if (destination.startsWith("/login")) {
-      // An inactive/unrecognized account — not a redirect target, a dead
-      // end. Release the form instead of leaving it on "Please wait…"
-      // forever: `busy` was never cleared by the submit handler on this
-      // path (it only resolves success as "move to the next step"), so
-      // without this every field and the submit button stayed disabled
-      // with no way to retry or try a different account.
-      setBusy(false);
-      setAwaitingSession(false);
-      return;
-    }
+    if (destination.startsWith("/login")) return;
     window.location.assign(destination);
   }, [destination]);
 
@@ -71,7 +61,8 @@ export function AccountAuthForm({mode}: {mode: "signin" | "signup"}) {
     <label className="text-compact font-medium">Email<input className={input} type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)} disabled={busy} /></label>
     <label className="text-compact font-medium">Password<input className={input} type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={8} maxLength={128} value={password} onChange={e=>setPassword(e.target.value)} disabled={busy} /></label>
     {destination?.startsWith("/login") ? <p role="alert" className="text-compact text-danger">This account is not active. Contact support for assistance.</p> : error ? <p role="alert" className="text-compact text-danger">{error}</p> : null}
-    <Button type="submit" size="lg" disabled={busy}>{busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}</Button>
+    <Button type="submit" size="lg" disabled={busy}>{destination?.startsWith("/login") ? "Account inactive" : busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}</Button>
+    {destination?.startsWith("/login") ? <Button type="button" variant="outline" onClick={async()=>{try{const result=await authClient.signOut();if(result.error)throw new Error(result.error.message);window.location.reload();}catch{setError("Unable to sign out. Please refresh and try again.");}}}>Sign out and use another account</Button> : null}
     <p className="text-caption text-slate">Administrator accounts are invitation-only.</p>
   </form>;
 }

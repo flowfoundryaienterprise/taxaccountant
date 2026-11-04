@@ -1,3 +1,6 @@
+import { publicConvexClient } from "@/lib/convex/public-client";
+import { api } from "@/convex/_generated/api";
+import { LiveProfile } from "@/components/professionals/live-profile";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Globe2, Languages, MapPin, Scale, ShieldAlert } from "lucide-react";
@@ -96,6 +99,10 @@ function resolveBackLink(raw: RawSearchParams): { href: string; label: string } 
 
 export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
   const { slug } = await params;
+  if (process.env.NODE_ENV === "production") {
+    const live = await publicConvexClient.query(api.professionals.publicProfile, {slug});
+    return {title:live?.displayName ?? "Profile not found",description:live?.bio.slice(0,160),robots:{index:!!live,follow:true},alternates:{canonical:professionalHref(slug)}};
+  }
   const profile = getPublishedProfile(slug);
 
   if (!profile) {
@@ -219,6 +226,11 @@ export default async function ProfessionalProfilePage({
   searchParams,
 }: ProfilePageProps) {
   const { slug } = await params;
+  if (process.env.NODE_ENV === "production") {
+    const live = await publicConvexClient.query(api.professionals.publicProfile, {slug});
+    if (!live) notFound();
+    return <LiveProfile profile={live} />;
+  }
   const profile = getPublishedProfile(slug);
 
   if (!profile) notFound();

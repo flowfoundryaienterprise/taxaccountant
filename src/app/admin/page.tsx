@@ -8,50 +8,28 @@ import {
   Wrench,
 } from "lucide-react";
 
-import { AdminApplicationsPanel } from "@/components/admin/admin-applications-panel";
+import { LiveApplications } from "@/components/admin/live-applications";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
 import { buttonVariants } from "@/components/ui/button";
-import { adminProfessionals } from "@/lib/admin/admin-data";
+
 import { formatDate, truncate } from "@/lib/admin/admin-formatters";
 import { contentRepository } from "@/lib/cms/content-adapter";
 import { fetchAuthQuery } from "@/lib/auth/server";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 
-/**
- * CMS overview, redesigned to the approved client mockup: four headline
- * counts, a tabbed professional-applications queue, quick actions, a
- * review checklist, and the latest inquiries and content drafts side by
- * side.
- *
- * ## Why "Sample data · design preview"
- * Professional records are still the fixture catalogue
- * (`@/lib/admin/admin-data`, `provenance: "demonstration"`/`"approved"` —
- * see the note there), not a live Convex collection, so this screen mixes
- * real counts (pages, articles, inbound messages — all genuine
- * `cms:*`/`contact:*` Convex reads) with that fixture data. The badge says
- * so plainly rather than letting the two blend together, the same rule
- * every other screen in this CMS follows for its `provenance` labels.
- */
+/** Authorized live overview; bounded counts are displayed as 100+ above the query cap. */
 export default async function AdminOverviewPage() {
-  const [pagesResult, articlesResult, newMessages] = await Promise.all([
+  const [pagesResult, articlesResult, overview, staff] = await Promise.all([
     contentRepository.listPages({ q: "" }),
     contentRepository.listArticles({ q: "" }),
-    fetchAuthQuery(api.contact.listMessages, {
-      status: "new",
-      paginationOpts: { numItems: 50, cursor: null },
-    }),
+    fetchAuthQuery(api.staff.marketplaceOverview, {}),
+    fetchAuthQuery(api.staff.currentStaff, {}),
   ]);
   const pages = pagesResult.items;
   const articles = articlesResult.items;
-  const professionals = adminProfessionals();
-
-  const publishedListings = professionals.filter((row) => row.status === "published").length;
-  const pendingApplications = professionals.filter((row) => row.status === "review").length;
-  const newInquiryCount = newMessages.page.length;
-
   const drafts = [
     ...pages.map((page) => ({
       id: `page-${page.id}`,
@@ -94,7 +72,7 @@ export default async function AdminOverviewPage() {
         actions={
           <>
             <span className="inline-flex items-center rounded-full border border-border bg-subtle px-3 py-1 text-caption font-medium text-slate">
-              Sample data · design preview
+              Live data · counts capped at 100+
             </span>
             <Link href="/" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
               View website
@@ -108,36 +86,36 @@ export default async function AdminOverviewPage() {
         <AdminStatCard
           icon="profiles"
           label="Published profiles"
-          value={publishedListings}
-          caption={`of ${professionals.length} professional records`}
-          href="/admin/professionals"
+          value={overview.published}
+          caption="Approved published profiles"
+          href="/admin/applications"
         />
         <AdminStatCard
           icon="applications"
           label="Pending applications"
-          value={pendingApplications}
-          caption={pendingApplications > 0 ? "Needs review" : "Nothing waiting"}
-          href="/admin/professionals"
+          value={overview.pending}
+          caption="Awaiting administrator review"
+          href="/admin/applications"
         />
         <AdminStatCard
           icon="enquiries"
           label="New inquiries"
-          value={newInquiryCount}
-          caption="unread contact and interest submissions"
-          href="/admin/messages"
+          value={overview.enquiries}
+          caption="New professional enquiries"
+          href="/admin/enquiries"
         />
         <AdminStatCard
           icon="articles"
           label="Active subscribers"
-          value="—"
-          caption="Aggregate not connected in this preview"
-          href="/admin/articles"
+          value={overview.subscribers}
+          caption="Active Stripe subscriptions"
+          href="/admin/subscriptions"
         />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <AdminApplicationsPanel rows={professionals} />
+          {staff?.role === "cms_admin" ? <LiveApplications limit={6} /> : <p className="rounded-card border border-border bg-white p-6">Professional review requires an administrator account.</p>}
         </div>
 
         <div className="flex flex-col gap-6">
@@ -182,23 +160,23 @@ export default async function AdminOverviewPage() {
         <div className="flex flex-col gap-3 rounded-[1.25rem] border border-border bg-white p-6 shadow-[0_20px_40px_-28px_rgba(16,44,87,0.18)]">
           <div className="flex items-center justify-between">
             <h2 className="text-compact font-semibold text-navy">Latest inquiries</h2>
-            <Link href="/admin/messages" className="text-compact font-medium text-action hover:underline">
+            <Link href="/admin/enquiries" className="text-compact font-medium text-action hover:underline">
               View all →
             </Link>
           </div>
           <ul className="flex flex-col gap-1">
-            {newMessages.page.slice(0, 3).map((message) => (
+            {overview.latest.map((message) => (
               <li
-                key={message._id}
+                key={message.id}
                 className="flex items-center justify-between gap-3 border-b border-border py-2.5 last:border-0"
               >
                 <span className="min-w-0 truncate text-compact text-navy">
-                  {truncate(message.subject || message.message, 48)}
+                  {truncate(message.service, 48)}<span className="block text-caption text-slate">{message.professional} · {new Date(message.createdAt).toLocaleDateString("en-US", {timeZone:"UTC"})}</span>
                 </span>
                 <AdminStatusBadge status={message.status} />
               </li>
             ))}
-            {newMessages.page.length === 0 ? (
+            {overview.latest.length === 0 ? (
               <li className="py-4 text-compact text-slate">No new inquiries right now.</li>
             ) : null}
           </ul>
@@ -236,9 +214,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       <p className="max-w-[92ch] text-caption text-slate">
-        Only approved content is published to the website. Pending applications, published profiles and their types come from the professional
-        fixture catalogue used throughout this CMS preview. Published pages, articles and new
-        inquiries are read live from Convex.
+        Only approved content is published to the website. Counts above 100 are shown as 100+.
       </p>
     </div>
   );

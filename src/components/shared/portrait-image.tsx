@@ -39,6 +39,7 @@ export function PortraitImage({ src, alt, initials, accent = "navy", sizes, clas
     <div className={className}>
       <Image
         src={src}
+        unoptimized={src.startsWith("https://")}
         alt={alt}
         fill
         sizes={sizes ?? "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"}

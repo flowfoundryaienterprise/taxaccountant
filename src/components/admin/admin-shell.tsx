@@ -28,6 +28,7 @@ interface AdminShellProps {
 export function AdminShell({ children, staffRole }: AdminShellProps) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const contentRef = React.useRef<HTMLDivElement>(null);
 
   const close = React.useCallback(() => setSidebarOpen(false), []);
 
@@ -35,11 +36,27 @@ export function AdminShell({ children, staffRole }: AdminShellProps) {
   // key handling of nested screens is untouched the rest of the time.
   React.useEffect(() => {
     if (!sidebarOpen) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const sidebar = document.querySelector<HTMLElement>("[data-admin-sidebar]");
+    const focusable = () => Array.from(sidebar?.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),input,select,textarea,[tabindex="0"]') ?? []).filter(el=>el.getClientRects().length>0);
+    focusable()[0]?.focus();
+    const content = contentRef.current;
+    if (content) content.inert = true;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
+      if (event.key === "Tab") {
+        const elements=focusable(),first=elements[0],last=elements.at(-1);
+        if(event.shiftKey && document.activeElement===first){event.preventDefault();last?.focus();}
+        else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first?.focus();}
+      }
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    const desktop=window.matchMedia("(min-width: 1024px)");
+    const onResize=()=>{if(desktop.matches)close();};
+    desktop.addEventListener("change",onResize);
+    return () => {window.removeEventListener("keydown", onKeyDown);desktop.removeEventListener("change",onResize);if(content)content.inert=false;document.body.style.overflow=overflow;previous?.focus();};
   }, [sidebarOpen, close]);
 
   return (
@@ -47,7 +64,7 @@ export function AdminShell({ children, staffRole }: AdminShellProps) {
       <SkipLink />
       <AdminSidebar pathname={pathname} open={sidebarOpen} onClose={close} staffRole={staffRole} />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div ref={contentRef} className="flex min-w-0 flex-1 flex-col">
         <AdminHeader pathname={pathname} staffRole={staffRole} onOpenSidebar={() => setSidebarOpen(true)} />
         <main id="main-content" className="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-10">
           {children}

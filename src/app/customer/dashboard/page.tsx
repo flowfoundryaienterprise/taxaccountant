@@ -64,6 +64,8 @@ export default async function CustomerDashboardPage() {
 
   if (user.role !== "customer") redirect("/professional/dashboard");
 
+  const enquiries = await fetchAuthQuery(api.contact.myEnquiries, {});
+  const openEnquiries = enquiries.filter(e=>e.status!=="closed" && e.status!=="canceled").length;
   const accountLabel = user.displayName ?? user.email ?? "Your account";
 
   return (
@@ -97,7 +99,7 @@ export default async function CustomerDashboardPage() {
             caption={organizations.length === 1 ? "business you belong to" : "businesses you belong to"}
             href={organizations[0] ? `/organization/${organizations[0].organizationId}` : "/organization/new"}
           />
-          <AdminStatCard label="Enquiries" value="View inbox" caption="Your latest submissions and their status" href="#enquiries" />
+          <AdminStatCard label="Open enquiries" value={openEnquiries} caption="Among your latest 100 submissions" href="#enquiries" />
         </div>
 
         {organizations.length > 0 ? (

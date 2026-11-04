@@ -38,11 +38,16 @@ export interface AdminNavItem {
   group: AdminNavGroup;
   /** Hidden from a `cms_editor`'s nav — the page itself still re-checks the role server-side. */
   adminOnly?: boolean;
+  available?: boolean;
 }
 
 export const ADMIN_ROOT = "/admin";
 
 export const adminNavigation: AdminNavItem[] = [
+  {href:"/admin/users",label:"Users",icon:Users,description:"User management is not available yet.",group:"Manage",available:false},
+  {href:"/admin/reports",label:"Reports",icon:FileText,description:"Reporting is not available yet.",group:"System",available:false},
+  {href:"/admin/activity",label:"Activity log",icon:ShieldCheck,description:"Audit log viewer is not available yet.",group:"System",available:false},
+  {href:"/admin/enquiries",label:"Enquiries",icon:Inbox,description:"Customer enquiries to professionals.",group:"Manage",adminOnly:true},
   {
     href: "/admin",
     label: "Dashboard",
@@ -51,7 +56,8 @@ export const adminNavigation: AdminNavItem[] = [
     group: "Overview",
   },
   {
-    href: "/admin/professionals",
+    href: "/admin/applications",
+    adminOnly: true,
     label: "Professionals",
     icon: Users,
     description: "Professional listing records and publication state.",
@@ -66,7 +72,7 @@ export const adminNavigation: AdminNavItem[] = [
   },
   {
     href: "/admin/countries",
-    label: "Countries",
+    label: "Countries & jurisdictions",
     icon: Globe2,
     description: "Country records, discovery status and activation flags.",
     group: "Manage",
@@ -80,7 +86,7 @@ export const adminNavigation: AdminNavItem[] = [
   },
   {
     href: "/admin/messages",
-    label: "Inquiries",
+    label: "Contact messages",
     icon: Inbox,
     description: "Contact and professional-interest submissions.",
     group: "Manage",
@@ -144,6 +150,7 @@ export const ADMIN_NAV_GROUP_ORDER: AdminNavGroup[] = ["Overview", "Manage", "Co
  * `/admin` stays exact (every route would otherwise match it).
  */
 export function activeNavHref(pathname: string): string {
+  if(pathname === "/admin/dashboard") return ADMIN_ROOT;
   const matches = adminNavigation
     .map((item) => item.href)
     .filter((href) => (href === ADMIN_ROOT ? pathname === ADMIN_ROOT : pathname.startsWith(href)));
@@ -158,7 +165,10 @@ export interface AdminCrumb {
 
 /** Human labels for path segments that are not a known nav entry. */
 const SEGMENT_LABELS: Record<string, string> = {
-  admin: "CMS",
+  admin: "Admin",
+  dashboard: "Dashboard",
+  applications: "Professionals",
+  enquiries: "Enquiries",
   new: "New",
   edit: "Edit",
   pages: "Pages",

@@ -62,6 +62,7 @@ export default async function ProfessionalDashboardPage() {
   const profiles = await fetchAuthQuery(api.professionalOwnership.myProfiles, {});
   if (!profiles.some(profile => profile.publicationStatus === "review" || profile.publicationStatus === "published")) redirect("/professional/onboarding");
 
+  const recentEnquiries = await fetchAuthQuery(api.contact.myEnquiries, {professionalId: profiles[0]._id});
   const accountLabel = user.displayName ?? user.email ?? "Your account";
   const firms = organizations.filter((org) => org.kind === "professional_firm");
   const subscription = firms[0]
@@ -89,18 +90,14 @@ export default async function ProfessionalDashboardPage() {
           }
         />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <AdminStatCard
             label="Profile review"
             value={profiles[0].publicationStatus === "review" ? "Pending review" : statusLabel(profiles[0].publicationStatus)}
             caption="Only approved profiles are published"
           />
-          <AdminStatCard
-            label="Firms"
-            value={firms.length}
-            caption={firms.length === 1 ? "professional firm you belong to" : "professional firms you belong to"}
-            href={firms[0] ? `/organization/${firms[0].organizationId}` : "/organization/new"}
-          />
+          <AdminStatCard label="Profile completion" value={profiles[0].onboardingCompletedAt ? "100%" : "Review profile"} caption={profiles[0].displayName} href="/professional/profile" />
+          <AdminStatCard label="New leads" value={recentEnquiries.filter(e=>e.status==="new").length} caption={`Latest 100 enquiries for ${profiles[0].displayName}`} href="#enquiries" />
           <AdminStatCard
             label="Subscription"
             value={subscription ? statusLabel(subscription.status) : "None"}

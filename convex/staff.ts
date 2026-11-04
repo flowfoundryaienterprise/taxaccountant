@@ -5,6 +5,31 @@ import { internalMutation, mutation, query, type MutationCtx, type QueryCtx } fr
 import type { Doc } from "./_generated/dataModel";
 import schema from "./schema";
 
+export const latestEnquiries = query({
+  args:{},returns:v.array(v.object({id:v.id("leads"),description:v.string(),service:v.string(),professional:v.string(),status:v.string(),createdAt:v.number()})),
+  handler:async ctx=>{
+    const staff=await requireStaff(ctx);
+    if(staff.role!=="cms_admin")throw new Error("Administrator access is required.");
+    const leads=await ctx.db.query("leads").order("desc").take(100);
+    return Promise.all(leads.map(async lead=>({id:lead._id,description:lead.description,service:(await ctx.db.get(lead.serviceId))?.name??"Unavailable service",professional:(await ctx.db.get(lead.professionalId))?.displayName??"Unavailable professional",status:lead.status,createdAt:lead.createdAt})));
+  }
+});
+
+/** Bounded operational counts, explicitly displayed as 100+ when the cap is reached. */
+export const marketplaceOverview = query({
+  args:{},returns:v.object({published:v.string(),pending:v.string(),enquiries:v.string(),subscribers:v.string(),latest:v.array(v.object({id:v.id("leads"),service:v.string(),professional:v.string(),status:v.string(),createdAt:v.number()}))}),
+  handler:async ctx=>{
+    await requireStaff(ctx);
+    const published=await ctx.db.query("professionals").withIndex("by_publication_approval",q=>q.eq("publicationStatus","published").eq("approvedProfile",true)).take(101);
+    const pending=await ctx.db.query("professionals").withIndex("by_publication_status",q=>q.eq("publicationStatus","review")).take(101);
+    const enquiries=await ctx.db.query("leads").withIndex("by_status_created",q=>q.eq("status","new")).order("desc").take(101);
+    const subscribers=await ctx.db.query("professionalSubscriptions").withIndex("by_status",q=>q.eq("status","active")).take(101);
+    const count=(rows:unknown[])=>rows.length>100?"100+":String(rows.length);
+    const latest=await Promise.all(enquiries.slice(0,3).map(async lead=>({id:lead._id,service:(await ctx.db.get(lead.serviceId))?.name??"Service unavailable",professional:(await ctx.db.get(lead.professionalId))?.displayName??"Professional unavailable",status:lead.status,createdAt:lead.createdAt})));
+    return {published:count(published),pending:count(pending),enquiries:count(enquiries),subscribers:count(subscribers),latest};
+  }
+});
+
 export const applicationDetails = query({
   args: {professionalId:v.id("professionals")},
   returns:v.object({services:v.array(v.string()),credentials:v.array(v.string()),photoUrl:v.union(v.string(),v.null())}),

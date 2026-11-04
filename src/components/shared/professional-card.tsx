@@ -41,6 +41,7 @@ export interface ProfessionalCardModel {
 interface ProfessionalCardProps {
   professional: ProfessionalCardModel;
   compact?: boolean;
+  example?: boolean;
   /**
    * Where "View Profile" goes. Build it with `professionalHref` so every
    * caller uses the one canonical `/professionals/[slug]` route. The
@@ -101,6 +102,7 @@ function MetaRow({
 export function ProfessionalCard({
   professional,
   compact = false,
+  example = false,
   profileHref = "/find-accountant",
   cta = "link",
   saveable = false,
@@ -161,7 +163,7 @@ export function ProfessionalCard({
       <div className={cn("flex flex-1 flex-col", compact ? "gap-2 p-4" : "gap-3 p-5")}>
         <div>
           <h3 className="text-compact font-medium text-navy">{professional.name}</h3>
-          {compact ? <p className="text-caption font-medium text-slate">Example profile</p> : null}
+          {example ? <p className="text-caption font-medium text-slate">Example profile</p> : null}
 
           {professional.designation ? (
             <p

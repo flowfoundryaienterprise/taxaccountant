@@ -29,10 +29,16 @@ test("complete onboarding requests review; enquiries stay private and require pu
   const profile = await t.run(ctx=>ctx.db.get(professionalId));
   expect(profile?.publicationStatus).toBe("review");
   expect(profile?.approvedProfile).toBe(false);
+  expect(await t.query(api.professionals.publicProfile,{slug:profile!.slug})).toBeNull();
   expect(await owner.query(api.users.accountDestination,{})).toBe("/professional/dashboard");
   const enquiry = {professionalId,serviceId:data.serviceId,jurisdictionId:data.jurisdictionId,description:"I need help preparing my individual return this year."};
   await expect(customer.mutation(api.contact.createEnquiry,enquiry)).rejects.toThrow("not accepting");
   await t.run(ctx=>ctx.db.patch(professionalId,{publicationStatus:"published",approvedProfile:true}));
+  const publicProfile=await t.query(api.professionals.publicProfile,{slug:profile!.slug});
+  expect(publicProfile?.displayName).toBe("Jane");
+  expect(publicProfile).not.toHaveProperty("onboardingDraft");
+  expect(publicProfile).not.toHaveProperty("reviewFeedback");
+  expect((await t.query(api.professionals.publishedDirectory,{})).items).toHaveLength(1);
   const enquiryId = await customer.mutation(api.contact.createEnquiry,enquiry);
   expect(await customer.query(api.contact.myEnquiries,{})).toHaveLength(1);
   expect(await stranger.query(api.contact.myEnquiries,{})).toEqual([]);
@@ -43,6 +49,8 @@ test("complete onboarding requests review; enquiries stay private and require pu
   expect((await customer.query(api.contact.myEnquiries,{}))[0].status).toBe("closed");
   await owner.mutation(api.professionalOwnership.reopenForEditing,{professionalId});
   expect((await t.run(ctx=>ctx.db.get(professionalId)))?.approvedProfile).toBe(false);
+  expect(await t.query(api.professionals.publicProfile,{slug:profile!.slug})).toBeNull();
+  expect((await t.query(api.professionals.publishedDirectory,{})).items).toHaveLength(0);
 });
 
 test("onboarding resumes one owned draft and rejects access from another account", async () => {
@@ -104,4 +112,21 @@ test("suspended owners lose draft access", async () => {
   await expect(owner.query(api.professionalOwnership.getOwnedProfile, {professionalId})).rejects.toThrow();
   await expect(owner.mutation(api.professionalOwnership.saveOnboardingDraft, {professionalId, draft})).rejects.toThrow();
   expect(await owner.query(api.users.accountDestination, {})).toBe("/login?reason=inactive");
+});
+
+test("marketplace counts require staff and count only approved publication", async()=>{
+  const t=convexTest(schema,modules);
+  const owner=t.withIdentity({subject:"counts-owner",issuer:"https://example.convex.site"});
+  await owner.mutation(api.users.ensureAppUser,{role:"professional"});
+  const professionalId=await owner.mutation(api.professionalOwnership.beginOnboarding,{});
+  await expect(owner.query(api.staff.marketplaceOverview,{})).rejects.toThrow();
+  const admin=t.withIdentity({subject:"counts-admin",issuer:"https://example.convex.site"});
+  await t.run(async ctx=>{
+    await ctx.db.insert("staffMemberships",{authSubject:"https://example.convex.site|counts-admin",role:"cms_admin",active:true,updatedAt:Date.now()});
+    await ctx.db.patch(professionalId,{publicationStatus:"published",approvedProfile:false});
+  });
+  expect((await admin.query(api.staff.marketplaceOverview,{})).published).toBe("0");
+  await t.run(ctx=>ctx.db.patch(professionalId,{approvedProfile:true}));
+  expect((await admin.query(api.staff.marketplaceOverview,{})).published).toBe("1");
+  await expect(owner.query(api.staff.latestEnquiries,{})).rejects.toThrow();
 });

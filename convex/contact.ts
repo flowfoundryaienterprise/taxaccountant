@@ -10,14 +10,14 @@ import schema from "./schema";
 /** Private enquiry contracts: identity and firm ownership are resolved on the server. */
 export const myEnquiries = query({
   args: {professionalId: v.optional(v.id("professionals"))},
-  returns: v.array(schema.doc("leads")),
+  returns: v.array(v.object({...schema.doc("leads").fields,serviceName:v.string(),professionalName:v.string()})),
   handler: async (ctx, {professionalId}) => {
     const user = await requireActiveUser(ctx);
-    if (professionalId) {
-      await requireProfessionalEditAccess(ctx, professionalId);
-      return ctx.db.query("leads").withIndex("by_professional_status", q => q.eq("professionalId", professionalId)).order("desc").take(100);
-    }
-    return ctx.db.query("leads").withIndex("by_customer", q => q.eq("customerUserId", user._id)).order("desc").take(100);
+    if (professionalId) await requireProfessionalEditAccess(ctx, professionalId);
+    const leads=professionalId
+      ? await ctx.db.query("leads").withIndex("by_professional_created", q => q.eq("professionalId", professionalId)).order("desc").take(100)
+      : await ctx.db.query("leads").withIndex("by_customer", q => q.eq("customerUserId", user._id)).order("desc").take(100);
+    return Promise.all(leads.map(async lead=>({...lead,serviceName:(await ctx.db.get(lead.serviceId))?.name??"Unavailable service",professionalName:(await ctx.db.get(lead.professionalId))?.displayName??"Unavailable professional"})));
   },
 });
 
@@ -30,7 +30,7 @@ export const createEnquiry = mutation({
     const description = args.description.trim();
     if (description.length < 20 || description.length > 2000) throw new Error("Describe your enquiry in 20–2,000 characters.");
     const profile = await ctx.db.get(args.professionalId);
-    if (!profile?.approvedProfile || profile.publicationStatus !== "published") throw new Error("This professional is not accepting enquiries.");
+    if (!profile?.approvedProfile || profile.publicationStatus !== "published" || profile.publicContactMode !== "contact_form") throw new Error("This professional is not accepting enquiries.");
     const service = await ctx.db.get(args.serviceId);
     const jurisdiction = await ctx.db.get(args.jurisdictionId);
     const country = jurisdiction ? await ctx.db.get(jurisdiction.countryId) : null;
@@ -63,7 +63,7 @@ export const enquiryOptions = query({
     const profiles = await ctx.db.query("professionals").withIndex("by_publication_status", q => q.eq("publicationStatus", "published")).take(50);
     const result = [];
     for (const profile of profiles) {
-      if (!profile.approvedProfile) continue;
+      if (!profile.approvedProfile || profile.publicContactMode !== "contact_form") continue;
       const offerings = await ctx.db.query("professionalServices").withIndex("by_professional", q => q.eq("professionalId", profile._id)).take(50);
       for (const offering of offerings) {
         if (!offering.enabled) continue;
