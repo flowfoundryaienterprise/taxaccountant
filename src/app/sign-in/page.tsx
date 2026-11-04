@@ -22,13 +22,16 @@ interface SignInPageProps {
 }
 
 /**
- * Public customer/professional sign-in and sign-up (Phase 2, P2-W1).
+ * Shared sign-in and sign-up for every signed-in area of the site —
+ * customer, professional, and staff (Phase 2, P2-W1).
  *
- * Replaces the earlier "opens in Phase 2" explainer now that it has —
- * `AccountAuthForm` calls the same Better Auth instance the staff login
- * form uses, and provisions an ordinary `appUsers` row
- * (`convex/users.ts`), never a CMS role. Staff sign-in stays on its own
- * `/staff-login` route, outside this one, same as before.
+ * Replaces the earlier "opens in Phase 2" explainer now that it has.
+ * There is no separate `/staff-login` route: `AccountAuthForm` calls the
+ * same Better Auth instance a staff account uses, and `/admin/layout.tsx`
+ * redirects an unauthenticated or non-staff request here, same as every
+ * other protected area. See `AccountAuthForm`'s own comment for how it
+ * tells a staff sign-in apart from a public one and redirects
+ * accordingly.
  */
 export default async function SignInPage({ searchParams }: SignInPageProps) {
   const { intent } = await searchParams;
@@ -50,7 +53,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           </h1>
           <p className="text-lead text-slate">
             {isSignup
-              ? "A customer account lets you save favorites and searches once those features launch. Browsing and contacting the directory never requires one."
+              ? "Sign up as a customer to find professionals, or as a service provider to list your practice."
               : "Sign in to your TaxAccountant.com account."}
           </p>
           <Link

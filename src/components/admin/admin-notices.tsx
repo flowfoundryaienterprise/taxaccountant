@@ -107,7 +107,7 @@ export function CmsStatusNotice() {
         <p className="max-w-[92ch] text-caption text-slate">
           This screen is only reachable after a server-verified Better Auth session with an active
           staff role — anonymous and non-staff requests are redirected to{" "}
-          <code className="rounded bg-subtle px-1 py-0.5 font-mono text-navy">/staff-login</code>{" "}
+          <code className="rounded bg-subtle px-1 py-0.5 font-mono text-navy">/sign-in</code>{" "}
           before any admin markup renders. Pages, Articles and Messages save, publish and delete
           for real now. The remaining screens (Services, Countries, Jurisdictions, Professionals,
           Media, Settings, SEO) are still read-only previews — each says so on its own screen.

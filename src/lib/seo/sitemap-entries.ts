@@ -34,7 +34,7 @@ import { absoluteUrl } from "@/lib/seo/site";
  * | `/professionals/[slug]` | `noindex` — listing them would publish invented people |
  * | `/for-professionals` | `noindex` — explains an unlaunched capability |
  * | `/admin/*` | staff interface, absent from production builds |
- * | `/sign-in`, `/staff-login`, `/api/*` | nothing for a searcher |
+ * | `/sign-in`, `/api/*` | nothing for a searcher |
  * | `/privacy`, `/terms` | `noindex` — placeholder pending legal review, not real policy yet |
  * | Filtered `/find-accountant?...` | faceted-navigation trap |
  *

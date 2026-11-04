@@ -19,6 +19,7 @@ import type * as organizations from "../organizations.js";
 import type * as professionalOwnership from "../professionalOwnership.js";
 import type * as professionals from "../professionals.js";
 import type * as staff from "../staff.js";
+import type * as taxonomy from "../taxonomy.js";
 import type * as users from "../users.js";
 
 import type {
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   professionalOwnership: typeof professionalOwnership;
   professionals: typeof professionals;
   staff: typeof staff;
+  taxonomy: typeof taxonomy;
   users: typeof users;
 }>;
 

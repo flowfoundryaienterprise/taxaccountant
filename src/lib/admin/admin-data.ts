@@ -186,6 +186,7 @@ export function adminProfessionals(): AdminProfessionalRow[] {
       slug: profile.slug,
       displayName: profile.displayName,
       firmName: profile.firmName,
+      designation: profile.credentials[0]?.designation,
       countryCode: primary?.countryCode ?? "",
       city: primary?.city ?? "",
       serviceSlugs: profile.services.map((service) => service.serviceSlug),

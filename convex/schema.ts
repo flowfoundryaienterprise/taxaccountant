@@ -410,6 +410,16 @@ export default defineSchema({
       v.literal("suspended"),
       v.literal("deletion_requested"),
     ),
+    /**
+     * Which signup role the caller picked — "Customer" vs "Service
+     * Provider" on `/sign-in?intent=signup` (`AccountAuthForm`). Drives the
+     * post-sign-in/sign-up dashboard redirect only; it grants no
+     * permission by itself (a customer and a professional can both own any
+     * organization kind — this is a UX default, not an authorization
+     * check). Optional because rows created before this field existed, and
+     * staff/admin rows, have none.
+     */
+    role: v.optional(v.union(v.literal("customer"), v.literal("professional"))),
     createdAt: v.number(),
   }).index("by_auth_subject", ["authSubject"]),
 

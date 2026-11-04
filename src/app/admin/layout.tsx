@@ -25,8 +25,11 @@ import { api } from "@/convex/_generated/api";
  * `staffMemberships` row, so a stray Better Auth account grants nothing by
  * itself (ARCHITECTURE.md section 6).
  *
- * `/staff-login` lives outside this route tree specifically so it is never
- * itself subject to this redirect.
+ * Redirects to `/sign-in`, the one shared login for every signed-in area
+ * of the site — not a separate staff-only page. `AccountAuthForm`
+ * (`@/components/shared/account-auth-form`) already redirects a staff
+ * sign-in to `/admin` on its own and handles the `reason=not-staff` state
+ * below; see its own comment for why no second page is needed.
  *
  * ## Why there is no `<main>` here
  * `AdminShell` renders its own `<main>`, and the root layout steps aside for
@@ -48,12 +51,12 @@ export const metadata: Metadata = {
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   if (!(await isAuthenticated())) {
-    redirect("/staff-login");
+    redirect("/sign-in?intent=admin-dashboard");
   }
 
   const staff = await fetchAuthQuery(api.staff.currentStaff, {});
   if (!staff) {
-    redirect("/staff-login?reason=not-staff");
+    redirect("/sign-in?intent=admin-dashboard&reason=not-staff");
   }
 
   return <AdminShell staffRole={staff.role}>{children}</AdminShell>;

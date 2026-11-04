@@ -157,7 +157,14 @@ export const heroTrustList: HeroTrustItem[] = [
  * than by discipline — there is no longer anywhere for a fabricated rating
  * to live.
  */
-export const featuredSlugs = ["sarah-johnson", "michael-chen", "emily-rodriguez", "david-wilson"];
+export const featuredSlugs = [
+  "sarah-johnson",
+  "michael-chen",
+  "emily-rodriguez",
+  "david-wilson",
+  "priya-raman",
+  "fatima-al-mansoori",
+];
 
 export interface HowItWorksStep {
   step: number;
