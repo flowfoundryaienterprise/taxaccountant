@@ -36,7 +36,7 @@ export const professionalNavItems: DashboardNavItem[] = [
   { label: "Overview", href: "/professional/dashboard", icon: LayoutDashboard },
   { label: "My Profile", href: "/professional/onboarding", icon: UserRound },
   { label: "Lead Inbox", href: "/professional/leads", icon: Inbox, available: false },
-  { label: "Subscription", href: "/professional/subscription", icon: CreditCard, available: false },
+  { label: "Subscription", href: "/professional/subscription", icon: CreditCard },
   { label: "Notifications", href: "/professional/notifications", icon: Bell, available: false },
   { label: "Account Settings", href: "/professional/settings", icon: Settings, available: false },
 ];

@@ -29,6 +29,17 @@ const STATUS_LABELS: Record<string, string> = {
   reviewing: "Reviewing",
   closed: "Closed",
   spam: "Spam",
+  // professionalSubscriptions.status — mirrors Stripe's own Subscription
+  // status values exactly (convex/stripeBilling.ts), so this is the one
+  // place a Stripe status becomes a reader-facing label.
+  active: "Active",
+  incomplete: "Incomplete",
+  incomplete_expired: "Incomplete (expired)",
+  trialing: "Trialing",
+  past_due: "Past due",
+  canceled: "Canceled",
+  unpaid: "Unpaid",
+  paused: "Paused",
 };
 
 const STATUS_TONES: Record<string, StatusTone> = {
