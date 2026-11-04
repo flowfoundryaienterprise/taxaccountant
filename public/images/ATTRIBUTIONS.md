@@ -114,3 +114,7 @@ node scripts/generate-icons.mjs
 
 The same shape is drawn inline by `src/components/shared/brand-logo.tsx`
 for the header and footer; the two must be kept in sync by hand.
+
+## Reference homepage hero (November 2026)
+
+`hero-consultation.jpg`: [Coworkers Looking at Documents at the Office](https://www.pexels.com/photo/coworkers-looking-at-documents-at-the-office-4872032/) by Gustavo Fring, under the [Pexels License](https://www.pexels.com/license/). Downloaded at 1400px width for the homepage; not a portrait of a listed professional.

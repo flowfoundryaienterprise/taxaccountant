@@ -1,139 +1,21 @@
 import Link from "next/link";
-
 import { Container } from "@/components/layout/container";
 import { BrandLogo } from "@/components/shared/brand-logo";
-import { LocaleSelectors } from "@/components/layout/locale-selectors";
-import {
-  FacebookGlyph,
-  InstagramGlyph,
-  LinkedinGlyph,
-  XGlyph,
-  YoutubeGlyph,
-} from "@/components/shared/social-icons";
-import { serviceHref } from "@/lib/marketplace/query-params";
-import { serviceCatalog } from "@/lib/marketplace/services";
-
-type FooterLink = { label: string; href: string } | { label: string };
-
-const quickLinks: FooterLink[] = [
-  { label: "Home", href: "/" },
-  { label: "Find an Accountant", href: "/find-accountant" },
-  { label: "Services", href: "/services" },
-  { label: "Countries", href: "/countries" },
-  { label: "How it Works", href: "/how-it-works" },
-  { label: "Blog", href: "/#articles" },
-  // "Pricing" stays plain text — no approved pricing exists yet (PRD.md A-07).
-  { label: "Pricing" },
-  { label: "Contact", href: "/contact" },
+const groups = [
+  {title: "Explore", links: [{label: "Home", href: "/"}, {label: "Find an Accountant", href: "/find-accountant"}, {label: "Services", href: "/services"}, {label: "About us", href: "/about"}]},
+  {title: "Professionals", links: [{label: "List your practice", href: "/for-professionals"}, {label: "Professional sign in", href: "/sign-in"}, {label: "How it works", href: "/how-it-works"}]},
+  {title: "Resources", links: [{label: "Blog", href: "/resources"}, {label: "Help center", href: "/help"}, {label: "Contact", href: "/contact"}]},
+  {title: "Legal", links: [{label: "Privacy policy", href: "/privacy"}, {label: "Terms of service", href: "/terms"}]},
 ];
-
-/**
- * Service links go to the service detail pages, matching the header menu and
- * the homepage cards — one destination per service across the whole site.
- * "All services" closes the list so the remaining categories are reachable.
- */
-const servicesLinks: FooterLink[] = [
-  ...serviceCatalog
-    .slice(0, 6)
-    .map((service) => ({ label: service.title, href: serviceHref(service.slug) })),
-  { label: "All services", href: "/services" },
-];
-
-const forProfessionalsLinks: FooterLink[] = [
-  { label: "Join as a Professional", href: "/for-professionals" },
-  // Public professional accounts are Phase 2 — same honest explainer /sign-in
-  // already gives customers (DESIGN.md section 6).
-  { label: "Professional Login", href: "/sign-in" },
-  // No approved pricing exists yet (PRD.md A-07) — stays plain text.
-  { label: "Pricing Plans" },
-  { label: "Resources", href: "/resources" },
-  { label: "Help Center", href: "/help" },
-];
-
-const supportLinks: FooterLink[] = [
-  { label: "FAQ", href: "/faq" },
-  { label: "Contact Us", href: "/contact" },
-  // No live chat exists — stays plain text rather than a dead destination.
-  { label: "Live Chat" },
-  { label: "Security & Privacy", href: "/privacy" },
-  { label: "Terms of Service", href: "/terms" },
-];
-
-const socialIcons = [
-  { icon: FacebookGlyph, label: "Facebook" },
-  { icon: LinkedinGlyph, label: "LinkedIn" },
-  { icon: XGlyph, label: "X" },
-  { icon: InstagramGlyph, label: "Instagram" },
-  { icon: YoutubeGlyph, label: "YouTube" },
-];
-
 export function SiteFooter() {
-  return (
-    <footer className="border-t border-border bg-tint">
-      <Container className="grid grid-cols-2 gap-10 py-12 sm:grid-cols-3 lg:grid-cols-5">
-        <div className="col-span-2 flex flex-col gap-3 sm:col-span-3 lg:col-span-1">
-          <Link
-            href="/"
-            aria-label="TaxAccountant home"
-            className="flex items-center gap-2.5 text-xl font-semibold tracking-tight text-navy"
-          >
-            <BrandLogo size={32} className="shrink-0" />
-            TaxAccountant
-          </Link>
-          <p className="max-w-[32ch] text-compact text-slate">
-            A global marketplace connecting individuals and businesses with trusted tax and
-            accounting professionals.
-          </p>
-          <div className="flex items-center gap-2 pt-2">
-            {socialIcons.map(({ icon: Icon, label }) => (
-              <span
-                key={label}
-                aria-label={label}
-                title={`${label} (not yet connected)`}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-slate transition-[color,border-color,transform] duration-150 hover:-translate-y-0.5 hover:border-action hover:text-action"
-              >
-                <Icon className="h-3.5 w-3.5" aria-hidden />
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <FooterColumn title="Quick Links" links={quickLinks} />
-        <FooterColumn title="Services" links={servicesLinks} />
-        <FooterColumn title="For Professionals" links={forProfessionalsLinks} />
-        <FooterColumn title="Support" links={supportLinks} />
-      </Container>
-
-      <Container className="flex flex-col gap-4 border-t border-border py-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-compact text-slate">&copy; {new Date().getFullYear()} TaxAccountant. All rights reserved.</p>
-        <LocaleSelectors />
-      </Container>
-    </footer>
-  );
-}
-
-function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) {
-  return (
-    <div className="flex flex-col gap-3">
-      <h3 className="text-caption font-medium text-navy">{title}</h3>
-      <ul className="flex flex-col gap-2">
-        {links.map((link) =>
-          "href" in link ? (
-            <li key={link.label}>
-              <Link
-                href={link.href}
-                className="text-compact text-slate transition-colors duration-150 hover:text-action"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ) : (
-            <li key={link.label} className="text-compact text-slate/70">
-              {link.label}
-            </li>
-          ),
-        )}
-      </ul>
-    </div>
-  );
+  return <footer className="bg-navy text-white">
+    <Container className="grid grid-cols-2 gap-7 py-9 sm:grid-cols-4 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1fr]">
+      <div className="col-span-2 sm:col-span-4 lg:col-span-1 lg:border-r lg:border-white/20 lg:pr-6">
+        <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight"><BrandLogo size={28} />TaxAccountant</Link>
+        <p className="mt-3 max-w-[32ch] text-compact text-white/80">Connecting people and businesses with tax and accounting expertise.</p>
+      </div>
+      {groups.map(group => <div key={group.title}><h2 className="mb-3 text-compact font-semibold">{group.title}</h2><ul className="space-y-2">{group.links.map(link => <li key={link.href}><Link href={link.href} className="text-caption text-white/80 hover:text-white hover:underline">{link.label}</Link></li>)}</ul></div>)}
+    </Container>
+    <Container className="flex flex-wrap justify-between gap-3 border-t border-white/20 py-4 text-caption text-white/80"><p>&copy; {new Date().getFullYear()} TaxAccountant. All rights reserved.</p><p>English (US)</p></Container>
+  </footer>;
 }

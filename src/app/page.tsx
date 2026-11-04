@@ -4,21 +4,21 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo/structured-data";
 
 import { FeaturedProfessionals } from "@/components/home/featured-professionals";
-import { GlobalCoverage } from "@/components/home/global-coverage";
+
 import { HeroSection } from "@/components/home/hero-section";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { LatestArticles } from "@/components/home/latest-articles";
 import { MarketplaceTrust } from "@/components/home/marketplace-trust";
-import { ProfessionalCTA } from "@/components/home/professional-cta";
+
 import { ServicesSection } from "@/components/home/services-section";
-import { WhyChooseUs } from "@/components/home/why-choose-us";
 
 export const metadata: Metadata = {
-  title: "Find Tax Accountants Worldwide",
+  title: "Find Tax & Accounting Professionals",
+  robots: { index: process.env.NODE_ENV === "production", follow: true },
   description:
     "Discover tax and accounting professionals by service, location, language, and tax jurisdiction on TaxAccountant.com.",
   openGraph: {
-    title: "TaxAccountant.com — Global Tax & Accounting Marketplace",
+    title: "TaxAccountant.com — Tax & Accounting Marketplace",
     description:
       "Search tax and accounting professionals by country, tax jurisdiction and service.",
     url: "/",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <>
+    <div className="reference-home">
       {/*
         Organization and WebSite only. No SearchAction (it would advertise a
         search over fixture listings), no AggregateRating, no Person — see
@@ -53,9 +53,8 @@ export default function Home() {
       <FeaturedProfessionals />
       <HowItWorks />
       <LatestArticles />
-      <GlobalCoverage />
-      <WhyChooseUs />
-      <ProfessionalCTA />
-    </>
+
+
+    </div>
   );
 }

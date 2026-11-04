@@ -47,7 +47,7 @@ const AA_NON_TEXT = 3;
 
 const WHITE = "#ffffff";
 /** Hover shades live as arbitrary values in `buttonVariants`, not as tokens. */
-const ACTION_HOVER = "#0668c7";
+const ACTION_HOVER = "#075984";
 
 test("body and secondary text clear AA on every surface", () => {
   for (const surface of [WHITE, token("tint"), token("canvas"), token("subtle")]) {

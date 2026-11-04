@@ -3,7 +3,6 @@ import { ArrowRight } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { ArticleCard } from "@/components/shared/article-card";
-import { Reveal } from "@/components/shared/reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { demoArticles } from "@/lib/home-content";
 
@@ -19,7 +18,7 @@ export function LatestArticles() {
             nothing yet and says so, which is the honest destination for a
             link that promises articles.
           */}
-          <SectionHeading eyebrow="Resources" title="Guides in preparation" />
+          <SectionHeading eyebrow="Insights & resources" title="Fresh perspectives. Clearer decisions." />
           <Link
             href="/resources"
             className="inline-flex shrink-0 items-center gap-1.5 text-compact font-medium text-action transition-colors duration-150 hover:text-navy"
@@ -29,17 +28,14 @@ export function LatestArticles() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {demoArticles.map((article, index) => (
-            <Reveal
-              key={article.id}
-              delayMs={index * 70}
-              className={index === 0 ? "sm:col-span-2 lg:col-span-2" : undefined}
-            >
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {demoArticles.slice(0, 3).map((article) => (
+            <div key={article.id}>
               <ArticleCard article={article} />
-            </Reveal>
+            </div>
           ))}
         </div>
+        <p className="text-caption text-slate">Article concepts for design preview. Guides are not yet published.</p>
       </Container>
     </section>
   );

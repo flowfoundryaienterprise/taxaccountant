@@ -3,7 +3,6 @@ import { ArrowRight } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { ProfessionalCard } from "@/components/shared/professional-card";
-import { Reveal } from "@/components/shared/reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { featuredSlugs } from "@/lib/home-content";
 import { toCardModel } from "@/lib/directory/card-model";
@@ -31,7 +30,7 @@ export function FeaturedProfessionals() {
           <SectionHeading
             eyebrow="Meet the professionals"
             title="Accountants & tax specialists."
-            description="Explore profiles by expertise, location and language."
+            description="Preview the profile format. USA professional listings are coming soon."
           />
           <Link
             href="/find-accountant"
@@ -43,22 +42,23 @@ export function FeaturedProfessionals() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map(({ slug, card }, index) => (
-            <Reveal key={slug} delayMs={index * 60}>
+          {(process.env.NODE_ENV === "production" ? [] : featured).map(({ slug, card }) => (
+            <div key={slug}>
               <ProfessionalCard
+                compact
                 professional={card}
                 profileHref={professionalHref(slug)}
                 className="h-full"
                 sizes="(min-width: 1024px) 33vw, 50vw"
               />
-            </Reveal>
+            </div>
           ))}
         </div>
 
-        <p className="text-caption text-slate">
-          Illustrative profiles for design preview. No profile on this platform has been verified
+        {process.env.NODE_ENV === "production" ? <p className="rounded-card border border-border bg-white p-8 text-slate">Approved USA professional listings will appear here when available.</p> : <p className="text-caption text-slate">
+          Illustrative profiles for design preview, not active marketplace listings. No example profile has been verified
           yet, and each record states its own review status.
-        </p>
+        </p>}
       </Container>
     </section>
   );
