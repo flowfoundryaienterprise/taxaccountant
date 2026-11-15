@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import Image from "next/image";
 import { ImageOff, X } from "lucide-react";
 
-import { demoMedia } from "@/lib/admin/admin-fixtures";
 import { cn } from "@/lib/utils";
 
 interface MediaPickerProps {
@@ -30,7 +31,7 @@ interface MediaPickerProps {
  */
 export function MediaPicker({ value, onChange, label, hint, disabled }: MediaPickerProps) {
   const [failed, setFailed] = React.useState<string | null>(null);
-  const images = demoMedia.filter((asset) => asset.contentType.startsWith("image/"));
+  const images = useQuery(api.adminData.selectableMedia, {}) ?? [];
   const selected = images.find((asset) => asset.path === value);
 
   return (
@@ -104,7 +105,7 @@ export function MediaPicker({ value, onChange, label, hint, disabled }: MediaPic
               ) : (
                 <Image
                   src={asset.path}
-                  alt={asset.altText ?? `Asset ${asset.objectKey}`}
+                  alt={asset.altText}
                   fill
                   sizes="(min-width: 640px) 20vw, 45vw"
                   className="object-cover"
@@ -115,6 +116,7 @@ export function MediaPicker({ value, onChange, label, hint, disabled }: MediaPic
           );
         })}
       </div>
+      {!images.length ? <p className="text-caption text-slate">No approved public media assets are available yet.</p> : null}
     </fieldset>
   );
 }

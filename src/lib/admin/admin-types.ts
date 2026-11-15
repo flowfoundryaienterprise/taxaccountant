@@ -189,7 +189,7 @@ export interface AdminMediaAsset {
   id: string;
   objectKey: string;
   /** Public path for assets already shipped in `public/`. */
-  path: string;
+  path?: string;
   contentType: string;
   sizeBytes: number;
   altText?: string;

@@ -24,7 +24,7 @@ export async function FeaturedProfessionals() {
           <SectionHeading
             eyebrow="Meet the professionals"
             title="Accountants & tax specialists."
-            description={directory.preview ? "Preview the profile format. USA professional listings are coming soon." : "Explore approved USA professionals by expertise and location."}
+            description="Explore approved professionals by expertise and location."
           />
           <Link
             href="/find-accountant"
@@ -50,10 +50,7 @@ export async function FeaturedProfessionals() {
           ))}
         </div>
 
-        {!directory.preview && !featured.length ? <p className="rounded-card border border-border bg-white p-8 text-slate">Approved USA professional listings will appear here when available.</p> : directory.preview ? <p className="text-caption text-slate">
-          Illustrative profiles for design preview, not active marketplace listings. No example profile has been verified
-          yet, and each record states its own review status.
-        </p> : null}
+        {!featured.length ? <p className="rounded-card border border-border bg-white p-8 text-slate">Approved professional listings will appear here when available.</p> : null}
       </Container>
     </section>
   );

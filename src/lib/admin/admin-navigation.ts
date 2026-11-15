@@ -48,6 +48,7 @@ export const adminNavigation: AdminNavItem[] = [
   {href:"/admin/reports",label:"Reports",icon:FileText,description:"Reporting is not available yet.",group:"System",available:false},
   {href:"/admin/activity",label:"Activity log",icon:ShieldCheck,description:"Audit log viewer is not available yet.",group:"System",available:false},
   {href:"/admin/enquiries",label:"Enquiries",icon:Inbox,description:"Customer enquiries to professionals.",group:"Manage",adminOnly:true},
+  {href:"/admin/verification/claims",label:"Ownership claims",icon:ShieldCheck,description:"Review requests to manage existing professional listings.",group:"Manage"},
   {
     href: "/admin",
     label: "Dashboard",
@@ -168,6 +169,9 @@ const SEGMENT_LABELS: Record<string, string> = {
   admin: "Admin",
   dashboard: "Dashboard",
   applications: "Professionals",
+  verification: "Verification",
+  claims: "Ownership claims",
+  listings: "Listing applications",
   enquiries: "Enquiries",
   new: "New",
   edit: "Edit",

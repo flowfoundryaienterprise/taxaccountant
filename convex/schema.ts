@@ -467,6 +467,7 @@ export default defineSchema({
     decidedAt: v.optional(v.number()),
   })
     .index("by_professional", ["professionalId"])
+    .index("by_professional_status", ["professionalId", "status"])
     .index("by_org", ["organizationId"])
     .index("by_status", ["status"]),
 

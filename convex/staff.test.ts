@@ -3,6 +3,7 @@ import { expect, test } from "vitest";
 import { convexTest } from "convex-test";
 import { register as registerBetterAuth } from "@convex-dev/better-auth/test";
 import { api, internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
@@ -160,6 +161,35 @@ test("decideClaim reject flips a pending claim to revoked", async () => {
 
   const ownership = await t.run(async (ctx) => ctx.db.get(ownershipId));
   expect(ownership?.status).toBe("revoked");
+});
+
+test("decideClaim cannot approve a second owner for one listing", async () => {
+  const t = convexTest(schema, modules);
+  registerBetterAuth(t);
+  const { asStaff } = await createStaffAdmin(t, "staff-double-claim@example.com", "Staff Reviewer");
+  const professionalId = await seedProfessional(t, "double-claim-target", "Double Claim Target", "published");
+
+  const ownershipIds: Id<"professionalOwnership">[] = [];
+  for (const email of ["first-claim@example.com", "second-claim@example.com"]) {
+    const claimant = await signedInUser(t, email);
+    const { organizationId } = await claimant.mutation(api.organizations.createOrganization, {
+      name: email,
+      kind: "professional_firm",
+    });
+    const { ownershipId } = await claimant.mutation(api.professionalOwnership.requestProfessionalClaim, {
+      organizationId,
+      professionalId,
+    });
+    ownershipIds.push(ownershipId);
+  }
+
+  await asStaff.mutation(api.staff.decideClaim, { ownershipId: ownershipIds[0], decision: "approve" });
+  await expect(asStaff.mutation(api.staff.decideClaim, {
+    ownershipId: ownershipIds[1],
+    decision: "approve",
+  })).rejects.toThrow("already has an approved owner");
+  expect((await t.run((ctx) => ctx.db.get(ownershipIds[1])))?.status).toBe("pending");
+  await asStaff.mutation(api.staff.decideClaim, { ownershipId: ownershipIds[1], decision: "reject" });
 });
 
 // --- (d) listProfessionalsPendingReview filtering --------------------------

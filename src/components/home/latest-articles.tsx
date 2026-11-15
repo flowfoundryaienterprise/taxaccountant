@@ -2,11 +2,13 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
-import { ArticleCard } from "@/components/shared/article-card";
+import { ResourceCard } from "@/components/resources/resource-card";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { demoArticles } from "@/lib/home-content";
+import { publicContentRepository } from "@/lib/cms/public-content-adapter";
+import { toResourceCard } from "@/lib/marketplace/public-content-types";
 
-export function LatestArticles() {
+export async function LatestArticles() {
+  const { items } = await publicContentRepository.listArticles({ limit: 3 });
   return (
     <section id="articles" className="py-16 sm:py-24">
       <Container className="flex flex-col gap-10">
@@ -29,13 +31,13 @@ export function LatestArticles() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {demoArticles.slice(0, 3).map((article) => (
-            <div key={article.id}>
-              <ArticleCard article={article} />
+          {items.map((article) => (
+            <div key={article.slug}>
+              <ResourceCard resource={toResourceCard(article)} />
             </div>
           ))}
         </div>
-        <p className="text-caption text-slate">Article concepts for design preview. Guides are not yet published.</p>
+        {!items.length ? <p className="text-caption text-slate">Reviewed resources will appear here after they are published.</p> : null}
       </Container>
     </section>
   );

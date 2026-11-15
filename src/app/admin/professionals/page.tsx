@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { api } from "@/convex/_generated/api";
+import { fetchAuthQuery } from "@/lib/auth/server";
 import Link from "next/link";
 import { Users } from "lucide-react";
 
@@ -8,7 +10,7 @@ import { AdminFilterBar } from "@/components/admin/admin-filter-bar";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
 import { ProvenanceNotice, ReadOnlyNotice } from "@/components/admin/admin-notices";
-import { adminProfessionals, countryName, serviceName } from "@/lib/admin/admin-data";
+import { countryName, serviceName } from "@/lib/admin/admin-data";
 import { pluralize } from "@/lib/admin/admin-formatters";
 import {
   buildAdminList,
@@ -53,7 +55,15 @@ export default async function AdminProfessionalsScreen({
   const params = await searchParams;
   const query = readParam(params, "q");
   const status = readParam(params, "status") || "all";
-  const professionals = adminProfessionals();
+  const live = await fetchAuthQuery(api.adminData.listProfessionals, {});
+  const professionals: AdminProfessionalRow[] = live.items.map(row => ({
+    id: row.id, slug: row.slug, displayName: row.displayName,
+    firmName: row.firmName, designation: row.credentials[0]?.designation,
+    countryCode: row.countryCode, city: row.city, serviceSlugs: row.serviceSlugs,
+    jurisdictionCodes: row.jurisdictionCodes, languageCodes: row.languageCodes,
+    status: row.status, verificationStatus: row.verificationStatus,
+    credentialsReviewed: row.credentialsReviewed, provenance: "approved",
+  }));
 
   const list = buildAdminList<AdminProfessionalRow>({
     rows: professionals,
@@ -155,7 +165,7 @@ export default async function AdminProfessionalsScreen({
       <ProvenanceNotice
         provenance="approved"
         entity="professional listing records"
-        detail="Unpublished records are included here because an internal publication view needs them; the public site reads a separate function that refuses them."
+        detail={`These records come from staff-authorized Convex reads, including unpublished listings. The public site reads a separate function that refuses them.${live.limited ? " Showing the 100 most recent records." : ""}`}
       />
 
       <AdminFilterBar
