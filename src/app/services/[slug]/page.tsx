@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { api } from "@/convex/_generated/api";
+import { publicConvexClient } from "@/lib/convex/public-client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
@@ -15,7 +17,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { serviceJsonLd } from "@/lib/seo/structured-data";
 import { ServiceNeeds } from "@/components/services/service-needs";
 import { filterProfessionals } from "@/lib/directory/filters";
-import { directoryFixtures } from "@/lib/directory/fixtures";
+import { loadDirectory } from "@/lib/directory/public-directory";
 import { EMPTY_FILTERS } from "@/lib/directory/query-params";
 import { directoryHref } from "@/lib/marketplace/query-params";
 import {
@@ -40,7 +42,8 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: ServiceDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const service = getService(slug);
+  const published = await publicConvexClient.query(api.taxonomy.listServiceCategories, {});
+  const service = published.some(row => row.slug === slug) ? getService(slug) : undefined;
 
   if (!service) {
     return {
@@ -77,11 +80,13 @@ export async function generateMetadata({ params }: ServiceDetailPageProps): Prom
  */
 export default async function ServiceDetailPage({ params }: ServiceDetailPageProps) {
   const { slug } = await params;
-  const service = getService(slug);
+  const published = await publicConvexClient.query(api.taxonomy.listServiceCategories, {});
+  const service = published.some(row => row.slug === slug) ? getService(slug) : undefined;
 
   if (!service) notFound();
 
-  const matches = filterProfessionals(directoryFixtures, {
+  const directory = await loadDirectory();
+  const matches = filterProfessionals(directory.items, {
     ...EMPTY_FILTERS,
     services: [service.slug],
   });

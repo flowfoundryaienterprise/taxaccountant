@@ -13,15 +13,13 @@ import { ProfessionalPreview } from "@/components/shared/professional-preview";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { ServiceFaq } from "@/components/services/service-faq";
 import { filterProfessionals } from "@/lib/directory/filters";
-import { directoryFixtures } from "@/lib/directory/fixtures";
+import { loadDirectory } from "@/lib/directory/public-directory";
 import { EMPTY_FILTERS } from "@/lib/directory/query-params";
+import { loadPublicCountries } from "@/lib/marketplace/live-catalog";
+import { serviceCatalog } from "@/lib/marketplace/services";
 import {
-  discoverableCountryCodes,
   getCountry,
-  isDiscoverable,
-  jurisdictionsForCountry,
   resourcesForCountry,
-  servicesForCountry,
 } from "@/lib/marketplace/countries";
 import { countryHref, directoryHref } from "@/lib/marketplace/query-params";
 
@@ -34,19 +32,16 @@ interface CountryDetailPageProps {
  * resolve on demand — to the honest "not open yet" state, not to a
  * fabricated listing — and unknown codes 404.
  */
-export function generateStaticParams() {
-  return discoverableCountryCodes.map((countryCode) => ({ countryCode }));
-}
-
 export async function generateMetadata({ params }: CountryDetailPageProps): Promise<Metadata> {
   const { countryCode } = await params;
-  const country = getCountry(countryCode);
+  const live = (await loadPublicCountries()).find(row => row.country.code === countryCode.toUpperCase());
+  const country = live?.country ?? getCountry(countryCode);
 
   if (!country) {
     return { title: "Country not found", robots: { index: false, follow: true } };
   }
 
-  if (!isDiscoverable(country)) {
+  if (!live) {
     return {
       title: `${country.name} — not yet available`,
       description: `TaxAccountant.com is not listing tax and accounting professionals for ${country.name} yet.`,
@@ -120,16 +115,18 @@ function countryFaqs(countryName: string) {
  */
 export default async function CountryDetailPage({ params }: CountryDetailPageProps) {
   const { countryCode } = await params;
-  const country = getCountry(countryCode);
+  const live = (await loadPublicCountries()).find(row => row.country.code === countryCode.toUpperCase());
+  const country = live?.country ?? getCountry(countryCode);
 
   if (!country) notFound();
-  if (!isDiscoverable(country)) return <CountryUnavailable country={country} />;
+  if (!live) return <CountryUnavailable country={country} />;
 
-  const jurisdictions = jurisdictionsForCountry(country.code);
-  const services = servicesForCountry(country.code);
+  const jurisdictions = live.jurisdictions;
+  const directory = await loadDirectory();
+  const services = serviceCatalog.filter(service => directory.items.some(profile => profile.countryCode === country.code && profile.serviceSlugs.includes(service.slug)));
   const resources = resourcesForCountry(country.code);
 
-  const professionals = filterProfessionals(directoryFixtures, {
+  const professionals = filterProfessionals(directory.items, {
     ...EMPTY_FILTERS,
     countries: [country.code],
   });

@@ -50,6 +50,32 @@ export const listCountries = query({
   },
 });
 
+/** Public country activation and jurisdiction taxonomy for discovery pages. */
+export const publicCountryCatalog = query({
+  args: {},
+  returns: v.array(v.object({
+    code: v.string(), name: v.string(), defaultLocale: v.string(),
+    displayCurrency: v.string(), jurisdictionCodes: v.array(v.string()),
+    jurisdictions: v.array(v.object({ code: v.string(), label: v.string() })),
+  })),
+  handler: async (ctx) => {
+    const countries = await ctx.db.query("countries")
+      .withIndex("by_discoverable_status", q => q.eq("discoverable", true).eq("status", "published"))
+      .take(100);
+    return await Promise.all(countries.map(async country => {
+      const jurisdictions = await ctx.db.query("taxJurisdictions")
+        .withIndex("by_country", q => q.eq("countryId", country._id)).take(100);
+      const active = jurisdictions.filter(jurisdiction => jurisdiction.active);
+      return {
+        code: country.code, name: country.name, defaultLocale: country.defaultLocale,
+        displayCurrency: country.displayCurrency,
+        jurisdictionCodes: active.map(jurisdiction => jurisdiction.code),
+        jurisdictions: active.map(jurisdiction => ({ code: jurisdiction.code, label: jurisdiction.label })),
+      };
+    }));
+  },
+});
+
 export const listTaxJurisdictions = query({
   args: { countryId: v.id("countries") },
   handler: async (ctx, args) => {

@@ -579,23 +579,40 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 
 **Interfaces:**
 - Consumes: `api.professionalOwnership.createProfessionalDraft`, `requestProfessionalClaim`, `updateProfessionalBasics`, `setProfessionalServices`, `setProfessionalLocations`, `setProfessionalLanguages`, `addPublicCredential`/`removePublicCredential`, `submitForReview` (Tasks 5, 6); `api.professionals.searchPublishedProfessionals` (Task 5).
+- Produces (this task's own addition — see Step 0): `api.taxonomy.listCountries`, `listTaxJurisdictions`, `listServiceCategories`, `listLanguages`.
+
+**Scope note added mid-execution:** the services/locations/languages wizard steps need real `Id<"serviceCategories">`/`Id<"countries">`/`Id<"taxJurisdictions">`/`Id<"languages">` values to submit to Task 6's mutations, but none of those four tables have any rows in the dev deployment, and no Convex query exists to list them (confirmed via `npx convex data <table>` — all empty; `API.md` §2 names `countries:listDiscoverable`/`jurisdictions:listByCountry`/`services:listPublished` as planned Phase 1 functions that were never built). The user approved closing this gap as part of this task rather than descoping the wizard to manual ID entry.
+
+- [ ] **Step 0: Add `convex/taxonomy.ts` (public read queries) and seed dev reference data**
+
+Four public queries, `domain:verb` naming per `API.md` §1, each a plain `.collect()` over a small reference table (no pagination needed — these are bounded lookup tables, not growing ones):
+- `listCountries` — args `{}`, filter `onboardingEnabled: true` (via `by_discoverable_status` isn't quite right since that's keyed on `discoverable`; a plain `.collect()` + filter is fine here given the table's small bounded size), returns `{countryId, code, name}[]`.
+- `listTaxJurisdictions` — args `{countryId}`, filter `active: true`, via the `by_country` index, returns `{jurisdictionId, code, label, level}[]`.
+- `listServiceCategories` — args `{}`, filter `publicationStatus: "published"`, via the `by_publication_status` index, returns `{serviceId, slug, name}[]`.
+- `listLanguages` — args `{}`, filter `enabled: true`, returns `{languageId, code, label}[]`.
+
+Seed via a new `internalMutation` in the same file (mirrors `convex/devProvision.ts`'s dev-only-bootstrap pattern — never reachable from any client surface), idempotent (check-by-unique-code before insert, safe to run more than once), run once manually via `npx convex run taxonomy:seedDevTaxonomy '{}'` against the dev deployment only — never production. Seed real, non-fabricated reference data only:
+- Countries: reuse the same set `src/lib/directory/taxonomy.ts`'s `countryOptions` fixture already names (re-derive real ISO codes/currencies — do not invent), `onboardingEnabled: true`, `discoverable: true`, `status: "published"`.
+- Tax jurisdictions: reuse `src/lib/directory/taxonomy.ts`'s existing `jurisdictionOptions` fixture values (e.g. `US-FED` / "United States — Federal (IRS)") so wizard data lines up with the directory's existing fixture labels, `active: true`.
+- Service categories: the exact named list from `PRD.md` §P1-F05 ("Individual tax, business tax, international tax, bookkeeping, payroll, tax planning, audits/support, entity formation, amended returns") — reuse `src/lib/home-content.ts`'s `services` fixture for slug/title consistency, `publicationStatus: "published"`.
+- Languages: a small real set with correct BCP-47 codes (e.g. English `en`, Spanish `es`, French `fr`, Hindi `hi`, Mandarin `zh`), `enabled: true`.
 
 - [ ] **Step 1: Build the entry screen** — "Create a new listing" vs. "Claim an existing listing" choice. Claim path renders `claim-search.tsx` (text input → `searchPublishedProfessionals`, select a result → `requestProfessionalClaim`, then redirect to a "claim pending staff review" landing state — not into the wizard, since a pending claim has no edit access per Task 5).
 
-- [ ] **Step 2: Build `onboarding-wizard.tsx`** for the create-new path — one step per Task 6 mutation (basics, services, locations, languages, credentials, review), each step's "Next" button calling that step's mutation before advancing, matching the create-then-autosave design (§6 approach B). Final step calls `submitForReview` and shows the post-submit landing state the design doc §7.5 calls for ("draft saved, here's what's next" — no dashboard to link to yet, since that's P2-W4).
+- [ ] **Step 2: Build `onboarding-wizard.tsx`** for the create-new path — one step per Task 6 mutation (basics, services, locations, languages, credentials, review), each step's "Next" button calling that step's mutation before advancing, matching the create-then-autosave design (§6 approach B). Services/locations/languages steps render real pickers sourced from Step 0's new queries, not free text. Final step calls `submitForReview` and shows the post-submit landing state the design doc §7.5 calls for ("draft saved, here's what's next" — no dashboard to link to yet, since that's P2-W4).
 
 - [ ] **Step 3: Typecheck and build**
 
 Run: `npm run typecheck && npm run build`
 Expected: no errors.
 
-- [ ] **Step 4: Manual verification** — walk both paths end-to-end: create-new through to `submitForReview`, and claim-existing against a fixture professional, confirming the pending-claim landing state renders and no wizard-step mutation is reachable for it.
+- [ ] **Step 4: Run the seed mutation against dev, then manual verification** — `npx convex run taxonomy:seedDevTaxonomy '{}'`, confirm via `npx convex data countries` (etc.) that rows now exist. Then walk both paths end-to-end: create-new through to `submitForReview` with real service/location/language selections, and claim-existing against a fixture professional, confirming the pending-claim landing state renders and no wizard-step mutation is reachable for it.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/app/professional src/components/professional
-git commit -m "feat: add professional onboarding wizard (create-new and claim-existing)
+git add convex/taxonomy.ts src/app/professional src/components/professional
+git commit -m "feat: add professional onboarding wizard and taxonomy picker queries
 
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 ```

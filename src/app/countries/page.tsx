@@ -8,12 +8,10 @@ import { Container } from "@/components/layout/container";
 import { EmptyState } from "@/components/shared/empty-state";
 import { MarketplaceCta } from "@/components/shared/marketplace-cta";
 import { SectionHeading } from "@/components/shared/section-heading";
-import {
-  countriesByRegion,
-  discoverableCountries,
-  jurisdictionsForCountry,
-  servicesForCountry,
-} from "@/lib/marketplace/countries";
+import { countriesByRegion } from "@/lib/marketplace/countries";
+import { loadDirectory } from "@/lib/directory/public-directory";
+import { loadPublicCountries } from "@/lib/marketplace/live-catalog";
+import { serviceCatalog } from "@/lib/marketplace/services";
 import { directoryHref } from "@/lib/marketplace/query-params";
 
 export const metadata: Metadata = {
@@ -48,13 +46,15 @@ export const metadata: Metadata = {
  * fixtures, so there is exactly one place where "what is discoverable" is
  * decided.
  */
-export default function CountriesPage() {
-  const countries: CountryCardData[] = discoverableCountries.map((country) => ({
+export default async function CountriesPage() {
+  const [catalog, directory] = await Promise.all([loadPublicCountries(), loadDirectory()]);
+  const discoverableCountries = catalog.map(row => row.country);
+  const countries: CountryCardData[] = catalog.map(({ country, jurisdictions }) => ({
     code: country.code,
     name: country.name,
     region: country.region,
-    serviceTitles: servicesForCountry(country.code).map((service) => service.title),
-    jurisdictionCount: jurisdictionsForCountry(country.code).length,
+    serviceTitles: serviceCatalog.filter(service => directory.items.some(profile => profile.countryCode === country.code && profile.serviceSlugs.includes(service.slug))).map(service => service.title),
+    jurisdictionCount: jurisdictions.length,
   }));
 
   const regionOrder = countriesByRegion(discoverableCountries).map((group) => group.region);

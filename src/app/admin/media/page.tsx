@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { api } from "@/convex/_generated/api";
+import { fetchAuthQuery } from "@/lib/auth/server";
 import Image from "next/image";
 import { AlertTriangle, ImageIcon, Upload } from "lucide-react";
 
@@ -6,8 +8,7 @@ import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 import { AdminFilterBar } from "@/components/admin/admin-filter-bar";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
-import { ProvenanceNotice, ReadOnlyNotice } from "@/components/admin/admin-notices";
-import { demoMedia } from "@/lib/admin/admin-fixtures";
+import { ProvenanceNotice } from "@/components/admin/admin-notices";
 import { formatFileSize } from "@/lib/admin/admin-formatters";
 import {
   buildAdminList,
@@ -40,11 +41,13 @@ export default async function AdminMediaScreen({
   const params = await searchParams;
   const query = readParam(params, "q");
   const type = readParam(params, "type") || "all";
+  const live = await fetchAuthQuery(api.adminData.listMedia, {});
+  const media: AdminMediaAsset[] = live.items.map(asset => ({ ...asset, provenance: "approved" }));
 
   const list = buildAdminList<AdminMediaAsset>({
-    rows: demoMedia,
+    rows: media,
     query,
-    searchFields: (row) => [row.objectKey, row.path, row.altText ?? "", row.contentType],
+    searchFields: (row) => [row.objectKey, row.path ?? "", row.altText ?? "", row.contentType],
     filterValue: type,
     filterMatch: (row, value) =>
       value === "missing-alt" ? !row.altText : row.contentType === value,
@@ -53,13 +56,13 @@ export default async function AdminMediaScreen({
     pageSize: 12,
   });
 
-  const missingAlt = demoMedia.filter((asset) => !asset.altText).length;
+  const missingAlt = media.filter((asset) => !asset.altText).length;
 
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
         title="Media library"
-        description="Approved public website assets. Private document storage is deliberately not part of this interface."
+        description="Stored media metadata. Private objects have no public preview or link."
         actions={
           <button
             type="button"
@@ -75,9 +78,9 @@ export default async function AdminMediaScreen({
       />
 
       <ProvenanceNotice
-        provenance="demonstration"
+        provenance="approved"
         entity="media records"
-        detail="Each row points at a file already shipped in public/ and listed in ATTRIBUTIONS.md, so nothing here is a private or unapproved asset."
+        detail={`Rows are staff-authorized Convex media records.${live.limited ? " Showing the 100 most recent records." : ""} Private objects are never linked publicly.`}
       />
 
       <section
@@ -116,16 +119,16 @@ export default async function AdminMediaScreen({
         filterName="type"
         filterLabel="Filter"
         filterOptions={[
-          { value: "all", label: "All", count: demoMedia.length },
+          { value: "all", label: "All", count: media.length },
           {
             value: "image/jpeg",
             label: "JPEG",
-            count: demoMedia.filter((asset) => asset.contentType === "image/jpeg").length,
+            count: media.filter((asset) => asset.contentType === "image/jpeg").length,
           },
           {
             value: "image/svg+xml",
             label: "SVG",
-            count: demoMedia.filter((asset) => asset.contentType === "image/svg+xml").length,
+            count: media.filter((asset) => asset.contentType === "image/svg+xml").length,
           },
           { value: "missing-alt", label: "Missing alt text", count: missingAlt },
         ]}
@@ -136,8 +139,8 @@ export default async function AdminMediaScreen({
       {list.rows.length === 0 ? (
         <AdminEmptyState
           icon={ImageIcon}
-          title="No assets match these filters"
-          description="Clear the filters to see every approved asset."
+          title={media.length ? "No assets match these filters" : "No media records yet"}
+          description={media.length ? "Clear the filters to see stored assets." : "Approved assets will appear after the secure upload workflow stores a media record."}
         />
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -147,18 +150,18 @@ export default async function AdminMediaScreen({
               className="flex flex-col overflow-hidden rounded-card border border-border bg-white"
             >
               <div className="relative aspect-[4/3] w-full bg-subtle">
-                <Image
+                {asset.path ? <Image
                   src={asset.path}
                   alt={asset.altText ?? ""}
                   fill
                   sizes="(min-width: 1280px) 22vw, (min-width: 640px) 45vw, 90vw"
                   className="object-cover"
-                />
+                /> : <div className="flex h-full items-center justify-center text-caption text-slate">No public preview</div>}
               </div>
 
               <div className="flex flex-1 flex-col gap-2 p-4">
-                <p className="min-w-0 truncate text-caption font-medium text-navy" title={asset.path}>
-                  {asset.path.split("/").pop()}
+                <p className="min-w-0 truncate text-caption font-medium text-navy" title={asset.objectKey}>
+                  {asset.objectKey.split("/").pop()}
                 </p>
 
                 <dl className="flex flex-col gap-1 text-caption text-slate">
@@ -200,7 +203,6 @@ export default async function AdminMediaScreen({
         </ul>
       )}
 
-      <ReadOnlyNotice />
     </div>
   );
 }

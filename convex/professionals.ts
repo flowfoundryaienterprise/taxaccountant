@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 
 import { query, type QueryCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
@@ -17,7 +18,7 @@ async function projectListing(ctx:QueryCtx,profile:Doc<"professionals">,offering
   const locations=await ctx.db.query("professionalLocations").withIndex("by_professional",q=>q.eq("professionalId",profile._id)).take(10);
   const location=locations.find(l=>l.isPrimary)??locations[0];
   const country=location?await ctx.db.get(location.countryId):null;
-  if(!location || country?.code!=="US" || !country.discoverable || country.status!=="published") return null;
+  if(!location || !country || !country.discoverable || country.status!=="published") return null;
   const offerings=await ctx.db.query("professionalServices").withIndex("by_professional",q=>q.eq("professionalId",profile._id)).take(offeringLimit);
   const active=await Promise.all(offerings.filter(o=>o.enabled).map(async o=>{
     const service=await ctx.db.get(o.serviceId);const jurisdiction=await ctx.db.get(o.taxJurisdictionId);
@@ -38,10 +39,57 @@ async function projectListing(ctx:QueryCtx,profile:Doc<"professionals">,offering
 export const publishedDirectory = query({
   args:{},returns:v.object({items:v.array(publicListing),limited:v.boolean()}),
   handler:async ctx=>{
-    const candidates=await ctx.db.query("professionals").withIndex("by_publication_status",q=>q.eq("publicationStatus","published")).order("desc").take(101);
+    const candidates=await ctx.db.query("professionals").withIndex("by_publication_approval",q=>q.eq("publicationStatus","published").eq("approvedProfile",true)).order("desc").take(101);
     const items=[];
     for(const candidate of candidates.slice(0,100)){const item=await projectListing(ctx,candidate);if(item)items.push(item);}
     return {items,limited:candidates.length>100};
+  },
+});
+
+/** A bounded page of approved listings. Filters are applied to the public
+ * projection, so a location never stands in for tax jurisdiction coverage. */
+export const search = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    q: v.optional(v.string()),
+    countryCode: v.optional(v.string()),
+    taxJurisdictionCode: v.optional(v.string()),
+    serviceSlug: v.optional(v.string()),
+    language: v.optional(v.string()),
+    mode: v.optional(v.union(v.literal("remote"), v.literal("in_person"))),
+  },
+  returns: v.object({
+    page: v.array(publicListing),
+    continueCursor: v.string(),
+    isDone: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    if (args.paginationOpts.numItems > 50 || args.paginationOpts.numItems < 1) {
+      throw new Error("Page size must be between 1 and 50");
+    }
+    if ((args.q?.length ?? 0) > 120) throw new Error("Search text is too long");
+    const candidates = await ctx.db.query("professionals")
+      .withIndex("by_publication_approval", q => q.eq("publicationStatus", "published").eq("approvedProfile", true))
+      .order("desc")
+      .paginate(args.paginationOpts);
+    const needle = args.q?.trim().toLocaleLowerCase();
+    const projected = await Promise.all(candidates.page.map(candidate => projectListing(ctx, candidate)));
+    const page = projected.filter((item): item is NonNullable<typeof item> => item !== null).filter(item => {
+      if (args.countryCode && item.countryCode !== args.countryCode.toUpperCase()) return false;
+      if (args.taxJurisdictionCode && !item.jurisdictionCodes.includes(args.taxJurisdictionCode)) return false;
+      if (args.serviceSlug && !item.serviceSlugs.includes(args.serviceSlug)) return false;
+      if (args.language && !item.languageCodes.includes(args.language)) return false;
+      if (args.mode === "remote" && !item.remote) return false;
+      if (args.mode === "in_person" && !item.inPerson) return false;
+      if (needle) {
+        const searchable = [item.displayName, item.firmName ?? "", item.city,
+          ...item.credentials.map(c => c.designation), ...item.serviceNames,
+          ...item.jurisdictionNames].join(" ").toLocaleLowerCase();
+        if (!needle.split(/\s+/).every(term => searchable.includes(term))) return false;
+      }
+      return true;
+    });
+    return { page, continueCursor: candidates.continueCursor, isDone: candidates.isDone };
   },
 });
 export const publicProfile = query({

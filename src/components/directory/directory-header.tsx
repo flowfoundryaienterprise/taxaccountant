@@ -65,7 +65,7 @@ export function DirectoryHeader({ resultCount, preview = true }: { resultCount: 
               reason.
             </span>
           </p>
-        </Reveal> : <p className="text-compact text-slate">Approved USA listings. Search covers up to 100 recently published profiles. Publication does not verify every self-reported credential.</p>}
+        </Reveal> : <p className="text-compact text-slate">Approved listings in discoverable countries. This page shows up to 100 recently published profiles. Publication does not verify every self-reported credential.</p>}
       </div>
     </div>
   );

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { api } from "@/convex/_generated/api";
+import { publicConvexClient } from "@/lib/convex/public-client";
 
 import { Container } from "@/components/layout/container";
 import { MarketplaceCta } from "@/components/shared/marketplace-cta";
@@ -72,7 +74,10 @@ const indexFaqs = [
  * to its editorial detail. When `services:listPublished` (API.md section 2)
  * exists, this page reads it instead and the sections below are unchanged.
  */
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const published = await publicConvexClient.query(api.taxonomy.listServiceCategories, {});
+  const publishedSlugs = new Set(published.map(service => service.slug));
+  const visibleServices = serviceCatalog.filter(service => publishedSlugs.has(service.slug));
   return (
     <>
       <ServicesHero />
@@ -84,7 +89,7 @@ export default function ServicesPage() {
             title="Browse every service category"
             description="Each category explains what the work normally covers, who it suits, and the jurisdiction limits that apply before you start a search."
           />
-          <ServiceGrid services={serviceCatalog} columns={4} />
+          <ServiceGrid services={visibleServices} columns={4} />
         </Container>
       </section>
 
@@ -104,7 +109,7 @@ export default function ServicesPage() {
         description="Search the directory by country, tax jurisdiction, service and language — or start from a service category above."
         primary={{ label: "Find an Accountant", href: directoryHref() }}
         secondary={{ label: "Browse countries", href: "/countries" }}
-        note="Directory results are currently development examples used to build and test the search. Designations shown are self-declared and unverified."
+        note="Directory results show approved published profiles. Each credential displays its own review status."
       />
     </>
   );
