@@ -502,20 +502,29 @@ export const adminResetTwoFactor = mutation({
  */
 export const listPendingClaims = query({
   args: {},
+  returns: v.array(v.object({
+    _id: v.id("professionalOwnership"),
+    status: v.literal("pending"),
+    requestedAt: v.number(),
+    professionalDisplayName: v.string(),
+    organizationName: v.string(),
+  })),
   handler: async (ctx) => {
     await requireStaff(ctx);
 
     const rows = await ctx.db
       .query("professionalOwnership")
       .withIndex("by_status", (q) => q.eq("status", "pending"))
-      .collect();
+      .take(100);
 
     return await Promise.all(
       rows.map(async (row) => {
         const professional = await ctx.db.get(row.professionalId);
         const organization = await ctx.db.get(row.organizationId);
         return {
-          ...row,
+          _id: row._id,
+          status: "pending" as const,
+          requestedAt: row.requestedAt,
           professionalDisplayName: professional?.displayName ?? "Unknown professional",
           organizationName: organization?.name ?? "Unknown organization",
         };
@@ -537,6 +546,7 @@ export const decideClaim = mutation({
     ownershipId: v.id("professionalOwnership"),
     decision: v.union(v.literal("approve"), v.literal("reject")),
   },
+  returns: v.object({}),
   handler: async (ctx, args) => {
     const staff = await requireStaff(ctx);
 
@@ -546,6 +556,16 @@ export const decideClaim = mutation({
     }
     if (ownership.status !== "pending") {
       throw new Error("This claim has already been decided.");
+    }
+
+    if (args.decision === "approve") {
+      const approvedOwner = await ctx.db.query("professionalOwnership")
+        .withIndex("by_professional_status", (q) =>
+          q.eq("professionalId", ownership.professionalId).eq("status", "approved"))
+        .first();
+      if (approvedOwner) {
+        throw new Error("This listing already has an approved owner.");
+      }
     }
 
     const newStatus = args.decision === "approve" ? ("approved" as const) : ("revoked" as const);
