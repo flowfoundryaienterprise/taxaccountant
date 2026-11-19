@@ -61,7 +61,7 @@ export function SiteChrome({ header, footer, children }: SiteChromeProps) {
           jump the header on every page. */}
       <SkipLink />
       {header}
-      <main id="main-content" className="flex-1">
+      <main id="main-content" className="public-main flex-1">
         {children}
       </main>
       {footer}

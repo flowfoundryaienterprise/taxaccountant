@@ -5,19 +5,19 @@ import { cn } from "@/lib/utils";
 
 export const buttonVariants = cva(
   /*
-   * `transition-colors`, not `transition-colors`: this base class is on every
+   * `transition-colors`, not `transition-all`: this base class is on every
    * button on the site, and `all` animates layout properties too — width,
    * height and margins stutter on weak devices (ARCHITECTURE.md
    * performance guidance). A button's hover is a colour change and its
    * press is a 2% scale, so those are the only two things named.
    */
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-input text-compact font-medium transition-colors duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[0.5rem] text-compact font-semibold transition-colors duration-200 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action focus-visible:ring-offset-2",
   {
     variants: {
       variant: {
-        primary: "bg-action text-white hover:bg-[#075984]",
-        secondary: "bg-tint text-navy hover:bg-[#dcecff]",
-        outline: "border border-control bg-white text-navy hover:bg-tint",
+        primary: "bg-action text-white hover:bg-action-dark shadow-sm hover:shadow-md",
+        secondary: "bg-tint text-navy hover:bg-gray-100 shadow-sm",
+        outline: "border border-control bg-white text-navy hover:bg-tint shadow-sm hover:shadow-md",
         ghost: "text-navy hover:bg-tint",
       },
       size: {

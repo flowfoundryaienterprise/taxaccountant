@@ -50,21 +50,21 @@ export const publicRepositoryStatus: RepositoryStatus = {
 
 export const publicContentRepository: PublicContentRepository = {
   async listArticles(options): Promise<CmsPage_<PublicArticle>> {
-    const result = await publicConvexClient.query(api.content.listPublishedResources, {
+    const result = await publicConvexClient().query(api.content.listPublishedResources, {
       category: options?.category,
       limit: options?.limit,
     });
     return { items: result.items, hasMore: result.hasMore };
   },
   async getArticle(slug): Promise<PublicArticle | undefined> {
-    const result = await publicConvexClient.query(api.content.getPublishedBySlug, { slug });
+    const result = await publicConvexClient().query(api.content.getPublishedBySlug, { slug });
     return result?.kind === "article" ? result.article : undefined;
   },
   async getPage(slug): Promise<PublicPage | undefined> {
-    const result = await publicConvexClient.query(api.content.getPublishedBySlug, { slug });
+    const result = await publicConvexClient().query(api.content.getPublishedBySlug, { slug });
     return result?.kind === "page" ? result.page : undefined;
   },
   async listCategories(): Promise<string[]> {
-    return publicConvexClient.query(api.content.listCategories, {});
+    return publicConvexClient().query(api.content.listCategories, {});
   },
 };

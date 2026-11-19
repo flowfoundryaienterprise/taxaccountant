@@ -1,13 +1,10 @@
 import Link from "next/link";
-import { UsersRound, ClipboardCheck, MessageSquare, Newspaper, CircleUserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
-const icons = { profiles: UsersRound, applications: ClipboardCheck, enquiries: MessageSquare, articles: Newspaper, account: CircleUserRound };
 interface AdminStatCardProps {
-  label: string; value: number | string; caption: string; href?: string; className?: string; icon?: keyof typeof icons;
+  label: string; value: number | string; caption: string; href?: string; className?: string; icon?: "profiles" | "applications" | "enquiries" | "articles" | "account";
 }
-export function AdminStatCard({label, value, caption, href, className, icon = "account"}: AdminStatCardProps) {
-  const Icon = icons[icon];
-  const content = <><Icon className="h-10 w-10 shrink-0 text-action" strokeWidth={1.5} aria-hidden /><div className="min-w-0"><p className="text-compact font-semibold text-navy">{label}</p><p className={cn("break-words font-bold tracking-tight tabular-nums text-navy",typeof value==="string" && value.length>10 ? "text-xl" : "text-4xl")}>{value}</p><p className="mt-1 text-caption text-slate">{caption}</p></div></>;
-  const classes = cn("flex items-center gap-4 rounded-card border border-border bg-white p-5 shadow-sm", href && "transition-colors hover:border-action", className);
+export function AdminStatCard({label, value, caption, href, className}: AdminStatCardProps) {
+  const content = <div className="min-w-0"><p className="text-compact text-slate">{label}</p><p className={cn("mt-3 break-words font-semibold tracking-[-0.04em] tabular-nums text-navy",typeof value==="string" && value.length>10 ? "text-xl" : "text-[2.25rem]")}>{value}</p><p className="mt-2 text-caption text-slate">{caption}</p></div>;
+  const classes = cn("workspace-stat flex items-start rounded-card border border-border bg-white p-5", href && "transition-colors hover:border-control", className);
   return href ? <Link href={href} className={classes}>{content}</Link> : <div className={classes}>{content}</div>;
 }

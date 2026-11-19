@@ -11,7 +11,7 @@ interface ProfilePageProps {
 
 export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const profile = await publicConvexClient.query(api.professionals.publicProfile, { slug });
+  const profile = await publicConvexClient().query(api.professionals.publicProfile, { slug });
   if (!profile) return { title: "Profile not found", robots: { index: false, follow: true } };
   return {
     title: profile.displayName,
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
 
 export default async function ProfessionalProfilePage({ params }: ProfilePageProps) {
   const { slug } = await params;
-  const profile = await publicConvexClient.query(api.professionals.publicProfile, { slug });
+  const profile = await publicConvexClient().query(api.professionals.publicProfile, { slug });
   if (!profile) notFound();
   return <LiveProfile profile={profile} />;
 }

@@ -44,22 +44,23 @@ export default function PrivacyPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-heading-sm font-semibold text-navy">What this site collects today</h2>
           <p>
-            Browsing the directory, searching, and viewing professional profiles does not require
-            an account and is not tied to your identity by this site. If you submit the{" "}
+            Browsing the directory and viewing professional profiles does not require an account.
+            If you sign up, authentication and session records are stored through Better Auth and
+            Convex. If you submit the{" "}
             <a href="/contact" className="font-medium text-action hover:underline">
               Contact form
             </a>
             , we store the name, email, optional phone number, subject and message you provide, so
-            our staff can respond to you.
+            staff can respond. Customer enquiries are stored with the selected professional and
+            service. Professional subscription billing is handled through Stripe when enabled.
           </p>
         </section>
 
         <section className="flex flex-col gap-2">
           <h2 className="text-heading-sm font-semibold text-navy">What we do not ask for</h2>
           <p>
-            No page on this site — including the Contact form — asks for tax identification
-            numbers, bank or account numbers, or tax documents. Please don&apos;t include them in a
-            message to us.
+            Public contact and enquiry forms do not request tax identification numbers, bank or
+            account numbers, or tax documents. Please don&apos;t include them in a message to us.
           </p>
         </section>
 

@@ -172,6 +172,28 @@ test("a checkout-started row is the one applySubscriptionState later updates for
 
 // --- mySubscription rejects a non-member ---
 
+test("webhook state and replay marker commit together", async () => {
+  const t = convexTest(schema, modules);
+  const event = {
+    stripeEventId: "evt_test_atomic",
+    type: "customer.subscription.updated",
+    stripeCustomerId: "cus_test_atomic",
+    stripeSubscriptionId: "sub_test_atomic",
+    status: "active" as const,
+  };
+  expect(await t.mutation(internal.stripeBilling.applySubscriptionEventOnce, event))
+    .toEqual({alreadyProcessed: false});
+  expect(await t.mutation(internal.stripeBilling.applySubscriptionEventOnce, {...event, status: "canceled"}))
+    .toEqual({alreadyProcessed: true});
+  const rows = await t.run(ctx => ctx.db.query("professionalSubscriptions").withIndex("by_stripe_customer", q => q.eq("stripeCustomerId", event.stripeCustomerId)).take(2));
+  const markers = await t.run(ctx => ctx.db.query("stripeWebhookEvents").withIndex("by_stripe_event_id", q => q.eq("stripeEventId", event.stripeEventId)).take(2));
+  expect(rows).toHaveLength(1);
+  expect(rows[0].status).toBe("active");
+  expect(markers).toHaveLength(1);
+});
+
+// --- mySubscription rejects a non-member ---
+
 test("mySubscription rejects a caller with no membership in the organization", async () => {
   const t = convexTest(schema, modules);
   const owner = await signedInUser(t, "firm-owner-5@example.com");

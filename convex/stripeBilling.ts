@@ -6,10 +6,11 @@ import {
   internalQuery,
   mutation,
   query,
+  type MutationCtx,
   type QueryCtx,
 } from "./_generated/server";
 import { requireStaff } from "./staff";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 
 /**
  * Stripe billing — the Convex half that is plain queries/mutations with
@@ -180,8 +181,7 @@ export const recordWebhookEventOnce = internalMutation({
  * arrive before `recordCheckoutStarted`'s own write is visible to a
  * separate webhook delivery.
  */
-export const applySubscriptionState = internalMutation({
-  args: {
+const subscriptionStateArgs = {
     stripeCustomerId: v.string(),
     stripeSubscriptionId: v.string(),
     stripePriceId: v.optional(v.string()),
@@ -197,8 +197,18 @@ export const applySubscriptionState = internalMutation({
     ),
     currentPeriodEnd: v.optional(v.number()),
     cancelAtPeriodEnd: v.optional(v.boolean()),
-  },
-  handler: async (ctx, args) => {
+} as const;
+
+type SubscriptionUpdate = {
+  stripeCustomerId: string;
+  stripeSubscriptionId: string;
+  stripePriceId?: string;
+  status: Doc<"professionalSubscriptions">["status"];
+  currentPeriodEnd?: number;
+  cancelAtPeriodEnd?: boolean;
+};
+
+async function upsertSubscriptionState(ctx: MutationCtx, args: SubscriptionUpdate) {
     const existing = await ctx.db
       .query("professionalSubscriptions")
       .withIndex("by_stripe_customer", (q) => q.eq("stripeCustomerId", args.stripeCustomerId))
@@ -234,6 +244,27 @@ export const applySubscriptionState = internalMutation({
       stripeCustomerId: args.stripeCustomerId,
       createdAt: now,
     });
+}
+
+export const applySubscriptionState = internalMutation({
+  args: subscriptionStateArgs,
+  returns: v.id("professionalSubscriptions"),
+  handler: upsertSubscriptionState,
+});
+
+/** Apply a signed event and mark it processed in the same transaction. */
+export const applySubscriptionEventOnce = internalMutation({
+  args: {...subscriptionStateArgs, stripeEventId: v.string(), type: v.string()},
+  returns: v.object({alreadyProcessed: v.boolean()}),
+  handler: async (ctx, args) => {
+    const existing = await ctx.db.query("stripeWebhookEvents")
+      .withIndex("by_stripe_event_id", q => q.eq("stripeEventId", args.stripeEventId)).unique();
+    if (existing) return {alreadyProcessed: true};
+    await upsertSubscriptionState(ctx, args);
+    await ctx.db.insert("stripeWebhookEvents", {
+      stripeEventId: args.stripeEventId, type: args.type, processedAt: Date.now(),
+    });
+    return {alreadyProcessed: false};
   },
 });
 

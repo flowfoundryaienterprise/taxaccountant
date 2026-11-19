@@ -6,9 +6,10 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ConvexClientProvider } from "@/components/shared/convex-client-provider";
 import { getToken } from "@/lib/auth/server";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_ORIGIN } from "@/lib/seo/site";
+import { SITE_DESCRIPTION, SITE_INDEXABLE, SITE_NAME, SITE_ORIGIN } from "@/lib/seo/site";
 
 import "./globals.css";
+import "./premium.css";
 
 /* Neutral sans-serif typography follows the supplied reference. */
 const referenceFont = Inter({
@@ -29,8 +30,8 @@ export const metadata: Metadata = {
     type: "website",
   },
   robots: {
-    index: true,
-    follow: true,
+    index: SITE_INDEXABLE,
+    follow: SITE_INDEXABLE,
   },
   /*
    * Declared explicitly rather than relying on the `app/icon.*` file

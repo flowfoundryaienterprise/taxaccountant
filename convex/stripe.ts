@@ -188,8 +188,7 @@ export const createPortalSession = action({
  * anything in the body (brief section 8: "Verify webhook signatures") —
  * an unverified or misconfigured request gets a 400/500, never silent
  * success. `recordWebhookEventOnce` is the idempotency guard: a Stripe
- * retry of an already-applied event returns 200 immediately without
- * reprocessing.
+ * retry of an already-applied event is acknowledged without reapplying it.
  */
 export const stripeWebhookHandler = httpAction(async (ctx, request) => {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -220,20 +219,15 @@ export const stripeWebhookHandler = httpAction(async (ctx, request) => {
     });
   }
 
-  const { alreadyProcessed } = await ctx.runMutation(internal.stripeBilling.recordWebhookEventOnce, {
-    stripeEventId: event.id,
-    type: event.type,
-  });
-  if (alreadyProcessed) {
-    return new Response(null, { status: 200 });
-  }
-
+  let appliedSubscription = false;
   const applySubscription = async (subscription: Stripe.Subscription) => {
     const customerId =
       typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
     const item = subscription.items.data[0];
     const currentPeriodEnd = item?.current_period_end ?? (subscription as { current_period_end?: number }).current_period_end;
-    await ctx.runMutation(internal.stripeBilling.applySubscriptionState, {
+    await ctx.runMutation(internal.stripeBilling.applySubscriptionEventOnce, {
+      stripeEventId: event.id,
+      type: event.type,
       stripeCustomerId: customerId,
       stripeSubscriptionId: subscription.id,
       stripePriceId: typeof item?.price === "string" ? item.price : item?.price?.id,
@@ -241,6 +235,7 @@ export const stripeWebhookHandler = httpAction(async (ctx, request) => {
       currentPeriodEnd: currentPeriodEnd ? currentPeriodEnd * 1000 : undefined,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     });
+    appliedSubscription = true;
   };
 
   switch (event.type) {
@@ -278,6 +273,13 @@ export const stripeWebhookHandler = httpAction(async (ctx, request) => {
       // it (200) is still correct so Stripe doesn't keep retrying an
       // event this app has no handling for.
       break;
+  }
+
+  if (!appliedSubscription) {
+    await ctx.runMutation(internal.stripeBilling.recordWebhookEventOnce, {
+      stripeEventId: event.id,
+      type: event.type,
+    });
   }
 
   return new Response(null, { status: 200 });

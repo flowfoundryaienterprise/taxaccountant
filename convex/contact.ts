@@ -5,7 +5,14 @@ import { mutation, query } from "./_generated/server";
 import { requireStaff } from "./staff";
 import { requireActiveUser } from "./users";
 import { requireProfessionalEditAccess } from "./professionalOwnership";
+import { rateLimits } from "./rateLimits";
+import { CONSENT_VERSION } from "../src/lib/legal/consent";
 import schema from "./schema";
+
+function containsSensitiveIdentifiers(value: string): boolean {
+  // This catches common identifiers; it cannot replace human review or DLP.
+  return /\b\d{3}[- ]\d{2}[- ]\d{4}\b|\b\d{2}-\d{7}\b|\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b/i.test(value);
+}
 
 /** Private enquiry contracts: identity and firm ownership are resolved on the server. */
 export const myEnquiries = query({
@@ -29,6 +36,7 @@ export const createEnquiry = mutation({
     if (user.role !== "customer") throw new Error("A customer account is required.");
     const description = args.description.trim();
     if (description.length < 20 || description.length > 2000) throw new Error("Describe your enquiry in 20–2,000 characters.");
+    if (containsSensitiveIdentifiers(description)) throw new Error("Do not include tax or bank identifiers in an enquiry.");
     const profile = await ctx.db.get(args.professionalId);
     if (!profile?.approvedProfile || profile.publicationStatus !== "published" || profile.publicContactMode !== "contact_form") throw new Error("This professional is not accepting enquiries.");
     const service = await ctx.db.get(args.serviceId);
@@ -37,7 +45,17 @@ export const createEnquiry = mutation({
     if (service?.publicationStatus !== "published" || !jurisdiction?.active || country?.code !== "US" || !country.discoverable || country.status !== "published") throw new Error("Choose an available USA service and jurisdiction.");
     const offerings = await ctx.db.query("professionalServices").withIndex("by_professional", q => q.eq("professionalId", args.professionalId)).take(601);
     if (!offerings.some(o => o.serviceId === args.serviceId && o.taxJurisdictionId === args.jurisdictionId && o.enabled)) throw new Error("This professional does not offer the selected service in this jurisdiction.");
-    return ctx.db.insert("leads", {...args, description, customerUserId: user._id, status: "new", createdAt: Date.now()});
+    const now = Date.now();
+    const recent = await ctx.db.query("leads")
+      .withIndex("by_customer_professional_created", q => q.eq("customerUserId", user._id).eq("professionalId", args.professionalId).gte("createdAt", now - 10 * 60_000))
+      .take(10);
+    if (recent.some(lead => lead.serviceId === args.serviceId && lead.jurisdictionId === args.jurisdictionId && lead.description === description)) {
+      throw new Error("This enquiry was already submitted recently.");
+    }
+    const customerLimit = await rateLimits.limit(ctx, "enquiryByCustomer", {key: user._id});
+    const professionalLimit = await rateLimits.limit(ctx, "enquiryByProfessional", {key: `${user._id}:${args.professionalId}`});
+    if (!customerLimit.ok || !professionalLimit.ok) throw new Error("Too many enquiries. Please try again later.");
+    return ctx.db.insert("leads", {...args, description, customerUserId: user._id, status: "new", createdAt: now});
   },
 });
 
@@ -57,10 +75,13 @@ export const closeEnquiry = mutation({
 
 /** Project public labels only; private onboarding drafts never leave this query. */
 export const enquiryOptions = query({
-  args: {}, returns: v.array(v.object({professionalId: v.id("professionals"), displayName: v.string(), serviceId: v.id("serviceCategories"), serviceName: v.string(), jurisdictionId: v.id("taxJurisdictions"), jurisdictionName: v.string()})),
-  handler: async ctx => {
+  args: {professionalId: v.optional(v.string())}, returns: v.array(v.object({professionalId: v.id("professionals"), displayName: v.string(), serviceId: v.id("serviceCategories"), serviceSlug: v.string(), serviceName: v.string(), jurisdictionId: v.id("taxJurisdictions"), jurisdictionName: v.string()})),
+  handler: async (ctx, args) => {
     await requireActiveUser(ctx);
-    const profiles = await ctx.db.query("professionals").withIndex("by_publication_status", q => q.eq("publicationStatus", "published")).take(50);
+    const selectedId = args.professionalId ? ctx.db.normalizeId("professionals", args.professionalId) : null;
+    const profiles = args.professionalId
+      ? selectedId ? [await ctx.db.get(selectedId)].filter((profile): profile is NonNullable<typeof profile> => profile !== null) : []
+      : await ctx.db.query("professionals").withIndex("by_publication_approval", q => q.eq("publicationStatus", "published").eq("approvedProfile", true)).take(50);
     const result = [];
     for (const profile of profiles) {
       if (!profile.approvedProfile || profile.publicContactMode !== "contact_form") continue;
@@ -71,7 +92,7 @@ export const enquiryOptions = query({
         const jurisdiction = await ctx.db.get(offering.taxJurisdictionId);
         const country = jurisdiction ? await ctx.db.get(jurisdiction.countryId) : null;
         if (service?.publicationStatus !== "published" || !jurisdiction?.active || country?.code !== "US" || !country.discoverable || country.status !== "published") continue;
-        result.push({professionalId: profile._id, displayName: profile.displayName, serviceId: service._id, serviceName: service.name, jurisdictionId: jurisdiction._id, jurisdictionName: jurisdiction.label});
+        result.push({professionalId: profile._id, displayName: profile.displayName, serviceId: service._id, serviceSlug: service.slug, serviceName: service.name, jurisdictionId: jurisdiction._id, jurisdictionName: jurisdiction.label});
         if (result.length === 100) return result;
       }
     }
@@ -79,31 +100,7 @@ export const enquiryOptions = query({
   },
 });
 
-/**
- * Public contact / professional-interest intake (PRD.md P1-F08).
- *
- * `publicMessages` has existed in `convex/schema.ts` since the schema was
- * first drafted; this is the first mutation that writes to it. Anonymous
- * and public by design — this is not a privileged write, it is what a
- * contact form is for — but still validated and bounded server-side rather
- * than trusting the client.
- *
- * ## Anti-abuse, honestly scoped
- * Two lightweight, frontend-implementable checks: a honeypot field (a
- * form field invisible to a human, name deliberately generic) and a
- * minimum elapsed-time check (a bot that fills and submits in under a
- * second is almost certainly not reading the form). Neither requires a new
- * dependency. What this does **not** do: per-IP/per-email rate limiting or
- * cooldowns — Convex's own guidelines recommend `@convex-dev/rate-limiter`
- * for that rather than a hand-rolled counter (hand-rolled counters race
- * under concurrency), and installing a new component wasn't part of this
- * task. Recommended before this leaves Phase 1 preview.
- *
- * ## What this deliberately does not collect
- * No tax identifiers, no file upload, no bank details — PRD.md section 5
- * ("Minimize sensitive information: never ask for tax identifiers or tax
- * documents through public forms") and AGENTS.md section 1 forbid it.
- */
+/** Anonymous intake with server validation and transactional per-sender limits. */
 export const submitPublicMessage = mutation({
   args: {
     kind: v.union(v.literal("contact"), v.literal("professional_interest")),
@@ -125,19 +122,14 @@ export const submitPublicMessage = mutation({
     sourcePath: v.string(),
     /** Honeypot — must arrive empty. A bot that fills every field trips this. */
     companyWebsite: v.optional(v.string()),
-    /** Client-measured ms between form mount and submit. */
-    elapsedMs: v.number(),
   },
+  returns: v.object({ok: v.boolean()}),
   handler: async (ctx, args) => {
     if (args.companyWebsite && args.companyWebsite.trim().length > 0) {
       // Silently accept-and-drop rather than error — telling a bot it was
       // caught only teaches it to leave the honeypot blank next time.
       return { ok: true as const };
     }
-    if (args.elapsedMs < 1500) {
-      throw new Error("Please review the form and try again.");
-    }
-
     const name = args.name.trim();
     const email = args.email.trim().toLowerCase();
     const message = args.message.trim();
@@ -145,9 +137,12 @@ export const submitPublicMessage = mutation({
     if (name.length < 1 || name.length > 200) {
       throw new Error("Name must be between 1 and 200 characters.");
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new Error("Enter a valid email address.");
     }
+    if (args.consentVersion !== CONSENT_VERSION) throw new Error("Please reload the form and review the current privacy notice.");
+    const expectedPath = args.kind === "contact" ? "/contact" : "/for-professionals";
+    if (args.sourcePath !== expectedPath) throw new Error("Invalid form source.");
     if (message.length < 10 || message.length > 4000) {
       throw new Error("Message must be between 10 and 4000 characters.");
     }
@@ -159,6 +154,13 @@ export const submitPublicMessage = mutation({
     if (subject && subject.length > 200) {
       throw new Error("Subject is too long.");
     }
+    if (containsSensitiveIdentifiers(`${subject ?? ""} ${message}`)) {
+      throw new Error("Do not include tax or bank identifiers in a public message.");
+    }
+
+    const senderLimit = await rateLimits.limit(ctx, "publicMessageByEmail", {key: email});
+    const globalLimit = await rateLimits.limit(ctx, "publicMessageGlobal");
+    if (!senderLimit.ok || !globalLimit.ok) throw new Error("Too many messages. Please try again later.");
 
     const now = Date.now();
     await ctx.db.insert("publicMessages", {

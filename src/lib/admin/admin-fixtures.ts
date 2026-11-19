@@ -1,4 +1,5 @@
 import type { AdminMediaAsset, AdminSettingGroup } from "@/lib/admin/admin-types";
+import { SITE_DESCRIPTION, SITE_ORIGIN } from "@/lib/seo/site";
 
 /**
  * DEMONSTRATION FIXTURES for the CMS screens that still have no data source.
@@ -188,15 +189,14 @@ export const settingGroups: AdminSettingGroup[] = [
       {
         key: "siteDescription",
         label: "Default description",
-        value:
-          "TaxAccountant.com connects customers with qualified tax and accounting professionals worldwide.",
+        value: SITE_DESCRIPTION,
         hint: "Fallback meta description for routes that do not set their own.",
         state: "implemented",
       },
       {
         key: "siteOrigin",
         label: "Canonical origin",
-        value: "https://taxaccountant.com",
+        value: SITE_ORIGIN,
         hint: "Base URL used for canonical links and structured data.",
         state: "implemented",
       },
@@ -210,7 +210,7 @@ export const settingGroups: AdminSettingGroup[] = [
       {
         key: "contactEmail",
         label: "Public contact address",
-        hint: "No public contact address has been approved. The Phase 1 contact workflow is not built.",
+        hint: "Public contact submissions are stored for staff review; a public email address is not configured.",
         state: "pending",
       },
       {

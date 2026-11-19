@@ -4,7 +4,7 @@ import { getCountry, type CountryEntry } from "./countries";
 
 /** Convex decides publication. Local entries supply map coordinates and editorial context. */
 export async function loadPublicCountries() {
-  const rows = await publicConvexClient.query(api.taxonomy.publicCountryCatalog, {});
+  const rows = await publicConvexClient().query(api.taxonomy.publicCountryCatalog, {});
   return rows.flatMap(row => {
     const presentation = getCountry(row.code);
     if (!presentation) return [];

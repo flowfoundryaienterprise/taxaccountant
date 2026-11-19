@@ -1,4 +1,5 @@
 import { ConvexHttpClient } from "convex/browser";
+import { validConvexUrl } from "@/lib/convex/config";
 
 /**
  * A Convex client for **unauthenticated, public** server-side reads —
@@ -13,4 +14,13 @@ import { ConvexHttpClient } from "convex/browser";
  * `ConvexHttpClient` is cheap to hold onto — a module-level singleton avoids
  * re-parsing the deployment URL on every request.
  */
-export const publicConvexClient = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+let client: ConvexHttpClient | null = null;
+
+export function publicConvexClient(): ConvexHttpClient {
+  const raw = process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (!raw) throw new Error("Public data is unavailable: NEXT_PUBLIC_CONVEX_URL is not configured.");
+  if (!validConvexUrl(raw)) {
+    throw new Error("Public data is unavailable: NEXT_PUBLIC_CONVEX_URL is invalid.");
+  }
+  return client ??= new ConvexHttpClient(raw);
+}

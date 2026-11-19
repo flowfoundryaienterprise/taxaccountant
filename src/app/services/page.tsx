@@ -75,7 +75,12 @@ const indexFaqs = [
  * exists, this page reads it instead and the sections below are unchanged.
  */
 export default async function ServicesPage() {
-  const published = await publicConvexClient.query(api.taxonomy.listServiceCategories, {});
+  let published: {slug: string}[];
+  try {
+    published = await publicConvexClient().query(api.taxonomy.listServiceCategories, {});
+  } catch {
+    return <Container className="py-16"><div role="alert" className="rounded-card border border-border bg-white p-8"><h1 className="text-heading-sm font-semibold text-navy">Services unavailable</h1><p className="mt-3 text-slate">The published service catalogue could not be loaded. Please try again shortly.</p><a href="/services" className="mt-4 inline-block text-action underline">Retry</a></div></Container>;
+  }
   const publishedSlugs = new Set(published.map(service => service.slug));
   const visibleServices = serviceCatalog.filter(service => publishedSlugs.has(service.slug));
   return (

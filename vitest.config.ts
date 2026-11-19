@@ -3,6 +3,9 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "edge-runtime",
+    // Better Auth password hashing and multi-step onboarding can exceed the
+    // default five seconds on shared CI runners without being stuck.
+    testTimeout: 20_000,
     server: { deps: { inline: ["convex-test"] } },
     // `convex/auth.ts` reads `SITE_URL` at module load time and throws if it
     // is unset (a deliberate guard against a misconfigured real deployment).

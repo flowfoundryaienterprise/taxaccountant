@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import { expect, test } from "vitest";
 import { convexTest } from "convex-test";
+import { register as registerRateLimiter } from "@convex-dev/rate-limiter/test";
 import { api } from "./_generated/api";
 import schema from "./schema";
 
@@ -9,6 +10,7 @@ const draft = {step: 0, category: "cpa_accountant" as const, displayName: "Jane"
 
 test("complete onboarding requests review; enquiries stay private and require publication", async () => {
   const t = convexTest(schema, modules);
+  registerRateLimiter(t);
   const owner = t.withIdentity({subject: "provider", issuer: "https://example.convex.site"});
   const customer = t.withIdentity({subject: "buyer", issuer: "https://example.convex.site"});
   const stranger = t.withIdentity({subject: "stranger", issuer: "https://example.convex.site"});
@@ -39,7 +41,9 @@ test("complete onboarding requests review; enquiries stay private and require pu
   expect(publicProfile).not.toHaveProperty("onboardingDraft");
   expect(publicProfile).not.toHaveProperty("reviewFeedback");
   expect((await t.query(api.professionals.publishedDirectory,{})).items).toHaveLength(1);
+  await expect(customer.mutation(api.contact.createEnquiry,{...enquiry,description:"Please handle SSN 123-45-6789 in my filing."})).rejects.toThrow("Do not include tax or bank identifiers");
   const enquiryId = await customer.mutation(api.contact.createEnquiry,enquiry);
+  await expect(customer.mutation(api.contact.createEnquiry,enquiry)).rejects.toThrow("already submitted");
   expect(await customer.query(api.contact.myEnquiries,{})).toHaveLength(1);
   expect(await stranger.query(api.contact.myEnquiries,{})).toEqual([]);
   await expect(stranger.query(api.contact.myEnquiries,{professionalId})).rejects.toThrow();

@@ -5,9 +5,10 @@ import { ConvexBetterAuthProvider, type AuthClient } from "@convex-dev/better-au
 
 import { authClient } from "@/lib/auth/client";
 import { EnsureAppUser } from "@/components/shared/ensure-app-user";
+import { validConvexUrl } from "@/lib/convex/config";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-const convexClient = convexUrl ? new ConvexReactClient(convexUrl) : null;
+const convexClient = validConvexUrl(convexUrl) ? new ConvexReactClient(convexUrl) : null;
 
 interface ConvexClientProviderProps {
   children: React.ReactNode;

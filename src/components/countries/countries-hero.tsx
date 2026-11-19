@@ -27,14 +27,7 @@ export interface CountryMarker {
  */
 export function CountriesHero({ markers }: { markers: CountryMarker[] }) {
   return (
-    <section className="relative overflow-hidden border-b border-border bg-tint/50">
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-14 left-[3%] select-none text-[11rem] font-semibold leading-none tracking-tighter text-navy/[0.04] sm:text-[15rem]"
-      >
-        {markers.length}
-      </span>
-
+    <section className="premium-page-hero relative overflow-hidden border-b border-border bg-white">
       <Container className="relative flex flex-col gap-8 py-12 sm:py-16">
         <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Countries" }]} />
 
@@ -81,7 +74,7 @@ export function CountriesHero({ markers }: { markers: CountryMarker[] }) {
 
           <Reveal
             delayMs={120}
-            className="relative aspect-[2/1] w-full rounded-panel bg-white p-2 shadow-float"
+            className="relative aspect-[2/1] w-full bg-white p-2"
           >
             <div className="relative h-full w-full">
               <Image

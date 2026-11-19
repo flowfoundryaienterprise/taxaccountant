@@ -21,6 +21,7 @@ import type * as organizations from "../organizations.js";
 import type * as professionalOwnership from "../professionalOwnership.js";
 import type * as professionals from "../professionals.js";
 import type * as profileFields from "../profileFields.js";
+import type * as rateLimits from "../rateLimits.js";
 import type * as staff from "../staff.js";
 import type * as stripe from "../stripe.js";
 import type * as stripeBilling from "../stripeBilling.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   professionalOwnership: typeof professionalOwnership;
   professionals: typeof professionals;
   profileFields: typeof profileFields;
+  rateLimits: typeof rateLimits;
   staff: typeof staff;
   stripe: typeof stripe;
   stripeBilling: typeof stripeBilling;
@@ -82,4 +84,5 @@ export declare const internal: FilterApi<
 
 export declare const components: {
   betterAuth: import("@convex-dev/better-auth/_generated/component.js").ComponentApi<"betterAuth">;
+  rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
 };
