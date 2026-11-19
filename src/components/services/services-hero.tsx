@@ -6,7 +6,6 @@ import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { Container } from "@/components/layout/container";
 import { Reveal } from "@/components/shared/reveal";
 import { buttonVariants } from "@/components/ui/button";
-import { serviceCatalog } from "@/lib/marketplace/services";
 import { directoryHref } from "@/lib/marketplace/query-params";
 import { cn } from "@/lib/utils";
 
@@ -30,14 +29,7 @@ const assurances = [
 
 export function ServicesHero() {
   return (
-    <section className="relative overflow-hidden border-b border-border bg-tint/50">
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-16 right-[2%] select-none text-[12rem] font-semibold leading-none tracking-tighter text-navy/[0.04] sm:text-[16rem]"
-      >
-        {serviceCatalog.length}
-      </span>
-
+    <section className="premium-page-hero relative overflow-hidden border-b border-border bg-white">
       <Container className="relative flex flex-col gap-8 py-12 sm:py-16">
         <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Services" }]} structuredData />
 
@@ -45,7 +37,7 @@ export function ServicesHero() {
           <Reveal className="flex flex-col gap-6">
             <div className="flex flex-col gap-3">
               <h1 className="max-w-[16ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
-                {serviceCatalog.length} service categories, one honest directory
+                Tax and accounting services.
               </h1>
               <p className="max-w-[62ch] text-lead text-slate">
                 Explore tax and accounting services and find professionals with expertise relevant
@@ -91,7 +83,7 @@ export function ServicesHero() {
 
           <Reveal
             delayMs={120}
-            className="relative aspect-[4/3] w-full overflow-hidden rounded-panel border border-border bg-white shadow-float lg:aspect-[4/5]"
+            className="relative aspect-[4/3] w-full overflow-hidden bg-white lg:aspect-[4/5]"
           >
             <Image
               src="/images/article-accountant-calculator.jpg"

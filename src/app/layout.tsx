@@ -9,6 +9,7 @@ import { getToken } from "@/lib/auth/server";
 import { SITE_DESCRIPTION, SITE_INDEXABLE, SITE_NAME, SITE_ORIGIN } from "@/lib/seo/site";
 
 import "./globals.css";
+import "./premium.css";
 
 /* Neutral sans-serif typography follows the supplied reference. */
 const referenceFont = Inter({

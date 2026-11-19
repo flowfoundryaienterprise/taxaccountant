@@ -39,7 +39,7 @@ export function ServiceCard({
          * passes over it, because it is not a physical object and nothing
          * about the hover means "closer".
          */
-        "group flex h-full flex-col gap-4 rounded-card border p-6 transition-colors duration-150",
+        "group flex h-full flex-col gap-5 rounded-[0.25rem] border p-7 transition-colors duration-150",
         highlighted
           ? "border-navy bg-navy"
           : "border-border bg-white hover:border-action focus-visible:border-action",
@@ -53,9 +53,9 @@ export function ServiceCard({
         The icon stays, at the muted text role, sized and stroked like
         every other icon on the site.
       */}
-      <Icon className={cn("h-[18px] w-[18px]", highlighted ? "text-white/80" : "text-slate")} aria-hidden />
+      <Icon className={cn("h-6 w-6", highlighted ? "text-white/80" : "text-action")} aria-hidden />
       <div className="flex flex-col gap-1.5">
-        <h3 className={cn("text-compact font-medium", highlighted ? "text-white" : "text-navy")}>
+        <h3 className={cn("text-xl font-semibold tracking-tight", highlighted ? "text-white" : "text-navy")}>
           {service.title}
         </h3>
         <p className={cn("text-compact", highlighted ? "text-white/70" : "text-slate")}>

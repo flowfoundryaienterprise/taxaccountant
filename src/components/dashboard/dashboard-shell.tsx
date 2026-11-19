@@ -29,14 +29,37 @@ export function DashboardShell({ eyebrow, title, accountLabel, variant, children
   const items = variant === "customer" ? customerNavItems : professionalNavItems;
 
   return (
-    <div className="reference-dashboard flex min-h-screen w-full bg-tint">
+    <div className="workspace-shell flex min-h-screen w-full bg-gray-50">
       <div className="hidden lg:block"><DashboardSidebar eyebrow={eyebrow} pathname={pathname} items={items} /></div>
-      <dialog ref={drawer} aria-label="Account navigation" className="reference-drawer" onClick={event => { if (event.target === event.currentTarget || (event.target as HTMLElement).closest("a")) drawer.current?.close(); }}>
-        <button type="button" aria-label="Close navigation" onClick={() => drawer.current?.close()} className="absolute top-3 right-2 z-10 rounded p-2 text-white"><X size={20} /></button>
+      <dialog
+        ref={drawer}
+        aria-label="Account navigation"
+        className="reference-drawer"
+        onClick={(event) => {
+          if (event.target === event.currentTarget || (event.target as HTMLElement).closest("a")) {
+            drawer.current?.close();
+          }
+        }}
+      >
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={() => drawer.current?.close()}
+          className="absolute top-3 right-2 z-10 rounded p-2 text-white hover:bg-white/10 transition-colors"
+        >
+          <X size={20} />
+        </button>
         <DashboardSidebar eyebrow={eyebrow} pathname={pathname} items={items} />
       </dialog>
       <div className="flex min-w-0 flex-1 flex-col">
-        <button type="button" onClick={() => drawer.current?.showModal()} className="flex items-center gap-2 border-b border-border bg-white px-4 py-3 text-compact font-semibold lg:hidden"><Menu size={20} aria-hidden />Menu</button>
+        <button
+          type="button"
+          onClick={() => drawer.current?.showModal()}
+          className="flex items-center gap-2 border-b border-border bg-white px-4 py-3 text-compact font-semibold lg:hidden"
+        >
+          <Menu size={20} aria-hidden />
+          Menu
+        </button>
         <DashboardHeader title={title} accountLabel={accountLabel} />
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-10">{children}</main>
       </div>

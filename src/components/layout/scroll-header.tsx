@@ -25,9 +25,9 @@ export function ScrollHeader({ children }: { children: React.ReactNode }) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 border-b transition-[box-shadow,border-color,background-color] duration-300",
+        "sticky top-0 z-30 border-b transition-[border-color,background-color,box-shadow] duration-300",
         scrolled
-          ? "border-border bg-white/85 shadow-[0_8px_24px_-16px_rgba(16,44,87,0.25)] backdrop-blur-md"
+          ? "border-border bg-white/95 backdrop-blur-sm shadow-sm"
           : "border-transparent bg-white",
       )}
     >

@@ -29,9 +29,9 @@ export function MarketplaceCta({
   note,
 }: MarketplaceCtaProps) {
   return (
-    <section className="py-16 sm:py-20">
+    <section className="premium-marketplace-cta py-16 sm:py-20">
       <Container>
-        <div className="flex flex-col items-start gap-6 rounded-panel bg-navy px-6 py-12 text-white sm:px-12">
+        <div className="flex flex-col items-start gap-7 bg-navy px-6 py-14 text-white sm:px-12 sm:py-20">
           <div className="flex max-w-[58ch] flex-col gap-3">
             <h2 className="text-heading-lg font-semibold">{title}</h2>
             <p className="text-lead text-white/80">{description}</p>

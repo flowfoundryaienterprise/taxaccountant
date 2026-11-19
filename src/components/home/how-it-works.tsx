@@ -1,16 +1,34 @@
-import { Search, UsersRound, ClipboardCheck } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/layout/container";
-import { SectionHeading } from "@/components/shared/section-heading";
+import { Reveal } from "@/components/shared/reveal";
+
 const steps = [
-  {icon: Search, title: "Explore your options", description: "Choose the service and expertise you need."},
-  {icon: UsersRound, title: "Compare professionals", description: "Review profiles, specialties and locations."},
-  {icon: ClipboardCheck, title: "Submit an enquiry", description: "Sign in and send an enquiry to an available professional."},
+  { title: "Search with intent", description: "Filter by service, country, tax jurisdiction and language." },
+  { title: "Read the profile", description: "Compare services, experience and consultation options." },
+  { title: "Start a conversation", description: "Sign in and send an enquiry to an available professional." },
 ];
+
 export function HowItWorks() {
-  return <section id="how-it-works" className="py-12"><Container>
-    <SectionHeading eyebrow="How it works" title="Your next expert, in three simple steps." />
-    <ol className="reference-steps mt-8 grid gap-8 md:grid-cols-3">{steps.map(({icon: Icon, title, description}, index) =>
-      <li key={title} className="relative flex items-start gap-4"><Icon className="h-12 w-12 shrink-0 text-action" strokeWidth={1.5} aria-hidden /><div><span className="text-4xl font-bold text-action/50" aria-hidden>0{index + 1}</span><h3 className="font-semibold"><span className="sr-only">Step {index + 1}: </span>{title}</h3><p className="mt-1 text-compact text-slate">{description}</p></div></li>
-    )}</ol>
-  </Container></section>;
+  return (
+    <section id="how-it-works" className="editorial-process">
+      <Container>
+        <div className="editorial-process-heading">
+          <h2>From question to conversation.</h2>
+          <p>A clear path from a complex tax need to a professional who works in that area.</p>
+        </div>
+        <ol className="editorial-process-list">
+          {steps.map((step, i) => (
+            <Reveal key={step.title} delayMs={i * 100}>
+              <li>
+                <h3>{step.title}</h3>
+                <p>{step.description}</p>
+              </li>
+            </Reveal>
+          ))}
+        </ol>
+        <Link href="/how-it-works" className="editorial-process-link">How it works <ArrowUpRight size={18} aria-hidden /></Link>
+      </Container>
+    </section>
+  );
 }

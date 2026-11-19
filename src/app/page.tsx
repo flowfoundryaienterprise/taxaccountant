@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="reference-home">
+    <div className="marketplace-home">
       {/*
         Organization and WebSite only. No SearchAction (it would advertise a
         search over fixture listings), no AggregateRating, no Person — see

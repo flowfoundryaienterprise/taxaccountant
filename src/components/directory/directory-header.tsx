@@ -13,15 +13,8 @@ import { Reveal } from "@/components/shared/reveal";
  */
 export function DirectoryHeader({ resultCount, preview = true }: { resultCount: number; preview?: boolean }) {
   return (
-    <div className="relative overflow-hidden border-b border-border bg-tint/50">
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-14 right-[4%] select-none text-[11rem] font-semibold leading-none tracking-tighter text-navy/[0.04] sm:text-[15rem]"
-      >
-        {resultCount}
-      </span>
-
-      <div className="relative mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-4 py-12 sm:px-6 sm:py-16 lg:max-w-[72ch] lg:px-8">
+    <div className="premium-discovery-header relative overflow-hidden border-b border-border bg-white">
+      <div className="relative mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-4 py-12 sm:px-6 sm:py-20 lg:px-8">
         <nav aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-1.5 text-caption text-slate">
             <li>
@@ -42,8 +35,8 @@ export function DirectoryHeader({ resultCount, preview = true }: { resultCount: 
         </nav>
 
         <Reveal className="flex flex-col gap-3">
-          <h1 className="max-w-[20ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
-            Find the right <span className="text-action">tax accountant</span> for your needs
+          <h1 className="max-w-[17ch] text-5xl font-semibold leading-[0.98] tracking-tight text-navy sm:text-6xl">
+            Find the right tax accountant.
           </h1>
           <p className="max-w-[70ch] text-lead text-slate">
             Explore tax and accounting professionals by country, tax jurisdiction, specialty and
