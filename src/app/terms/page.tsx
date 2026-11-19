@@ -14,8 +14,7 @@ export const metadata: Metadata = {
 /**
  * Same placeholder treatment as /privacy, and for the same reason — no
  * terms of service have been drafted or approved (PRD.md A-05). This page
- * exists so the link works and says what's actually true (Phase 1 scope,
- * no transactions yet) instead of either 404ing or inventing legal terms.
+ * exists so the link works without inventing legal terms.
  */
 export default function TermsPage() {
   return (
@@ -39,29 +38,28 @@ export default function TermsPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-heading-sm font-semibold text-navy">What TaxAccountant.com is today</h2>
           <p>
-            A public directory for discovering tax and accounting professionals by country, tax
-            jurisdiction, service and language. Browsing and searching are free and do not require
-            an account.
+            A public directory for discovering tax and accounting professionals. Browsing does not
+            require an account. Customer enquiries and professional accounts require sign-in.
           </p>
         </section>
 
         <section className="flex flex-col gap-2">
           <h2 className="text-heading-sm font-semibold text-navy">What this site does not do</h2>
           <p>
-            This site does not provide tax, legal or financial advice, does not book appointments,
-            does not process payments, and does not independently verify every credential shown on
-            a profile unless a profile specifically states it has been reviewed. Information about
-            a professional is provided by that professional or sourced from public records and is
-            not guaranteed accurate.
+            This site does not provide tax, legal or financial advice or book appointments. It does
+            not collect customer payments for services supplied by professionals. Professional
+            subscriptions can be billed through Stripe when billing is configured. A credential is
+            reviewed only when the profile explicitly shows that status; profile information should
+            be confirmed with the professional before engagement.
           </p>
         </section>
 
         <section className="flex flex-col gap-2">
           <h2 className="text-heading-sm font-semibold text-navy">What this page does not cover yet</h2>
           <p>
-            Account terms, liability limitations, dispute resolution and acceptable-use rules are
-            not finalised. A reviewed, approved terms of service will replace this page before any
-            of those are claimed.
+            Account and subscription terms, cancellation and refund rules, liability limitations,
+            dispute resolution and acceptable-use rules require legal approval. A reviewed terms of
+            service must replace this draft before release.
           </p>
         </section>
       </div>

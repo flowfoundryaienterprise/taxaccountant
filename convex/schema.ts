@@ -31,7 +31,7 @@ export default defineSchema({
     description: v.string(),
     status: v.union(v.literal("new"), v.literal("quoted"), v.literal("engaged"), v.literal("closed"), v.literal("canceled")),
     createdAt: v.number(),
-  }).index("by_customer", ["customerUserId"]).index("by_professional_status", ["professionalId", "status"]).index("by_professional_created", ["professionalId", "createdAt"]).index("by_status_created", ["status", "createdAt"]),
+  }).index("by_customer", ["customerUserId"]).index("by_customer_professional_created", ["customerUserId", "professionalId", "createdAt"]).index("by_professional_status", ["professionalId", "status"]).index("by_professional_created", ["professionalId", "createdAt"]).index("by_status_created", ["status", "createdAt"]),
   // ---------------------------------------------------------------------
   // Geography and taxonomy
   // ---------------------------------------------------------------------

@@ -31,12 +31,7 @@ export const metadata: Metadata = {
     url: "/find-accountant",
     type: "website",
   },
-  /*
-   * Not indexable while the results are development fixtures: section 14 of
-   * the Day 3 brief — "Do not create SEO-indexable fake professional
-   * listings". Flip to index/follow when `professionals:search` serves
-   * approved published profiles.
-   */
+  // Keep the directory out of search indexes until the 100-profile cap is removed.
   robots: { index: false, follow: true },
 };
 
@@ -44,26 +39,14 @@ interface FindAccountantPageProps {
   searchParams: Promise<RawSearchParams>;
 }
 
-/**
- * Public professional directory.
- *
- * A Server Component: the URL is the entire filter state, so filtering,
- * sorting and pagination all happen here on each request and the client
- * components below only exist to *write* back to the URL. That is what makes
- * deep links, refresh and browser back/forward correct without any
- * client-side store.
- *
- * ## Data source
- * Results come from `@/lib/directory/fixtures` — typed, development-only
- * examples. There is no `convex/professionals` module yet;
- * `professionals:search` is IMPLEMENTATION_PLAN.md Day 9 and the Day 3 brief
- * explicitly forbids creating backend search here. The swap is contained:
- * replace the `searchDirectory(listings, filters)` call with the
- * query's cursor-paginated result and keep the `DirectoryResults` shape.
- */
 export default async function FindAccountantPage({ searchParams }: FindAccountantPageProps) {
   const raw = await searchParams;
-  const directory = await loadDirectory();
+  let directory: Awaited<ReturnType<typeof loadDirectory>>;
+  try {
+    directory = await loadDirectory();
+  } catch {
+    return <Container className="py-16"><div role="alert" className="rounded-card border border-border bg-white p-8"><h1 className="text-heading-sm font-semibold text-navy">Directory unavailable</h1><p className="mt-3 text-slate">Professional listings could not be loaded. Please try again shortly.</p><a href="/find-accountant" className="mt-4 inline-block text-action underline">Retry search</a></div></Container>;
+  }
   const listings = directory.items;
 
   // City tokens are validated against the data, so a stale or hand-edited
@@ -87,6 +70,7 @@ export default async function FindAccountantPage({ searchParams }: FindAccountan
       <DirectoryHeader resultCount={listings.length} preview={directory.preview} />
 
       <Container className="flex flex-col gap-8 py-10 sm:py-12">
+        {directory.limited ? <p role="status" className="rounded-card border border-warning/30 bg-white p-4 text-compact text-slate">This directory currently shows only the first 100 approved profiles. Search counts and filters apply to those profiles only.</p> : null}
         <AccountantSearchBar key={searchBarKey(filters)} filters={filters} />
 
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">

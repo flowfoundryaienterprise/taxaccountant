@@ -7,13 +7,15 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 
 export function EnquiryInbox({professionalId}: {professionalId?: Id<"professionals">}) {
+  const params=useSearchParams();
+  const requestedProfessional = professionalId ? null : params.get("professional");
+  const requestedService = professionalId ? null : params.get("service");
   const enquiries = useQuery(api.contact.myEnquiries, {professionalId});
-  const options = useQuery(api.contact.enquiryOptions, professionalId ? "skip" : {});
+  const options = useQuery(api.contact.enquiryOptions, professionalId ? "skip" : {professionalId: requestedProfessional ?? undefined});
   const create = useMutation(api.contact.createEnquiry);
   const close = useMutation(api.contact.closeEnquiry);
   const [selection, setSelection] = useState("");
-  const params=useSearchParams();
-  const suggested=options?.findIndex(o=>o.professionalId===params.get("professional"))??-1;
+  const suggested=options?.findIndex(o=>o.professionalId===requestedProfessional && (!requestedService || o.serviceSlug===requestedService))??-1;
   const chosen=selection || (suggested>=0?String(suggested):"");
   const [description, setDescription] = useState("");
   const [busy, setBusy] = useState(false);
@@ -37,7 +39,7 @@ export function EnquiryInbox({professionalId}: {professionalId?: Id<"professiona
     {!professionalId ? <form onSubmit={submit} className="mt-6 flex flex-col gap-3 border-t border-border pt-5">
       <h3 className="font-semibold">Submit an enquiry</h3>
       <p className="text-caption text-slate">Choose an approved USA professional and their available service. Do not include tax IDs, bank details, or tax documents.</p>
-      {options === undefined ? <p role="status">Loading available professionals…</p> : options.length === 0 ? <p className="text-compact text-slate">No approved professionals are accepting enquiries yet.</p> : <>
+      {options === undefined ? <p role="status">Loading available professionals…</p> : options.length === 0 ? <p className="text-compact text-slate">No approved professionals are accepting enquiries here. <a href="/find-accountant" className="text-action underline">Browse the directory</a>.</p> : <>
         <label className="text-compact font-medium">Professional, service and jurisdiction<select required value={chosen} onChange={e => setSelection(e.target.value)} className="mt-1 min-h-12 w-full rounded-input border border-control bg-white px-3"><option value="">Select an available service</option>{options.map((o,i) => <option key={`${o.professionalId}-${o.serviceId}-${o.jurisdictionId}`} value={i}>{o.displayName} · {o.serviceName} · {o.jurisdictionName}</option>)}</select></label>
         <label className="text-compact font-medium">How can they help?<textarea required minLength={20} maxLength={2000} rows={4} value={description} onChange={e=>setDescription(e.target.value)} className="mt-1 w-full rounded-input border border-control p-3" /></label>
         <Button type="submit" disabled={busy} className="self-start">{busy ? "Submitting…" : "Submit enquiry"}</Button>

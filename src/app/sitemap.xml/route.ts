@@ -1,4 +1,5 @@
 import { buildSitemapEntries } from "@/lib/seo/sitemap-entries";
+import { SITE_INDEXABLE } from "@/lib/seo/site";
 
 /**
  * `/sitemap.xml`
@@ -26,7 +27,7 @@ function escapeXml(value: string): string {
 }
 
 export async function GET() {
-  const entries = await buildSitemapEntries();
+  const entries = SITE_INDEXABLE ? await buildSitemapEntries() : [];
 
   const urls = entries
     .map((entry) => {
@@ -52,7 +53,7 @@ export async function GET() {
       "Content-Type": "application/xml; charset=utf-8",
       // Public, non-sensitive, and cheap to regenerate. No private data is
       // ever in here, so a shared cache is safe.
-      "Cache-Control": "public, max-age=3600, must-revalidate",
+      "Cache-Control": SITE_INDEXABLE ? "public, max-age=3600, must-revalidate" : "no-store",
     },
   });
 }

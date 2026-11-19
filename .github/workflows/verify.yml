@@ -1,0 +1,30 @@
+name: Verify
+
+on:
+  push:
+    branches: [feat/frontend]
+  pull_request:
+    branches: [feat/frontend]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      NEXT_PUBLIC_DEPLOYMENT_ENV: preview
+      NEXT_PUBLIC_SITE_URL: https://preview.invalid
+      NEXT_PUBLIC_CONVEX_URL: https://example.convex.cloud
+      NEXT_PUBLIC_CONVEX_SITE_URL: https://example.convex.site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run test:convex -- --maxWorkers=1
+      - run: npm run build

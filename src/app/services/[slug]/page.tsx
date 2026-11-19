@@ -42,7 +42,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: ServiceDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const published = await publicConvexClient.query(api.taxonomy.listServiceCategories, {});
+  const published = await publicConvexClient().query(api.taxonomy.listServiceCategories, {});
   const service = published.some(row => row.slug === slug) ? getService(slug) : undefined;
 
   if (!service) {
@@ -80,7 +80,7 @@ export async function generateMetadata({ params }: ServiceDetailPageProps): Prom
  */
 export default async function ServiceDetailPage({ params }: ServiceDetailPageProps) {
   const { slug } = await params;
-  const published = await publicConvexClient.query(api.taxonomy.listServiceCategories, {});
+  const published = await publicConvexClient().query(api.taxonomy.listServiceCategories, {});
   const service = published.some(row => row.slug === slug) ? getService(slug) : undefined;
 
   if (!service) notFound();

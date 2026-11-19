@@ -8,6 +8,7 @@ import { CheckCircle2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CONSENT_VERSION } from "@/lib/legal/consent";
 import { api } from "@/convex/_generated/api";
+import { validConvexUrl } from "@/lib/convex/config";
 
 interface EnquiryFormProps {
   kind: "contact" | "professional_interest";
@@ -23,23 +24,22 @@ interface EnquiryFormProps {
  * already existed in the schema with nowhere to write to it, and a Phase 1
  * public contact form is explicitly in scope (unlike CMS writes, which stay
  * disabled because that backend genuinely does not exist). See
- * `convex/contact.ts` for what server-side validation and anti-abuse
- * measures exist, and what is deliberately still missing (per-sender rate
- * limiting).
+ * `convex/contact.ts` validates and rate-limits submissions on the server.
  *
  * Exactly the fields `publicMessages` models: name, email, optional phone,
  * optional subject, message, consent. No tax identifiers, no file upload —
  * out of scope for a public form by design (AGENTS.md section 1).
  */
 export function EnquiryForm({ kind, successTitle, successBody }: EnquiryFormProps) {
+  if (!validConvexUrl(process.env.NEXT_PUBLIC_CONVEX_URL)) {
+    return <p role="alert" className="rounded-card border border-border bg-white p-5 text-slate">The contact form is temporarily unavailable. Please try again later.</p>;
+  }
+  return <ConnectedEnquiryForm kind={kind} successTitle={successTitle} successBody={successBody} />;
+}
+
+function ConnectedEnquiryForm({ kind, successTitle, successBody }: EnquiryFormProps) {
   const pathname = usePathname();
   const submit = useMutation(api.contact.submitPublicMessage);
-  // `useState`'s lazy initializer, not `useRef(Date.now())` — a ref's
-  // initial-value argument is still evaluated on every render even though
-  // only the first call is kept, which React's purity rule (impure calls
-  // during render) correctly flags. The functional form of `useState` is
-  // the sanctioned escape hatch for a one-time impure read at mount.
-  const [mountedAt] = React.useState(() => Date.now());
 
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -73,7 +73,6 @@ export function EnquiryForm({ kind, successTitle, successBody }: EnquiryFormProp
         consentVersion: CONSENT_VERSION,
         sourcePath: pathname,
         companyWebsite,
-        elapsedMs: Date.now() - mountedAt,
       });
       setSucceeded(true);
     } catch (err) {

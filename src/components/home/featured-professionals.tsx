@@ -9,14 +9,14 @@ import { toCardModel } from "@/lib/directory/card-model";
 
 import { professionalHref } from "@/lib/marketplace/query-params";
 
-/**
- * Six example records, rendered through the directory's own projection, in
- * a static 3-up grid matching the approved mockup ("Meet the professionals").
- * `ProfessionalCard` itself is untouched.
- */
 export async function FeaturedProfessionals() {
-  const directory = await loadDirectory();
-  const featured = directory.items.slice(0, 6).map(row => ({slug:row.slug,card:toCardModel(row)}));
+  let directory: Awaited<ReturnType<typeof loadDirectory>> | null = null;
+  try {
+    directory = await loadDirectory();
+  } catch {
+    // Keep the rest of the homepage available when the public data service fails.
+  }
+  const featured = directory?.items.slice(0, 6).map(row => ({slug:row.slug,card:toCardModel(row)})) ?? [];
   return (
     <section id="professionals" className="bg-tint py-16 sm:py-24">
       <Container className="flex flex-col gap-10">
@@ -40,7 +40,7 @@ export async function FeaturedProfessionals() {
             <div key={slug}>
               <ProfessionalCard
                 compact
-                example={directory.preview}
+                example={directory?.preview ?? false}
                 professional={card}
                 profileHref={professionalHref(slug)}
                 className="h-full"
@@ -50,7 +50,7 @@ export async function FeaturedProfessionals() {
           ))}
         </div>
 
-        {!featured.length ? <p className="rounded-card border border-border bg-white p-8 text-slate">Approved professional listings will appear here when available.</p> : null}
+        {!directory ? <p role="alert" className="rounded-card border border-border bg-white p-8 text-slate">Professional listings are temporarily unavailable. <Link href="/find-accountant" className="text-action underline">Try again</Link>.</p> : !featured.length ? <p className="rounded-card border border-border bg-white p-8 text-slate">Approved professional listings will appear here when available.</p> : null}
       </Container>
     </section>
   );

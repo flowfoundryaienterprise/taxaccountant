@@ -87,16 +87,13 @@ export const LEGAL_PENDING_APPROVAL: IndexingDecision = {
  * Staff-only surfaces. `follow: false` as well, because there is nothing
  * behind a CMS link a crawler should pursue.
  *
- * Worth stating plainly: this is **not** what keeps the CMS private. The
- * CMS is stripped from production builds entirely by the
- * `cms-production-exclusion` plugin, and `/admin` returns 404 in a deployed
- * environment. A robots directive is a request to well-behaved crawlers,
- * never an access control.
+ * A server-side staff session is the access control. A robots directive is
+ * only a request to well-behaved crawlers.
  */
 export const STAFF_ONLY: IndexingDecision = {
   index: false,
   follow: false,
-  reason: "noindex, nofollow — staff interface, and excluded from production builds entirely.",
+  reason: "noindex, nofollow — staff interface requiring authorized access.",
 };
 
 /** Converts a decision into the `robots` field of Next.js `Metadata`. */

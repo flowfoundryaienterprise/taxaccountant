@@ -13,7 +13,7 @@ import { getService, serviceCatalogSlugs } from "@/lib/marketplace/services";
 // A non-routable client origin plus a strict query mock prevents network access.
 process.env.NEXT_PUBLIC_CONVEX_URL = "https://unit-test.convex.cloud";
 const { publicConvexClient } = await import("@/lib/convex/public-client");
-mock.method(publicConvexClient, "query", async (reference: FunctionReference<"query">) => {
+mock.method(publicConvexClient(), "query", async (reference: FunctionReference<"query">) => {
   switch (getFunctionName(reference)) {
     case "content:listPublishedResources": return { items: [], hasMore: false };
     case "content:getPublishedBySlug": return null;

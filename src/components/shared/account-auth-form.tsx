@@ -7,8 +7,17 @@ import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth/client";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
+import { customerEnquiryReturnPath } from "@/lib/auth/customer-return";
+import { validConvexUrl } from "@/lib/convex/config";
 
 export function AccountAuthForm({mode}: {mode: "signin" | "signup"}) {
+  if (!validConvexUrl(process.env.NEXT_PUBLIC_CONVEX_URL) || !validConvexUrl(process.env.NEXT_PUBLIC_CONVEX_SITE_URL)) {
+    return <p role="alert" className="rounded-card border border-border bg-white p-5 text-slate">Sign-in is temporarily unavailable. Please try again later.</p>;
+  }
+  return <ConnectedAccountAuthForm mode={mode} />;
+}
+
+function ConnectedAccountAuthForm({mode}: {mode: "signin" | "signup"}) {
   const params = useSearchParams();
   const [role, setRole] = React.useState<"customer" | "professional">("customer");
   const [name, setName] = React.useState("");
@@ -34,8 +43,9 @@ export function AccountAuthForm({mode}: {mode: "signin" | "signup"}) {
   React.useEffect(() => {
     if (!destination) return;
     if (destination.startsWith("/login")) return;
-    window.location.assign(destination);
-  }, [destination]);
+    const enquiryReturn = customerEnquiryReturnPath(params.get("next"));
+    window.location.assign(destination === "/customer/dashboard" && enquiryReturn ? enquiryReturn : destination);
+  }, [destination, params]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault(); setBusy(true); setError(null);

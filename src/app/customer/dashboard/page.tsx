@@ -11,6 +11,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { fetchAuthMutation, fetchAuthQuery, isAuthenticated } from "@/lib/auth/server";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
+import { customerEnquiryReturnPath } from "@/lib/auth/customer-return";
 
 export const metadata: Metadata = {
   title: "Your dashboard",
@@ -46,9 +47,11 @@ export const metadata: Metadata = {
  * the row unchanged — it never overwrites a `role` an account already has,
  * including a `professional` one reached here by mistake.
  */
-export default async function CustomerDashboardPage() {
+export default async function CustomerDashboardPage({searchParams}: {searchParams: Promise<{professional?: string; service?: string}>}) {
   if (!(await isAuthenticated())) {
-    redirect("/sign-in?intent=customer-dashboard");
+    const {professional, service} = await searchParams;
+    const next = customerEnquiryReturnPath(professional ? `/customer/dashboard?professional=${encodeURIComponent(professional)}${service ? `&service=${encodeURIComponent(service)}` : ""}` : null);
+    redirect(next ? `/sign-in?intent=customer-dashboard&next=${encodeURIComponent(next)}` : "/sign-in?intent=customer-dashboard");
   }
 
   await fetchAuthMutation(api.users.ensureAppUser, { role: "customer" });

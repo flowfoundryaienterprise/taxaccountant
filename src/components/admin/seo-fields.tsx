@@ -9,6 +9,7 @@ import {
 } from "@/lib/admin/admin-formatters";
 import { LIMITS } from "@/lib/admin/admin-validation";
 import { cn } from "@/lib/utils";
+import { SITE_ORIGIN } from "@/lib/seo/site";
 
 export interface SeoFieldValues {
   seoTitle: string;
@@ -24,8 +25,6 @@ interface SeoFieldsProps {
   fallbackTitle: string;
   disabled?: boolean;
 }
-
-const SITE_ORIGIN = "https://taxaccountant.com";
 
 /**
  * SEO title, meta description, canonical path, plus a search-appearance

@@ -1,5 +1,5 @@
 import { DIRECTORY_QUERY_PARAMS } from "@/lib/seo/indexing";
-import { absoluteUrl } from "@/lib/seo/site";
+import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo/site";
 
 /**
  * `/robots.txt`
@@ -11,21 +11,22 @@ import { absoluteUrl } from "@/lib/seo/site";
  * Robots rules are a request to well-behaved crawlers. They are **not** an
  * access control, and nothing here is relied on for privacy:
  *
- *  - the CMS is removed from production builds entirely by the
- *    `cms-production-exclusion` plugin, so `/admin` returns 404 in a
- *    deployed environment whether or not a crawler respects this file;
+ *  - the CMS requires an authorized staff session on every deployment;
  *  - draft content is excluded by the public data layer, which never
  *    returns it, rather than by being hidden from crawlers.
  *
  * The disallow entries are about crawl budget, not secrecy — and listing a
  * genuinely secret path here would advertise it.
  *
- * ## Deliberately not blocking the site
- * Allow-by-default with targeted exclusions, so a new public route is
- * crawlable the moment it exists and per-page `noindex` does the
- * fine-grained work.
+ * Preview deployments disallow crawling. The approved production origin
+ * uses targeted exclusions and each page's indexing decision.
  */
 export function GET() {
+  if (!SITE_INDEXABLE) {
+    return new Response("User-agent: *\nDisallow: /\n", {
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+    });
+  }
   /*
    * Faceted-search parameter forms. Disallowing the query shapes stops a
    * crawler enumerating filter permutations; the route's static canonical
@@ -40,7 +41,7 @@ export function GET() {
     "User-agent: *",
     "Allow: /",
     "",
-    "# Staff interface. Already absent from production builds entirely.",
+    "# Staff interface. Access also requires an authorized session.",
     "Disallow: /admin",
     "Disallow: /admin/",
     "",

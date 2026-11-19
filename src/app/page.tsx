@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { JsonLd } from "@/components/seo/json-ld";
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo/structured-data";
+import { SITE_INDEXABLE } from "@/lib/seo/site";
 
 import { FeaturedProfessionals } from "@/components/home/featured-professionals";
 
@@ -14,11 +15,11 @@ import { ServicesSection } from "@/components/home/services-section";
 
 export const metadata: Metadata = {
   title: "Find Tax & Accounting Professionals",
-  robots: { index: process.env.NODE_ENV === "production", follow: true },
+  robots: { index: SITE_INDEXABLE, follow: SITE_INDEXABLE },
   description:
-    "Discover tax and accounting professionals by service, location, language, and tax jurisdiction on TaxAccountant.com.",
+    "Discover tax and accounting professionals by service, location, language, and tax jurisdiction on TaxAccountant.",
   openGraph: {
-    title: "TaxAccountant.com — Tax & Accounting Marketplace",
+    title: "TaxAccountant — Tax & Accounting Marketplace",
     description:
       "Search tax and accounting professionals by country, tax jurisdiction and service.",
     url: "/",
